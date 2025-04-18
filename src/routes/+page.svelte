@@ -23,13 +23,31 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
 
-<div class="w-full flex justify-end items-center px-4 py-2 text-2xl">
-    <div class="flex gap-5 text-pink-700">
-        <a href="https://x.com/JamCatCTO" target="_blank" aria-label="X / Twitter" class="hover:text-pink-900 transition">🐦</a>
-        <a href="https://instagram.com/JamCatCTO" target="_blank" aria-label="Instagram" class="hover:text-pink-900 transition">📸</a>
-        <a href="https://tiktok.com/@Jam.Cat.CTO" target="_blank" aria-label="TikTok" class="hover:text-pink-900 transition">🎵</a>
-    </div>
+<div class="w-full flex justify-center md:justify-end items-center px-4 py-2 text-2xl">
+    <div class="flex flex-wrap gap-3 text-white">
+    <a href="https://x.com/JamCatCTO" target="_blank" aria-label="X / Twitter"
+        class="bg-black hover:bg-gray-800 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+    🐦 Twitter
+    </a>
+    <a href="https://instagram.com/JamCatCTO" target="_blank" aria-label="Instagram"
+        class="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+    📸 Instagram
+    </a>
+    <a href="https://tiktok.com/@Jam.Cat.CTO" target="_blank" aria-label="TikTok"
+        class="bg-black text-white px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+    🎵 TikTok
+    </a>
+    <a href="https://www.coingecko.com/en/coins/jam-cat" target="_blank" aria-label="CoinGecko"
+        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+    🦎 CoinGecko
+    </a>
+    <a href="https://dexscreener.com/solana/35jzmqqc6ewrw6pefwdlhmtxbkvnc9mxpbes4rbws1ww" target="_blank" aria-label="DexScreener"
+        class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+    📊 DexScreener
+    </a>
 </div>
+</div>
+    
 
 <h1 class="text-5xl md:text-6xl font-extrabold text-center mb-4">
     🎶 Welcome to <span class="text-pink-600">JamCat AI</span> 😺
@@ -81,6 +99,23 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
     {/each}
     </ul>
 </div>
+
+<div class="mt-12 flex flex-wrap justify-center gap-4">
+<a
+    href="https://www.coingecko.com/en/coins/jam-cat"
+    target="_blank"
+    class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg text-lg transition shadow-md"
+>
+    🦎 View on CoinGecko
+</a>
+<a
+    href="https://dexscreener.com/solana/35jzmqqc6ewrw6pefwdlhmtxbkvnc9mxpbes4rbws1ww"
+    target="_blank"
+    class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg text-lg transition shadow-md"
+>
+    📊 $JAM on DexScreener
+</a>
+</div>  
 
 <footer class="mt-16 text-sm text-gray-500 text-center">
     🧠 Built with ❤️ by <strong>JamCat AI</strong> · 🚀 SvelteKit + Tailwind + Vibes<br/>
