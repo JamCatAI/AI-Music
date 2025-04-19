@@ -1,3 +1,30 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@layer utilities {
+  .cloud {
+    @apply bg-no-repeat bg-center bg-contain;
+    background-image: url('/kittyjam-jamming.gif');
+}
+
+@keyframes cloud1 { 0% { transform: translateX(0); } 100% { transform: translateX(150vw); } }
+@keyframes cloud2 { 0% { transform: translateX(0); } 100% { transform: translateX(160vw); } }
+@keyframes cloud3 { 0% { transform: translateX(0); } 100% { transform: translateX(140vw); } }
+@keyframes cloud4 { 0% { transform: translateX(0); } 100% { transform: translateX(180vw); } }
+@keyframes cloud5 { 0% { transform: translateX(0); } 100% { transform: translateX(130vw); } }
+@keyframes cloud6 { 0% { transform: translateX(0); } 100% { transform: translateX(170vw); } }
+@keyframes cloud7 { 0% { transform: translateX(0); } 100% { transform: translateX(200vw); } }
+
+.animate-cloud1 { animation: cloud1 30s linear infinite; }
+.animate-cloud2 { animation: cloud2 25s linear infinite; }
+.animate-cloud3 { animation: cloud3 28s linear infinite; }
+.animate-cloud4 { animation: cloud4 22s linear infinite; }
+.animate-cloud5 { animation: cloud5 24s linear infinite; }
+.animate-cloud6 { animation: cloud6 26s linear infinite; }
+.animate-cloud7 { animation: cloud7 20s linear infinite; }
+}

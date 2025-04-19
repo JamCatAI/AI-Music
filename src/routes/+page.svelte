@@ -95,6 +95,16 @@ function showRandomGptMeme() {
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
 
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="cloud absolute top-10 left-[-20%] w-48 h-28 animate-cloud1 opacity-10"></div>
+    <div class="cloud absolute top-[20%] left-[-30%] w-40 h-24 animate-cloud2 opacity-10"></div>
+    <div class="cloud absolute top-[35%] left-[-25%] w-56 h-32 animate-cloud3 opacity-10"></div>
+    <div class="cloud absolute top-[50%] left-[-35%] w-44 h-28 animate-cloud4 opacity-10"></div>
+    <div class="cloud absolute top-[60%] left-[-15%] w-64 h-36 animate-cloud5 opacity-10"></div>
+    <div class="cloud absolute top-[70%] left-[-40%] w-52 h-30 animate-cloud6 opacity-10"></div>
+    <div class="cloud absolute top-[80%] left-[-22%] w-60 h-34 animate-cloud7 opacity-10"></div>
+</div>
+
 <div class="w-full flex justify-center md:justify-end items-center px-4 py-2 text-2xl">
     <div class="flex flex-wrap gap-3 text-white">
     <a href="https://x.com/JamCatCTO" target="_blank" aria-label="X / Twitter"
