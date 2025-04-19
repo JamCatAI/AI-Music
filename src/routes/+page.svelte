@@ -4,6 +4,38 @@
 </svelte:head>
 
 <script>
+import { onMount } from 'svelte';
+
+let defaultTitle = 'JamCat AI | GIF Memes';
+let intervalId;
+let isPageHidden = false;
+
+const messages = ['JamCat is live!', 'Come back to jam!', 'Beats waiting!'];
+let i = 0;
+
+onMount(() => {
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      isPageHidden = true;
+      intervalId = setInterval(() => {
+        document.title = messages[i % messages.length];
+        i++;
+      }, 100);
+    } else {
+      isPageHidden = false;
+      clearInterval(intervalId);
+      document.title = defaultTitle;
+    }
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    clearInterval(intervalId);
+  };
+});
+
 const features = [
     "🎵 AI-Generated Beats in Seconds",
     "😼 Jam with a Smart Cat – Real-time Co-creation",
