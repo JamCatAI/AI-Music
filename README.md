@@ -1,6 +1,3 @@
-## 🔥 README for Your `sv`-Powered Svelte Project
-
-```md
 # 🎵 JamCat AI 😺 | Powered by [`sv`](https://github.com/sveltejs/cli)
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
