@@ -46,6 +46,19 @@ function playRandomTrack() {
     audio = new Audio(`/${randomTrack}`);
     audio.play();
 }
+
+const gptMemes = Array.from({ length: 10 }, (_, i) => ({
+    name: `GPT Meme #${i + 1}`,
+    file: `gpt/${i + 1}.png`
+}));
+
+let randomGptMeme = null;
+
+function showRandomGptMeme() {
+    const randomIndex = Math.floor(Math.random() * gptMemes.length);
+    randomGptMeme = gptMemes[randomIndex];
+}
+
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
@@ -133,11 +146,32 @@ function playRandomTrack() {
     {/if}
 </div>
 
+<div class="mt-8 text-center">
+    <button
+        class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg text-lg font-bold transition shadow-md hover:scale-105"
+        on:click={showRandomGptMeme}
+    >
+        🧠 Generate AI GPT Meme!
+    </button>
+
+    {#if randomGptMeme}
+        <div class="mt-8 flex flex-col items-center">
+            <img
+                src={`/${randomGptMeme.file}`}
+                alt={randomGptMeme.name}
+                class="w-72 h-auto rounded-lg shadow-lg border-4 border-indigo-400 transition-transform duration-300 hover:scale-105"
+            />
+            <p class="mt-2 text-xl font-semibold text-gray-700">🤯 {randomGptMeme.name} 🔮</p>
+            <p class="text-sm italic text-gray-500 mt-1">💡 100% Neural Net-powered ✨ – GPT meets Meme Mayhem 🧬🔥</p>
+        </div>
+    {/if}
+</div>
+
 <button
     class="mt-16 bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg text-lg transition shadow-lg hover:scale-105"
     on:click={playRandomTrack}
 >
-    🚀 Start Jamming
+    🚀 Start Jamming with AI Music
 </button>
 
 <div class="mt-12 bg-white shadow-lg rounded-xl p-8 max-w-3xl w-full">
