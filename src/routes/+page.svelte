@@ -19,6 +19,13 @@ const allGifs = [
 ];
 
 const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
+
+let randomMeme = null;
+
+function showRandomMeme() {
+    const randomIndex = Math.floor(Math.random() * galleryGifs.length);
+    randomMeme = galleryGifs[randomIndex];
+}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
@@ -44,6 +51,10 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
     <a href="https://dexscreener.com/solana/35jzmqqc6ewrw6pefwdlhmtxbkvnc9mxpbes4rbws1ww" target="_blank" aria-label="DexScreener"
         class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
     📊 DexScreener
+    </a>
+    <a href="https://t.me/JamCatOnSolana" target="_blank" aria-label="Telegram"
+        class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
+        💬 Telegram
     </a>
 </div>
 </div>
@@ -80,6 +91,26 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
         </div>
         {/each}      
     </div>
+</div>
+
+<div class="mt-16 text-center">
+    <button
+        class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg text-lg font-bold transition shadow-md hover:scale-105"
+        on:click={showRandomMeme}
+    >
+        🎲 Generate Random Meme!
+    </button>
+
+    {#if randomMeme}
+        <div class="mt-8 flex flex-col items-center">
+            <img
+                src={`/${randomMeme.file}`}
+                alt={randomMeme.name}
+                class="w-72 h-auto rounded-lg shadow-lg border-4 border-yellow-300 transition-transform duration-300 hover:scale-105"
+            />
+            <p class="mt-2 text-xl font-semibold text-gray-700">🔥 {randomMeme.name} 🔥</p>
+        </div>
+    {/if}
 </div>
 
 <button
