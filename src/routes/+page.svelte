@@ -107,6 +107,8 @@ function showRandomGptMeme() {
     class="w-64 md:w-80 h-auto mb-8 rounded-xl shadow-lg border-4 border-pink-400 hover:scale-105 transition-transform duration-300"
 />
 
+<div class="w-full border-t-4 border-dashed border-pink-400 my-12"></div>
+
 <div class="max-w-6xl w-full">
     <h2 class="text-3xl font-extrabold text-center mb-8 text-purple-700">🎬 AI Music Meme Gallery 🎶</h2>
     
@@ -126,7 +128,9 @@ function showRandomGptMeme() {
     </div>
 </div>
 
-<div class="mt-16 text-center">
+<div class="w-full border-t-4 border-dashed border-indigo-400 my-12"></div>
+
+<div class="mt-4 text-center">
     <button
         class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg text-lg font-bold transition shadow-md hover:scale-105"
         on:click={showRandomMeme}
