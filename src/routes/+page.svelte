@@ -1,3 +1,8 @@
+<svelte:head>
+  <title>{randomMeme ? `${randomMeme.name} | JamCat AI` : 'JamCat AI | GIF Memes'}</title>
+  <meta name="description" content={randomMeme ? `Watch ${randomMeme.name} meme powered by AI` : 'Jam to AI-generated beats with JamCat'} />
+</svelte:head>
+
 <script>
 const features = [
     "🎵 AI-Generated Beats in Seconds",
@@ -34,7 +39,7 @@ function showRandomMeme() {
     <div class="flex flex-wrap gap-3 text-white">
     <a href="https://x.com/JamCatCTO" target="_blank" aria-label="X / Twitter"
         class="bg-black hover:bg-gray-800 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
-    🐦 Twitter
+    🐦 X / Twitter
     </a>
     <a href="https://instagram.com/JamCatCTO" target="_blank" aria-label="Instagram"
         class="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 px-4 py-2 rounded-full shadow-lg transition transform hover:scale-105">
