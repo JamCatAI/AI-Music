@@ -31,6 +31,21 @@ function showRandomMeme() {
     const randomIndex = Math.floor(Math.random() * galleryGifs.length);
     randomMeme = galleryGifs[randomIndex];
 }
+
+let audio = null;
+
+function playRandomTrack() {
+    const tracks = ["music1.ogg", "music2.ogg", "music3.ogg"];
+    const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+
+    audio = new Audio(`/${randomTrack}`);
+    audio.play();
+}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
@@ -119,8 +134,8 @@ function showRandomMeme() {
 </div>
 
 <button
-    class="mt-16 bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg text-lg transition"
-    on:click={() => alert('Coming soon! 🚧🎸')}
+    class="mt-16 bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg text-lg transition shadow-lg hover:scale-105"
+    on:click={playRandomTrack}
 >
     🚀 Start Jamming
 </button>
