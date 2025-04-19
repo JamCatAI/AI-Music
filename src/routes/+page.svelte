@@ -49,7 +49,7 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
 </div>
     
 
-<h1 class="text-5xl md:text-6xl font-extrabold text-center mb-4">
+<h1 class="text-5xl md:text-6xl font-extrabold text-center mt-16 mb-4">
     🎶 Welcome to <span class="text-pink-600">JamCat AI</span> 😺
 </h1>
 
@@ -114,6 +114,14 @@ const galleryGifs = allGifs.filter(gif => gif.file !== "kittyjam-jamming.gif");
     class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg text-lg transition shadow-md"
 >
     📊 $JAM on DexScreener
+</a>
+<a
+  href="/whitepaper.pdf"
+  target="_blank"
+  download
+  class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-lg transition shadow-md"
+>
+  📄 Download Whitepaper
 </a>
 </div>  
 
