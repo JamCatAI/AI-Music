@@ -91,7 +91,7 @@ function showRandomGptMeme() {
     randomGptMeme = gptMemes[randomIndex];
 }
 
-const avatarPics = Array.from({ length: 32 }, (_, i) => ({
+const avatarPics = Array.from({ length: 40 }, (_, i) => ({
   file: `/profile-pics/jamcat${i + 1}.png`,
   name: `JamCat Avatar #${i + 1}`,
   downloadName: `jamcat${i + 1}.png`
