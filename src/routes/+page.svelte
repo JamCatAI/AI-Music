@@ -91,6 +91,12 @@ function showRandomGptMeme() {
     randomGptMeme = gptMemes[randomIndex];
 }
 
+const avatarPics = Array.from({ length: 12 }, (_, i) => ({
+  file: `/profile-pics/jamcat${i + 1}.png`,
+  name: `JamCat Avatar #${i + 1}`,
+  downloadName: `jamcat${i + 1}.png`
+}));
+
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-pink-300 via-purple-200 to-cyan-100 flex flex-col justify-start items-center px-6 py-12 text-gray-800">
@@ -148,6 +154,26 @@ function showRandomGptMeme() {
     alt="Kitty Jamming"
     class="w-64 md:w-80 h-auto mb-8 rounded-xl shadow-lg border-4 border-pink-400 hover:scale-105 transition-transform duration-300"
 />
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+    {#each avatarPics as avatar}
+      <div class="flex flex-col items-center bg-white p-4 rounded-xl shadow-lg">
+        <img
+          src={avatar.file}
+          alt={avatar.name}
+          class="w-40 h-40 rounded-full border-4 border-pink-400 shadow-md mb-3 hover:scale-105 transition-transform duration-300"
+        />
+        <a
+          href={avatar.file}
+          download={avatar.downloadName}
+          class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full shadow-md transition hover:scale-105"
+        >
+          ⬇️ Download
+        </a>
+      </div>
+    {/each}
+  </div>
+  
 
 <div class="w-full border-t-4 border-dashed border-pink-400 my-12"></div>
 
