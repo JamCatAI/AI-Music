@@ -5,6 +5,7 @@
 
 <script>
 import { onMount } from 'svelte';
+import JamCatPopGame from '$lib/JamCatPopGame.svelte';
 
 let defaultTitle = 'JamCat AI | GIF Memes';
 let intervalId;
@@ -139,7 +140,14 @@ const avatarPics = Array.from({ length: 40 }, (_, i) => ({
     </a>
 </div>
 </div>
-    
+
+<section class="w-full max-w-6xl mt-8">
+    <h2 class="text-3xl font-extrabold text-center mb-4 text-cyan-700">🎮 JamCat Leaderboard</h2>
+    <p class="text-center text-gray-700 mb-6">Play directly on the main page and push your country rank.</p>
+    <JamCatPopGame />
+</section>
+
+<div class="w-full border-t-4 border-dashed border-cyan-400 my-12"></div>
 
 <h1 class="text-5xl md:text-6xl font-extrabold text-center mt-16 mb-4">
     🎶 Welcome to <span class="text-pink-600">JamCat AI</span> 😺
