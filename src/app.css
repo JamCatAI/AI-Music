@@ -2,10 +2,6 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
-
 @layer utilities {
   .cloud {
     @apply bg-no-repeat bg-center bg-contain;

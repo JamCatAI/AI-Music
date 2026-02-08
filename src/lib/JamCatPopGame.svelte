@@ -163,9 +163,9 @@
 	$: myRow = leaderboard.find((r) => r.code === selectedCountry);
 </script>
 
-<div class="bg-slate-950 text-slate-100 px-5 py-8 rounded-2xl border border-slate-700 shadow-2xl">
+<div class="rounded-3xl border border-cyan-300/30 bg-slate-950/92 px-4 py-6 text-slate-100 shadow-2xl shadow-cyan-500/20 md:px-5 md:py-8">
 	<div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.2fr_1fr]">
-		<section class="rounded-2xl border border-cyan-300/20 bg-slate-900/70 p-5 shadow-2xl shadow-cyan-500/10">
+		<section class="rounded-2xl border border-cyan-300/25 bg-slate-900/75 p-5 shadow-2xl shadow-cyan-500/20">
 			<h2 class="text-3xl font-black tracking-tight text-cyan-300">JamCat</h2>
 			<p class="mt-2 text-sm text-slate-300">Tap or press Space/Enter to boost your country score.</p>
 
@@ -185,7 +185,7 @@
 			<button
 				type="button"
 				on:click={bopCat}
-				class="group mt-6 w-full rounded-2xl border border-cyan-200/30 bg-gradient-to-b from-cyan-400/20 to-blue-500/20 p-6"
+				class="group mt-6 w-full rounded-2xl border border-cyan-200/35 bg-gradient-to-b from-cyan-400/25 to-blue-500/25 p-6"
 			>
 				<img
 					src={animating ? '/kittyjam-jamming.gif' : '/kittyjam-still.png'}
@@ -229,7 +229,7 @@
 			</div>
 		</section>
 
-		<section class="rounded-2xl border border-fuchsia-300/20 bg-slate-900/70 p-5 shadow-2xl shadow-fuchsia-500/10">
+		<section class="rounded-2xl border border-fuchsia-300/25 bg-slate-900/75 p-5 shadow-2xl shadow-fuchsia-500/20">
 			<h3 class="text-xl font-black text-fuchsia-300">Country Leaderboard</h3>
 			<p class="mt-1 text-xs text-slate-400">Live activity across all JamCat regions.</p>
 			<p class="mt-1 text-xs text-slate-500">Background ticks: {worldTick}</p>
