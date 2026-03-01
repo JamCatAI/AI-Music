@@ -7,12 +7,12 @@
 
 	// ── Markets ──────────────────────────────────────────────────────────────────
 	const MARKETS = [
-		{ id: 'SOL-PERP',  base: 'SOL',  price: 185.42, change: 2.34,  vol: '842M',  oi: '234M',  funding:  0.0082, decimals: 2 },
-		{ id: 'BTC-PERP',  base: 'BTC',  price: 94820,  change: -0.87, vol: '2.1B',  oi: '1.2B',  funding: -0.0031, decimals: 1 },
-		{ id: 'ETH-PERP',  base: 'ETH',  price: 3284,   change: 1.12,  vol: '980M',  oi: '560M',  funding:  0.0045, decimals: 2 },
-		{ id: 'JTO-PERP',  base: 'JTO',  price: 3.84,   change: 5.21,  vol: '42M',   oi: '18M',   funding:  0.0124, decimals: 4 },
-		{ id: 'WIF-PERP',  base: 'WIF',  price: 2.17,   change: -3.44, vol: '38M',   oi: '15M',   funding: -0.0089, decimals: 4 },
-		{ id: 'JUP-PERP',  base: 'JUP',  price: 0.89,   change: 0.54,  vol: '61M',   oi: '22M',   funding:  0.0011, decimals: 4 },
+		{ id: 'WIF-PERP',     base: 'WIF',     price: 2.1840,  change:  7.34,  vol: '312M',  oi: '84M',   funding:  0.0214, decimals: 4 },
+		{ id: 'BONK-PERP',    base: 'BONK',    price: 0.00002847, change: -4.12, vol: '198M', oi: '51M',  funding: -0.0088, decimals: 8 },
+		{ id: 'POPCAT-PERP',  base: 'POPCAT',  price: 0.6213,  change: 12.77,  vol: '87M',   oi: '23M',   funding:  0.0341, decimals: 4 },
+		{ id: 'MYRO-PERP',    base: 'MYRO',    price: 0.0724,  change: -8.55,  vol: '43M',   oi: '11M',   funding: -0.0156, decimals: 4 },
+		{ id: 'MOODENG-PERP', base: 'MOODENG', price: 0.1492,  change:  3.21,  vol: '61M',   oi: '17M',   funding:  0.0097, decimals: 4 },
+		{ id: 'PNUT-PERP',    base: 'PNUT',    price: 0.3381,  change: -1.88,  vol: '55M',   oi: '14M',   funding: -0.0043, decimals: 4 },
 	];
 
 	// ── Helpers ───────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@
 	}
 
 	// ── State ─────────────────────────────────────────────────────────────────────
-	let selectedMarketId = $state('SOL-PERP');
+	let selectedMarketId = $state('WIF-PERP');
 	let markets = $state(MARKETS.map(m => ({ ...m })));
 
 	let market = $derived(markets.find(m => m.id === selectedMarketId));
@@ -77,13 +77,13 @@
 	// Bottom panel
 	let bottomTab = $state('positions');
 	let positions = $state([
-		{ id: 1, market: 'SOL-PERP',  side: 'long',  size: 10,  entry: 181.20, liq: 162.80, mark: 185.42, decimals: 2 },
-		{ id: 2, market: 'BTC-PERP',  side: 'short', size: 0.1, entry: 95400,  liq: 99200,  mark: 94820,  decimals: 1 },
+		{ id: 1, market: 'WIF-PERP',    side: 'long',  size: 500,   entry: 2.0340, liq: 1.8200, mark: 2.1840, decimals: 4 },
+		{ id: 2, market: 'POPCAT-PERP', side: 'short', size: 200,   entry: 0.6890, liq: 0.7580, mark: 0.6213, decimals: 4 },
 	]);
 	let openOrders = $state([
-		{ id: 1, market: 'SOL-PERP', type: 'Limit', side: 'long',  size: 5,   price: 178.00, filled: 0,   time: '14:22:01' },
-		{ id: 2, market: 'ETH-PERP', type: 'Limit', side: 'short', size: 0.5, price: 3320.00, filled: 0,  time: '14:18:44' },
-		{ id: 3, market: 'JTO-PERP', type: 'Limit', side: 'long',  size: 100, price: 3.71,   filled: 40,  time: '14:05:12' },
+		{ id: 1, market: 'WIF-PERP',     type: 'Limit', side: 'long',  size: 1000, price: 1.9500,     filled: 0,  time: '14:22:01' },
+		{ id: 2, market: 'BONK-PERP',    type: 'Limit', side: 'short', size: 5000000, price: 0.00002610, filled: 0, time: '14:18:44' },
+		{ id: 3, market: 'MOODENG-PERP', type: 'Limit', side: 'long',  size: 800,  price: 0.1340,     filled: 35, time: '14:05:12' },
 	]);
 	let tradeHistory = $state([]);
 	let toast = $state('');
