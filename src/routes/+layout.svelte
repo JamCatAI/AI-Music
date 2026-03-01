@@ -9,7 +9,9 @@
 		{ label: '🚀 Jam.fun', href: '/jam' },
 		{ label: '🤖 x402', href: '/x402' },
 		{ label: '🦾 OpenClaw', href: '/openclaw' },
+		{ label: '🔄 Swap', href: '/swap' },
 		{ label: '📊 Perps', href: '/perps' },
+		{ label: '🔮 Predict', href: '/predict' },
 		{ label: '🎮 Play', href: '/play' },
 	];
 </script>
