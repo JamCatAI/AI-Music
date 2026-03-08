@@ -366,16 +366,24 @@
 		</div>
 
 		<!-- Stats Bar -->
-		<div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+		<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
 			{#each [
-				{ label: 'Total Tokens',   value: stats.totalTokens.toLocaleString(),       icon: '🎵' },
-				{ label: 'Total Volume',   value: `${stats.totalVolume.toFixed(2)}M SOL`,   icon: '💰' },
-				{ label: 'Graduated',      value: stats.graduated.toLocaleString(),          icon: '🎓' },
-				{ label: 'Active Traders', value: stats.activeTraders.toLocaleString(),      icon: '👥' },
+				{ label: 'Total Tokens',   value: stats.totalTokens.toLocaleString(),       icon: '🎵', trend: '+124', color: 'from-pink-500 to-purple-500', glow: 'shadow-pink-500/20' },
+				{ label: 'Total Volume',   value: `${stats.totalVolume.toFixed(2)}M SOL`,   icon: '💰', trend: '+0.42M', color: 'from-green-500 to-emerald-500', glow: 'shadow-green-500/20' },
+				{ label: 'Graduated',      value: stats.graduated.toLocaleString(),          icon: '🎓', trend: '+8', color: 'from-blue-500 to-cyan-500', glow: 'shadow-blue-500/20' },
+				{ label: 'Active Traders', value: stats.activeTraders.toLocaleString(),      icon: '👥', trend: '+342', color: 'from-orange-500 to-yellow-500', glow: 'shadow-orange-500/20' },
 			] as s}
-				<div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-					<p class="text-xs text-gray-400">{s.icon} {s.label}</p>
-					<p class="mt-1 text-xl font-extrabold">{s.value}</p>
+				<div class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-2xl hover:{s.glow}">
+					<div class="absolute right-3 top-3">
+						<span class="rounded-full bg-green-400/20 px-2 py-0.5 text-[10px] font-bold text-green-400">{s.trend}</span>
+					</div>
+					<div class="mb-3 h-8 flex items-end gap-1 opacity-40 transition-opacity group-hover:opacity-100">
+						{#each Array.from({length: 8}, () => Math.random() * 100) as height}
+							<div class="flex-1 bg-gradient-to-t {s.color} rounded-t" style="height: {height}%"></div>
+						{/each}
+					</div>
+					<p class="text-xs font-medium text-gray-400">{s.icon} <span class="uppercase tracking-wider">{s.label}</span></p>
+					<p class="mt-1 text-2xl font-black tracking-tight text-white">{s.value}</p>
 				</div>
 			{/each}
 		</div>
@@ -388,54 +396,73 @@
 
 				<!-- King of the Hill -->
 				{#if king}
-					<div class="mb-6 overflow-hidden rounded-3xl border border-yellow-400/30 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-pink-500/10 p-5 backdrop-blur">
-						<p class="mb-3 text-xs font-bold uppercase tracking-widest text-yellow-400">👑 King of the Hill</p>
-						<div class="flex items-center gap-4">
-							<div class="relative h-16 w-16 shrink-0">
-								<img src="https://picsum.photos/seed/{king.imgSeed}/80/80"
+					<div class="group relative mb-8 overflow-hidden rounded-[2rem] border border-yellow-400/40 bg-gradient-to-br from-yellow-500/20 via-orange-500/10 to-pink-500/5 p-8 backdrop-blur-2xl transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)]">
+						<div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-yellow-500/20 blur-[80px] transition-all duration-500 group-hover:bg-yellow-400/30"></div>
+						
+						<div class="absolute top-6 right-6 z-10">
+							<span class="flex items-center gap-1.5 rounded-full border border-yellow-400/50 bg-gradient-to-r from-yellow-400/20 to-amber-500/20 px-3 py-1 text-[10px] font-black tracking-widest text-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.5)] backdrop-blur-md">
+								<span class="relative flex h-2 w-2">
+									<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>
+									<span class="relative inline-flex h-2 w-2 rounded-full bg-yellow-500"></span>
+								</span>
+								KING
+							</span>
+						</div>
+
+						<p class="mb-5 text-xs font-black uppercase tracking-[0.2em] text-yellow-400">👑 King of the Hill</p>
+						<div class="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center">
+							<div class="relative h-24 w-24 shrink-0">
+								<img src="https://picsum.photos/seed/{king.imgSeed}/160/160"
 									alt={king.name}
-									class="h-16 w-16 rounded-2xl border-2 border-yellow-400 object-cover shadow-lg shadow-yellow-500/30" />
-								<span class="absolute -bottom-1 -right-1 text-lg leading-none">{king.icon}</span>
+									class="h-24 w-24 rounded-[1.5rem] border-4 border-yellow-400/80 object-cover shadow-[0_0_30px_rgba(250,204,21,0.4)] transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3" />
+								<span class="absolute -bottom-3 -right-3 text-3xl leading-none drop-shadow-xl transition-transform duration-500 group-hover:scale-110">{king.icon}</span>
 							</div>
-							<div class="min-w-0 flex-1">
-								<div class="flex flex-wrap items-center gap-2">
-									<span class="text-xl font-extrabold">{king.name}</span>
-									<span class="rounded-full bg-yellow-400/20 px-2 py-0.5 text-xs font-bold text-yellow-300">${king.ticker}</span>
+							<div class="min-w-0 flex-1 pt-2">
+								<div class="flex flex-wrap items-center gap-3">
+									<span class="bg-gradient-to-r from-yellow-300 to-amber-500 bg-clip-text text-3xl font-black tracking-tight text-transparent drop-shadow-sm">{king.name}</span>
+									<span class="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-3 py-1 text-sm font-bold text-yellow-300 backdrop-blur-sm">${king.ticker}</span>
 								</div>
-								<p class="mt-0.5 truncate text-sm text-gray-400">{king.description}</p>
+								<p class="mt-2 line-clamp-2 text-sm leading-relaxed text-gray-300">{king.description}</p>
 							</div>
-							<div class="hidden text-right sm:block">
-								<p class="text-lg font-extrabold text-green-400">{fmtMcap(king.marketCap)}</p>
-								<p class="text-xs text-gray-400">market cap</p>
+							<div class="sm:text-right">
+								<p class="text-3xl font-black tracking-tighter text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.3)]">{fmtMcap(king.marketCap)}</p>
+								<p class="text-xs font-semibold uppercase tracking-wider text-gray-400">market cap</p>
 							</div>
 						</div>
-						<div class="mt-4">
-							<div class="mb-1 flex justify-between text-xs text-gray-400">
+						<div class="relative z-10 mt-6">
+							<div class="mb-2 flex justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
 								<span>Bonding curve progress</span>
-								<span class="font-bold text-white">{king.progress}%</span>
+								<span class="text-white">{king.progress}%</span>
 							</div>
-							<div class="h-2.5 overflow-hidden rounded-full bg-white/10">
-								<div class="h-full rounded-full bg-gradient-to-r from-yellow-400 to-green-400 transition-all duration-700"
-									style="width:{king.progress}%"></div>
+							<div class="h-3 overflow-hidden rounded-full bg-black/40 shadow-inner">
+								<div class="relative h-full rounded-full bg-gradient-to-r from-yellow-400 via-green-400 to-emerald-400 transition-all duration-1000 ease-out"
+									style="width:{king.progress}%">
+									<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+								</div>
 							</div>
 							{#if king.progress >= 100}
-								<p class="mt-1 text-xs text-green-400">🎉 Graduated to Raydium!</p>
+								<p class="mt-3 flex items-center gap-2 text-sm font-bold text-green-400">
+									<span class="text-lg">🎉</span> Graduated to Raydium!
+								</p>
 							{:else}
-								<p class="mt-1 text-xs text-gray-500">{fmtMcap(Math.max(0, 85000 - king.marketCap))} remaining to graduate</p>
+								<p class="mt-2 text-xs font-medium text-gray-400"><span class="text-white">{fmtMcap(Math.max(0, 85000 - king.marketCap))}</span> remaining to graduate</p>
 							{/if}
 						</div>
 					</div>
 				{/if}
 
 				<!-- Filter Tabs -->
-				<div class="mb-4 flex flex-wrap gap-2">
+				<div class="mb-6 flex flex-wrap gap-3">
 					{#each filterTabs as ft}
 						<button onclick={() => (activeFilter = ft.key)}
-							class="rounded-full px-4 py-1.5 text-sm font-semibold transition-all
+							class="group relative overflow-hidden rounded-full px-5 py-2 text-sm font-bold transition-all duration-300
 								{activeFilter === ft.key
-									? 'bg-pink-500 text-white shadow-md shadow-pink-500/30'
-									: 'border border-white/10 bg-white/5 text-gray-300 hover:border-pink-400/50 hover:text-white'}">
-							{ft.label}
+									? 'border-transparent text-white shadow-[0_0_20px_rgba(236,72,153,0.4)] scale-105'
+									: 'border border-white/10 bg-white/5 text-gray-400 hover:border-pink-500/50 hover:text-white hover:bg-white/10'}">
+							{#if activeFilter === ft.key}
+								<div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600"></div>
+							{/if}
+							<span class="relative z-10 block">{ft.label}</span>
 						</button>
 					{/each}
 				</div>
@@ -446,72 +473,95 @@
 				{:else}
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						{#each filtered as token (token.id)}
-							<div class="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition-all duration-200 hover:-translate-y-1 hover:border-pink-500/40 hover:shadow-xl hover:shadow-pink-500/10">
+							<div class="group relative flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-{token.gradient.split(' ')[1].split('-')[1]}-500/50 hover:shadow-2xl hover:shadow-{token.gradient.split(' ')[1].split('-')[1]}-500/20">
+								
+								<!-- Background Glow -->
+								<div class="absolute -inset-24 z-0 rounded-full bg-gradient-to-br {token.gradient} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-10 pointer-events-none"></div>
 
 								<!-- Card header -->
-								<div class="flex items-start gap-3 p-4 pb-2">
-									<div class="relative h-12 w-12 shrink-0">
-										<img src="https://picsum.photos/seed/{token.imgSeed}/80/80"
+								<div class="relative z-10 flex items-start gap-4 p-5 pb-3">
+									<div class="relative h-14 w-14 shrink-0">
+										<div class="absolute inset-0 scale-110 rounded-2xl bg-gradient-to-br {token.gradient} opacity-50 blur-md transition-all group-hover:opacity-100 group-hover:scale-125"></div>
+										<img src="https://picsum.photos/seed/{token.imgSeed}/100/100"
 											alt={token.name}
-											class="h-12 w-12 rounded-xl object-cover border border-white/10 bg-white/5" />
-										<span class="absolute -bottom-1 -right-1 text-sm leading-none">{token.icon}</span>
+											class="relative h-14 w-14 rounded-2xl object-cover border-2 border-white/20 shadow-xl transition-transform duration-300 group-hover:scale-105" />
+										<span class="absolute -bottom-2 -right-2 text-xl leading-none drop-shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:rotate-6">{token.icon}</span>
 									</div>
-									<div class="min-w-0 flex-1">
+									<div class="min-w-0 flex-1 pt-1">
 										<div class="flex items-center gap-2 flex-wrap">
-											<span class="font-bold leading-tight">{token.name}</span>
-											<span class="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-gray-300">${token.ticker}</span>
+											<span class="font-extrabold text-lg tracking-tight text-white">{token.name}</span>
+											<span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-gray-300 border border-white/10">${token.ticker}</span>
 										</div>
-										<p class="mt-0.5 text-[10px] text-gray-500">by {token.creator} · {token.createdAgo}</p>
+										<p class="mt-1 text-[11px] font-medium text-gray-500">by <span class="text-gray-300">{token.creator}</span> · {token.createdAgo}</p>
 									</div>
-									<span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold {tagBadge(token.tag)}">
-										{tagLabel(token.tag)}
-									</span>
+									
+									<div class="flex flex-col items-end gap-1.5 shrink-0">
+										<span class="rounded-full px-2.5 py-1 text-[10px] font-black tracking-widest uppercase shadow-sm {tagBadge(token.tag)}">
+											{tagLabel(token.tag)}
+										</span>
+										{#if token.change24h > 100}
+											<span class="flex items-center gap-1 rounded-full bg-orange-500/20 px-2 py-0.5 text-[9px] font-bold text-orange-400 border border-orange-500/30">
+												<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500"></span>
+												VIRAL
+											</span>
+										{/if}
+									</div>
 								</div>
 
 								<!-- Description -->
-								<p class="px-4 text-xs leading-relaxed text-gray-400 line-clamp-2">{token.description}</p>
+								<p class="relative z-10 px-5 text-sm leading-relaxed text-gray-400 line-clamp-2">{token.description}</p>
 
 								<!-- Stats row -->
-								<div class="mt-3 grid grid-cols-3 gap-px border-y border-white/5 bg-white/5 text-center text-xs">
-									<div class="bg-black/20 py-2">
-										<p class="font-bold text-white">{fmtMcap(token.marketCap)}</p>
-										<p class="text-gray-500">mkt cap</p>
+								<div class="relative z-10 mt-4 grid grid-cols-3 gap-px border-y border-white/5 bg-black/40 text-center">
+									<div class="bg-white/5 py-3 transition-colors group-hover:bg-white/10">
+										<p class="text-base font-black text-white">{fmtMcap(token.marketCap)}</p>
+										<p class="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mt-0.5">mkt cap</p>
 									</div>
-									<div class="bg-black/20 py-2">
-										<p class="font-bold {token.change24h >= 0 ? 'text-green-400' : 'text-red-400'}">
+									<div class="bg-white/5 py-3 transition-colors group-hover:bg-white/10">
+										<p class="text-base font-black {token.change24h >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]' : 'text-red-400'}">
 											{token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(1)}%
 										</p>
-										<p class="text-gray-500">24h</p>
+										<p class="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mt-0.5">24h</p>
 									</div>
-									<div class="bg-black/20 py-2">
-										<p class="font-bold text-white">{token.holders}</p>
-										<p class="text-gray-500">holders</p>
+									<div class="bg-white/5 py-3 transition-colors group-hover:bg-white/10">
+										<p class="text-base font-black text-white">{token.holders}</p>
+										<p class="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mt-0.5">holders</p>
 									</div>
 								</div>
 
 								<!-- Bonding curve -->
-								<div class="px-4 pt-3">
-									<div class="mb-1 flex justify-between text-[10px] text-gray-500">
-										<span>Bonding curve</span>
-										<span class="font-semibold text-white">{token.progress}%</span>
+								<div class="relative z-10 px-6 pt-5 pb-1">
+									<div class="mb-2 flex justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
+										<span>Bonding Curve</span>
+										<span class="text-white">{token.progress}%</span>
 									</div>
-									<div class="h-1.5 overflow-hidden rounded-full bg-white/10">
-										<div class="h-full rounded-full transition-all duration-500 {progressColor(token.progress)}"
-											style="width:{token.progress}%"></div>
+									<div class="h-2 overflow-hidden rounded-full bg-black/60 shadow-inner">
+										<div class="relative h-full rounded-full transition-all duration-700 {progressColor(token.progress)}"
+											style="width:{token.progress}%">
+											<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+										</div>
 									</div>
 								</div>
 
 								<!-- Buy / Sell -->
-								<div class="mt-3 flex gap-2 px-4 pb-4">
-									<button class="flex-1 rounded-xl bg-green-500/20 py-2 text-sm font-bold text-green-400 transition hover:bg-green-500/30">Buy</button>
-									<button class="flex-1 rounded-xl bg-red-500/20 py-2 text-sm font-bold text-red-400 transition hover:bg-red-500/30">Sell</button>
+								<div class="relative z-10 mt-4 flex gap-3 px-5 pb-5">
+									<button class="group/btn relative flex-1 overflow-hidden rounded-xl bg-gradient-to-b from-green-400 to-green-600 p-px font-bold text-white shadow-lg shadow-green-500/20 transition-all hover:scale-[1.03] hover:shadow-green-500/40 active:scale-95">
+										<div class="relative flex h-full items-center justify-center rounded-[11px] bg-gradient-to-b from-green-500/80 to-green-600/80 px-4 py-2.5 backdrop-blur-md transition-colors group-hover/btn:from-green-400/80 group-hover/btn:to-green-500/80">
+											<span class="drop-shadow-md">Buy {token.ticker}</span>
+										</div>
+									</button>
+									<button class="group/btn relative flex-1 overflow-hidden rounded-xl bg-gradient-to-b from-red-400 to-red-600 p-px font-bold text-white shadow-lg shadow-red-500/20 transition-all hover:scale-[1.03] hover:shadow-red-500/40 active:scale-95">
+										<div class="relative flex h-full items-center justify-center rounded-[11px] bg-gradient-to-b from-red-500/80 to-red-600/80 px-4 py-2.5 backdrop-blur-md transition-colors group-hover/btn:from-red-400/80 group-hover/btn:to-red-500/80">
+											<span class="drop-shadow-md">Sell {token.ticker}</span>
+										</div>
+									</button>
 								</div>
 
 								<!-- Footer -->
-								<div class="border-t border-white/5 px-4 pb-3 pt-2 flex justify-between text-[10px] text-gray-600">
-									<span>💬 {token.replies}</span>
-									<span>🔄 {token.trades}</span>
-									<span>📊 {fmtMcap(token.volume24h)}</span>
+								<div class="relative z-10 flex justify-between border-t border-white/10 bg-black/30 px-5 py-3 text-[11px] font-semibold text-gray-400 backdrop-blur-sm">
+									<span class="flex items-center gap-1.5"><span class="text-pink-400">💬</span> <span class="text-gray-300">{token.replies}</span> replies</span>
+									<span class="flex items-center gap-1.5"><span class="text-blue-400">🔄</span> <span class="text-gray-300">{token.trades}</span> trades</span>
+									<span class="flex items-center gap-1.5"><span class="text-purple-400">📊</span> <span class="text-gray-300">{fmtMcap(token.volume24h)}</span> vol</span>
 								</div>
 							</div>
 						{/each}
@@ -520,26 +570,36 @@
 			</div>
 
 			<!-- Right: Live Feed -->
-			<div class="lg:w-64 xl:w-72 shrink-0">
-				<div class="sticky top-20 rounded-2xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
-					<div class="border-b border-white/10 px-4 py-3">
-						<p class="text-sm font-bold">⚡ Live Trades</p>
-						<span class="inline-flex items-center gap-1 text-[10px] text-green-400">
-							<span class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"></span>
-							Real-time
-						</span>
+			<div class="lg:w-64 xl:w-80 shrink-0">
+				<div class="sticky top-24 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden shadow-2xl">
+					<div class="relative border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-5 py-4">
+						<div class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/20 blur-[40px]"></div>
+						<div class="relative z-10 flex items-center justify-between">
+							<p class="text-base font-black tracking-tight flex items-center gap-2">
+								<span class="text-yellow-400">⚡</span> Live Trades
+							</p>
+							<span class="inline-flex items-center gap-1.5 rounded-full border border-green-400/30 bg-green-400/10 px-2 py-0.5 text-[10px] font-bold text-green-400 backdrop-blur-sm">
+								<span class="relative flex h-1.5 w-1.5">
+									<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+									<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
+								</span>
+								LIVE
+							</span>
+						</div>
 					</div>
-					<ul class="divide-y divide-white/5">
+					<ul class="divide-y divide-white/5 bg-black/20">
 						{#each liveFeed as trade, i (i)}
-							<li class="flex items-center gap-2 px-4 py-2.5 text-xs">
-								<span class="text-base">{trade.action === 'bought' ? '🟢' : '🔴'}</span>
+							<li class="group flex items-center gap-3 px-5 py-3.5 text-sm transition-colors hover:bg-white/5">
+								<div class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 {trade.action === 'bought' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'} shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+									<span class="text-sm">{trade.action === 'bought' ? '↑' : '↓'}</span>
+								</div>
 								<div class="min-w-0 flex-1">
-									<p class="truncate font-semibold text-gray-200">{trade.user}</p>
-									<p class="text-gray-500">{trade.action} <span class="font-bold text-white">${trade.token}</span></p>
+									<p class="truncate font-bold text-gray-200">{trade.user}</p>
+									<p class="text-xs font-semibold text-gray-500">{trade.action} <span class="text-white">${trade.token}</span></p>
 								</div>
 								<div class="text-right shrink-0">
-									<p class="font-bold {trade.action === 'bought' ? 'text-green-400' : 'text-red-400'}">{trade.sol} SOL</p>
-									<p class="text-gray-600">{trade.time}</p>
+									<p class="font-black {trade.action === 'bought' ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]' : 'text-red-400'}">{trade.sol} SOL</p>
+									<p class="text-[10px] font-medium text-gray-500 tracking-wider">just now</p>
 								</div>
 							</li>
 						{/each}

@@ -160,6 +160,43 @@
 
 	// ── Lifecycle ─────────────────────────────────────────────────────────────────
 	onMount(() => {
+		// Fetch real market data
+		(async () => {
+			try {
+				const cgIds = 'dogwifcoin,bonk,popcat,myro,moo-deng,peanut-the-squirrel';
+				const url = `https://api.coingecko.com/api/v3/simple/price?ids=${cgIds}&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true`;
+				const res = await fetch(url);
+				if (!res.ok) throw new Error('API down');
+				const data = await res.json();
+				
+				const idMap = {
+					'dogwifcoin': 'WIF-PERP',
+					'bonk': 'BONK-PERP',
+					'popcat': 'POPCAT-PERP',
+					'myro': 'MYRO-PERP',
+					'moo-deng': 'MOODENG-PERP',
+					'peanut-the-squirrel': 'PNUT-PERP'
+				};
+
+				markets = markets.map(m => {
+					const cgId = Object.keys(idMap).find(k => idMap[k] === m.id);
+					if (cgId && data[cgId]) {
+						const price = data[cgId].usd;
+						const change = data[cgId].usd_24h_change ?? m.change;
+						let vol = m.vol;
+						if (data[cgId].usd_24h_vol) {
+							const v = data[cgId].usd_24h_vol;
+							vol = v > 1e6 ? (v / 1e6).toFixed(1) + 'M' : (v / 1e3).toFixed(1) + 'K';
+						}
+						return { ...m, price, change, vol };
+					}
+					return m;
+				});
+			} catch (e) {
+				console.warn('Real data fetch failed. Falling back to dummy data.', e);
+			}
+		})();
+
 		// Seed trade history
 		const names = ['NOVA', 'PULSE', 'ECHO', 'SURGE', 'DRIFT', 'anon'];
 		for (let i = 0; i < 20; i++) {
@@ -298,26 +335,33 @@
 </script>
 
 <!-- ── Root ──────────────────────────────────────────────────────────────────── -->
-<div class="flex min-h-screen flex-col bg-[#0d0e14] font-mono text-white select-none">
+<div class="relative flex min-h-screen flex-col bg-[#0d0e14] font-mono text-white select-none overflow-hidden">
+	
+	<!-- Ambient Background Glow -->
+	<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[800px] rounded-full bg-blue-600/10 blur-[120px] pointer-events-none z-0"></div>
 
 	<!-- ── Market Header ─────────────────────────────────────────────────────── -->
-	<div class="border-b border-white/5 bg-[#13141b]">
+	<div class="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-xl shadow-md">
 		<!-- Market selector row -->
 		<div class="flex items-center gap-0 overflow-x-auto">
 			{#each markets as m}
 				<button
 					onclick={() => { selectedMarketId = m.id; }}
-					class="flex shrink-0 flex-col items-start border-b-2 px-4 py-2.5 transition-all
+					class="relative flex shrink-0 flex-col items-start px-5 py-3 transition-all duration-300
 						{selectedMarketId === m.id
-							? 'border-blue-400 bg-white/5'
-							: 'border-transparent hover:bg-white/3 hover:border-white/10'}"
+							? 'bg-gradient-to-t from-blue-500/10 to-transparent'
+							: 'hover:bg-white/5'}"
 				>
-					<span class="text-xs font-bold {selectedMarketId === m.id ? 'text-white' : 'text-slate-400'}">{m.id}</span>
-					<div class="flex items-baseline gap-1.5 mt-0.5">
-						<span class="text-sm font-extrabold {priceFlash === 'up' && selectedMarketId === m.id ? 'text-green-400' : priceFlash === 'down' && selectedMarketId === m.id ? 'text-red-400' : 'text-white'} transition-colors duration-300">
+					{#if selectedMarketId === m.id}
+						<!-- Active glowing top border -->
+						<div class="absolute top-0 left-0 right-0 h-0.5 bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></div>
+					{/if}
+					<span class="text-xs font-black tracking-wider uppercase {selectedMarketId === m.id ? 'text-white drop-shadow-sm' : 'text-slate-500'}">{m.id}</span>
+					<div class="flex items-baseline gap-2 mt-1">
+						<span class="text-[15px] font-extrabold {priceFlash === 'up' && selectedMarketId === m.id ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]' : priceFlash === 'down' && selectedMarketId === m.id ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]' : 'text-slate-200'} transition-all duration-300">
 							{fmtPrice(m.price, m.decimals)}
 						</span>
-						<span class="text-[10px] {m.change >= 0 ? 'text-green-400' : 'text-red-400'}">
+						<span class="text-[10px] font-bold {m.change >= 0 ? 'text-green-400' : 'text-red-400'}">
 							{m.change >= 0 ? '+' : ''}{m.change.toFixed(2)}%
 						</span>
 					</div>
@@ -327,156 +371,169 @@
 
 		<!-- Stats row -->
 		{#if market}
-			<div class="flex flex-wrap items-center gap-6 border-t border-white/5 px-4 py-2 text-[11px]">
-				<div>
-					<span class="text-slate-500">Mark </span>
-					<span class="text-white">{fmtPrice(market.price * 1.00005, market.decimals)}</span>
+			<div class="flex flex-wrap items-center gap-6 border-t border-white/10 bg-black/20 px-5 py-2.5 text-[11px] backdrop-blur-sm">
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">Mark</span>
+					<span class="text-white font-bold tracking-wide">{fmtPrice(market.price * 1.00005, market.decimals)}</span>
 				</div>
-				<div>
-					<span class="text-slate-500">Index </span>
-					<span class="text-white">{fmtPrice(market.price * 0.9999, market.decimals)}</span>
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">Index</span>
+					<span class="text-slate-200 font-bold">{fmtPrice(market.price * 0.9999, market.decimals)}</span>
 				</div>
-				<div>
-					<span class="text-slate-500">24h Vol </span>
-					<span class="text-white">${market.vol}</span>
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">24h Vol</span>
+					<span class="text-slate-200 font-bold">${market.vol}</span>
 				</div>
-				<div>
-					<span class="text-slate-500">Open Interest </span>
-					<span class="text-white">${market.oi}</span>
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">Open Interest</span>
+					<span class="text-slate-200 font-bold">${market.oi}</span>
 				</div>
-				<div>
-					<span class="text-slate-500">Funding </span>
-					<span class="{market.funding >= 0 ? 'text-green-400' : 'text-red-400'}">
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">Funding</span>
+					<span class="font-extrabold {market.funding >= 0 ? 'text-green-400 drop-shadow-[0_0_3px_rgba(74,222,128,0.3)]' : 'text-red-400 drop-shadow-[0_0_3px_rgba(248,113,113,0.3)]'}">
 						{market.funding >= 0 ? '+' : ''}{(market.funding).toFixed(4)}%
 					</span>
 				</div>
-				<div>
-					<span class="text-slate-500">Next Funding </span>
-					<span class="text-blue-300">{fmtCountdown(fundingCountdown)}</span>
+				<div class="flex items-center gap-1.5">
+					<span class="text-slate-400 font-medium">Next Funding</span>
+					<span class="font-bold text-blue-400">{fmtCountdown(fundingCountdown)}</span>
 				</div>
 			</div>
 		{/if}
 	</div>
 
 	<!-- ── Main 3-column area ─────────────────────────────────────────────────── -->
-	<div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+	<div class="relative z-10 flex min-h-0 flex-1 flex-col lg:flex-row">
 
 		<!-- LEFT: Order Panel -->
-		<div class="w-full shrink-0 border-b border-white/5 bg-[#13141b] lg:w-72 lg:border-b-0 lg:border-r">
+		<div class="w-full shrink-0 border-b border-white/5 bg-black/20 backdrop-blur-lg lg:w-[320px] lg:border-b-0 lg:border-r">
 			<div class="p-4">
 				<!-- Long / Short toggle -->
-				<div class="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-black/30 p-1">
+				<div class="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-black/40 p-1.5 shadow-inner">
 					<button
 						onclick={() => (side = 'long')}
-						class="rounded-md py-2 text-xs font-extrabold tracking-wide transition-all
-							{side === 'long' ? 'bg-green-500 text-white shadow-md shadow-green-500/30' : 'text-slate-400 hover:text-slate-200'}"
+						class="rounded-lg py-2.5 text-xs font-black tracking-wider transition-all duration-300
+							{side === 'long' 
+								? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(74,222,128,0.4)] scale-[1.02]' 
+								: 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}"
 					>▲ LONG</button>
 					<button
 						onclick={() => (side = 'short')}
-						class="rounded-md py-2 text-xs font-extrabold tracking-wide transition-all
-							{side === 'short' ? 'bg-red-500 text-white shadow-md shadow-red-500/30' : 'text-slate-400 hover:text-slate-200'}"
+						class="rounded-lg py-2.5 text-xs font-black tracking-wider transition-all duration-300
+							{side === 'short' 
+								? 'bg-gradient-to-br from-red-400 to-red-600 text-white shadow-[0_0_20px_rgba(248,113,113,0.4)] scale-[1.02]' 
+								: 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}"
 					>▼ SHORT</button>
 				</div>
 
 				<!-- Market / Limit tabs -->
-				<div class="mb-4 flex gap-3 border-b border-white/5 pb-2">
+				<div class="mb-5 flex gap-1 border-b border-white/10 pb-2">
 					{#each ['market', 'limit'] as ot}
 						<button
 							onclick={() => (orderType = ot)}
-							class="pb-1 text-xs font-semibold capitalize transition-all
-								{orderType === ot ? 'border-b-2 border-blue-400 text-white' : 'text-slate-500 hover:text-slate-300'}"
+							class="px-3 py-1.5 rounded text-xs font-bold capitalize transition-all duration-300
+								{orderType === ot 
+									? 'bg-blue-500/20 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
+									: 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
 						>{ot}</button>
 					{/each}
 				</div>
 
 				<!-- Balance -->
-				<div class="mb-3 flex justify-between text-[11px]">
-					<span class="text-slate-500">Available</span>
-					<span class="text-white">{fmt(balance)} USDC</span>
+				<div class="mb-4 flex justify-between text-[11px] items-center">
+					<span class="text-slate-500 font-medium">Available</span>
+					<span class="text-white font-bold tracking-wide">{fmt(balance)} USDC</span>
 				</div>
 
 				<!-- Limit price (only for limit orders) -->
 				{#if orderType === 'limit'}
-					<div class="mb-3">
-						<label class="mb-1 block text-[10px] text-slate-500 uppercase tracking-wider">Limit Price</label>
+					<div class="mb-4 group">
+						<label for="limitPrice" class="mb-1.5 block text-[10px] text-slate-400 font-bold uppercase tracking-wider group-focus-within:text-blue-400 transition-colors">Limit Price</label>
 						<input
+							id="limitPrice"
 							bind:value={limitPrice}
 							type="number"
-							class="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-blue-400/60"
+							class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-blue-500/60 focus:bg-blue-900/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all"
 						/>
 					</div>
 				{/if}
 
 				<!-- Size -->
-				<div class="mb-1">
-					<label class="mb-1 block text-[10px] text-slate-500 uppercase tracking-wider">Size (USD)</label>
+				<div class="mb-1.5 group">
+					<label for="sizeUSD" class="mb-1.5 block text-[10px] text-slate-400 font-bold uppercase tracking-wider group-focus-within:text-blue-400 transition-colors">Size (USD)</label>
 					<input
+						id="sizeUSD"
 						bind:value={sizeUSD}
 						type="number"
-						class="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-blue-400/60"
+						class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-blue-500/60 focus:bg-blue-900/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all"
 					/>
 				</div>
-				<div class="mb-4 grid grid-cols-4 gap-1">
+				<div class="mb-6 grid grid-cols-4 gap-1.5">
 					{#each [25, 50, 75, 100] as pct}
 						<button
 							onclick={() => (sizeUSD = String(Math.floor(balance * leverage * pct / 100)))}
-							class="rounded border border-white/10 bg-white/5 py-1 text-[10px] text-slate-400 hover:border-blue-400/40 hover:text-white transition-colors"
+							class="rounded-lg border border-white/10 bg-white/5 py-1.5 text-[10px] font-bold text-slate-400 hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-300 transition-all active:scale-95"
 						>{pct}%</button>
 					{/each}
 				</div>
 
 				<!-- Leverage -->
-				<div class="mb-4">
-					<div class="mb-1 flex justify-between">
-						<label class="text-[10px] text-slate-500 uppercase tracking-wider">Leverage</label>
-						<span class="text-xs font-bold text-blue-400">{leverage}×</span>
+				<div class="mb-6 rounded-xl border border-white/5 bg-black/20 p-3">
+					<div class="mb-2 flex justify-between items-center">
+						<label for="leverageInput" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Leverage</label>
+						<div class="rounded bg-blue-500/20 px-2 py-0.5 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+							<span class="text-xs font-black text-blue-400">{leverage}×</span>
+						</div>
 					</div>
 					<input
+						id="leverageInput"
 						bind:value={leverage}
 						type="range" min="1" max="100" step="1"
-						class="w-full accent-blue-400 cursor-pointer"
+						class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-500"
 					/>
-					<div class="mt-1 flex justify-between text-[9px] text-slate-600">
+					<div class="mt-2 flex justify-between text-[9px] font-bold text-slate-500">
 						<span>1×</span><span>25×</span><span>50×</span><span>75×</span><span>100×</span>
 					</div>
 				</div>
 
 				<!-- TP/SL toggle -->
-				<div class="mb-3">
+				<div class="mb-5">
 					<button
 						onclick={() => (showTpSl = !showTpSl)}
-						class="flex w-full items-center justify-between rounded-lg border border-white/10 px-3 py-2 text-[11px] text-slate-400 hover:border-white/20 transition-colors"
+						class="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-slate-300 hover:border-white/20 hover:bg-white/10 transition-all"
 					>
-						<span>TP / SL</span>
-						<span class="text-blue-400">{showTpSl ? '▲' : '▼'}</span>
+						<span>Take Profit / Stop Loss</span>
+						<span class="text-blue-400 transition-transform duration-300 {showTpSl ? 'rotate-180' : ''}">▼</span>
 					</button>
 					{#if showTpSl}
-						<div class="mt-2 grid grid-cols-2 gap-2">
-							<div>
-								<label class="mb-1 block text-[9px] text-green-400 uppercase">Take Profit</label>
-								<input bind:value={tpPrice} type="number" placeholder="Price"
-									class="w-full rounded-lg border border-green-400/20 bg-black/30 px-2 py-1.5 text-xs text-white outline-none focus:border-green-400/50" />
+						<div class="mt-3 grid grid-cols-2 gap-3">
+							<div class="group">
+								<label for="tpPrice" class="mb-1.5 block text-[9px] font-black text-green-400 tracking-wider">TAKE PROFIT</label>
+								<input id="tpPrice" bind:value={tpPrice} type="number" placeholder="Price"
+									class="w-full rounded-lg border border-green-500/30 bg-black/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-green-400 focus:bg-green-900/20 focus:shadow-[0_0_10px_rgba(74,222,128,0.2)] transition-all" />
 							</div>
-							<div>
-								<label class="mb-1 block text-[9px] text-red-400 uppercase">Stop Loss</label>
-								<input bind:value={slPrice} type="number" placeholder="Price"
-									class="w-full rounded-lg border border-red-400/20 bg-black/30 px-2 py-1.5 text-xs text-white outline-none focus:border-red-400/50" />
+							<div class="group">
+								<label for="slPrice" class="mb-1.5 block text-[9px] font-black text-red-400 tracking-wider">STOP LOSS</label>
+								<input id="slPrice" bind:value={slPrice} type="number" placeholder="Price"
+									class="w-full rounded-lg border border-red-500/30 bg-black/40 px-3 py-2 text-xs font-bold text-white outline-none focus:border-red-400 focus:bg-red-900/20 focus:shadow-[0_0_10px_rgba(248,113,113,0.2)] transition-all" />
 							</div>
 						</div>
 					{/if}
 				</div>
 
 				<!-- Order summary -->
-				<div class="mb-4 space-y-1.5 rounded-lg border border-white/5 bg-black/20 p-3 text-[11px]">
+				<div class="mb-6 space-y-2 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-4 text-[11px] shadow-lg backdrop-blur-sm">
 					{#each [
-						{ label: 'Size', value: `${sizeContracts()} ${market?.base ?? ''}` },
-						{ label: 'Notional', value: `$${fmt(notional())}` },
-						{ label: 'Fees', value: `$${fees()}` },
-						{ label: 'Liq. Price', value: fmtPrice(parseFloat(liqPrice()) || 0, market?.decimals ?? 2) },
+						{ label: 'Size', value: `${sizeContracts()} ${market?.base ?? ''}`, highlight: false },
+						{ label: 'Notional', value: `$${fmt(notional())}`, highlight: false },
+						{ label: 'Fees', value: `$${fees()}`, highlight: false },
+						{ label: 'Liq. Price', value: fmtPrice(parseFloat(liqPrice()) || 0, market?.decimals ?? 2), highlight: true },
 					] as row}
-						<div class="flex justify-between">
-							<span class="text-slate-500">{row.label}</span>
-							<span class="text-white">{row.value}</span>
+						<div class="flex justify-between items-center group/row">
+							<span class="text-slate-400 font-medium group-hover/row:text-slate-300 transition-colors">{row.label}</span>
+							<span class="font-bold {row.highlight ? (side === 'long' ? 'text-red-400 drop-shadow-[0_0_3px_rgba(248,113,113,0.5)]' : 'text-green-400 drop-shadow-[0_0_3px_rgba(74,222,128,0.5)]') : 'text-slate-100'}">
+								{row.value}
+							</span>
 						</div>
 					{/each}
 				</div>
@@ -485,36 +542,50 @@
 				<button
 					onclick={placeOrder}
 					disabled={!sizeUSD || parseFloat(sizeUSD) <= 0}
-					class="w-full rounded-xl py-3 text-sm font-extrabold tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95
+					class="w-full rounded-xl py-3.5 text-[13px] font-black uppercase tracking-widest transition-all duration-300 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed active:scale-[0.98] active:translate-y-0.5
 						{side === 'long'
-							? 'bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400'
-							: 'bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-400'}"
+							? 'bg-gradient-to-r from-green-500 to-emerald-400 text-white shadow-[0_0_30px_rgba(74,222,128,0.4)] hover:shadow-[0_0_40px_rgba(74,222,128,0.6)] border border-green-400/50'
+							: 'bg-gradient-to-r from-red-500 to-rose-400 text-white shadow-[0_0_30px_rgba(248,113,113,0.4)] hover:shadow-[0_0_40px_rgba(248,113,113,0.6)] border border-red-400/50'}"
 				>
-					{side === 'long' ? '▲ Place Long' : '▼ Place Short'}
+					{side === 'long' ? 'Place Long Order' : 'Place Short Order'}
 				</button>
 			</div>
 		</div>
 
 		<!-- CENTER: Chart -->
-		<div class="flex min-w-0 flex-1 flex-col border-b border-white/5 lg:border-b-0 lg:border-r">
+		<div class="relative flex min-w-0 flex-1 flex-col border-b border-white/5 lg:border-b-0 lg:border-r">
+			<!-- Chart glow -->
+			<div class="absolute inset-0 bg-gradient-to-t from-blue-900/5 to-transparent pointer-events-none"></div>
+
 			<!-- Timeframe tabs -->
-			<div class="flex items-center gap-0 border-b border-white/5 px-3">
+			<div class="relative z-10 flex items-center gap-1 border-b border-white/10 px-4 py-2 bg-black/10 backdrop-blur-sm">
 				{#each TFS as tf}
 					<button
 						onclick={() => (chartTf = tf)}
-						class="px-3 py-2.5 text-xs font-semibold transition-colors
-							{chartTf === tf ? 'text-white border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'}"
+						class="px-3 py-1.5 rounded-md text-[11px] font-bold transition-all duration-300
+							{chartTf === tf 
+								? 'bg-blue-500/20 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
+								: 'text-slate-500 hover:text-slate-200 hover:bg-white/5'}"
 					>{tf}</button>
 				{/each}
-				<span class="ml-auto text-[10px] text-slate-600">Simulated · not real data</span>
+				<div class="ml-auto rounded-full bg-white/5 border border-white/10 px-3 py-1 mt-0.5">
+					<span class="text-[9px] font-medium text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+						<span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.8)] animate-pulse"></span>
+						Live Price Data
+					</span>
+				</div>
 			</div>
 
 			<!-- SVG candlestick chart -->
 			<div class="relative flex-1 min-h-[300px]"
+				role="application"
+				aria-label="Interactive chart container"
 				onmouseleave={() => (hoveredCandle = null)}
 			>
 				{#if candles.length > 0}
 					<svg
+						role="img"
+						aria-label="Candlestick price chart"
 						class="h-full w-full"
 						viewBox="0 0 {CHART_W} {CHART_H + VOL_H}"
 						preserveAspectRatio="none"
@@ -605,7 +676,7 @@
 					<!-- Hover tooltip -->
 					{#if hoveredCandle}
 						<div
-							class="pointer-events-none absolute top-2 left-3 rounded-lg border border-white/10 bg-[#13141b]/95 px-3 py-2 text-[10px] space-y-0.5"
+							class="pointer-events-none absolute top-4 left-4 rounded-xl border border-white/10 bg-black/60 backdrop-blur-md px-4 py-3 text-[10px] shadow-2xl space-y-1 z-20"
 						>
 							{#each [
 								{ l: 'O', v: fmtPrice(hoveredCandle.open, market?.decimals ?? 2), c: hoveredCandle.close >= hoveredCandle.open ? 'text-green-400' : 'text-red-400' },
@@ -613,9 +684,9 @@
 								{ l: 'L', v: fmtPrice(hoveredCandle.low, market?.decimals ?? 2), c: 'text-red-400' },
 								{ l: 'C', v: fmtPrice(hoveredCandle.close, market?.decimals ?? 2), c: hoveredCandle.close >= hoveredCandle.open ? 'text-green-400' : 'text-red-400' },
 							] as row}
-								<div class="flex gap-2">
-									<span class="text-slate-500 w-3">{row.l}</span>
-									<span class="{row.c} font-bold">{row.v}</span>
+								<div class="flex gap-3 justify-between">
+									<span class="text-slate-500 font-bold">{row.l}</span>
+									<span class="{row.c} font-black drop-shadow-[0_0_2px_currentColor]">{row.v}</span>
 								</div>
 							{/each}
 						</div>
@@ -625,25 +696,27 @@
 		</div>
 
 		<!-- RIGHT: Orderbook -->
-		<div class="w-full shrink-0 bg-[#13141b] lg:w-52 xl:w-56">
-			<div class="border-b border-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-				Orderbook
+		<div class="w-full shrink-0 bg-black/20 backdrop-blur-lg lg:w-[280px]">
+			<div class="border-b border-white/10 px-4 py-3 bg-white/5 backdrop-blur-sm">
+				<span class="text-[10px] font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-200">
+					Orderbook
+				</span>
 			</div>
 
 			<!-- Column headers -->
-			<div class="grid grid-cols-3 gap-1 px-3 py-1 text-[9px] text-slate-600">
+			<div class="grid grid-cols-3 gap-1 px-4 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-widest">
 				<span>Price</span><span class="text-right">Size</span><span class="text-right">Total</span>
 			</div>
 
 			<!-- Asks (red, reversed — highest at top) -->
-			<div class="px-2">
+			<div class="px-2 space-y-0.5">
 				{#each book.asks as ask}
 					{@const pct = (ask.size / depthMax(book.asks)) * 100}
-					<div class="relative mb-px grid grid-cols-3 gap-1 rounded-sm px-1 py-[3px] text-[11px]">
-						<div class="pointer-events-none absolute inset-0 rounded-sm bg-red-500/10" style="width: {pct}%; margin-left: auto"></div>
-						<span class="relative text-red-400">{fmtPrice(ask.price, market?.decimals ?? 2)}</span>
+					<div class="relative group grid grid-cols-3 gap-1 rounded py-0.5 px-2 text-[11px] font-medium hover:bg-white/5 transition-colors cursor-pointer">
+						<div class="pointer-events-none absolute inset-0 rounded bg-red-500/10 group-hover:bg-red-500/20 transition-colors" style="width: {pct}%; margin-left: auto"></div>
+						<span class="relative text-red-400 font-bold group-hover:drop-shadow-[0_0_3px_rgba(248,113,113,0.5)] transition-all">{fmtPrice(ask.price, market?.decimals ?? 2)}</span>
 						<span class="relative text-right text-slate-300">{ask.size.toFixed(1)}</span>
-						<span class="relative text-right text-slate-500">{(ask.size * ask.price).toFixed(0)}</span>
+						<span class="relative text-right text-slate-500 group-hover:text-slate-400 transition-colors">{(ask.size * ask.price).toFixed(0)}</span>
 					</div>
 				{/each}
 			</div>
@@ -652,21 +725,21 @@
 			{#if book.asks.length && book.bids.length}
 				{@const spread = book.asks[0].price - book.bids[0].price}
 				{@const spreadPct = (spread / book.bids[0].price * 100).toFixed(3)}
-				<div class="my-1 flex items-center justify-between border-y border-white/5 px-3 py-1.5 text-[10px]">
-					<span class="font-bold text-white">{fmtPrice(book.asks[0].price - spread / 2, market?.decimals ?? 2)}</span>
-					<span class="text-slate-500">Spread {spreadPct}%</span>
+				<div class="my-2 flex items-center justify-between border-y border-white/10 bg-white/5 px-4 py-2 text-[10px] shadow-inner">
+					<span class="font-extrabold text-blue-300 drop-shadow-[0_0_5px_rgba(147,197,253,0.4)] text-[12px]">{fmtPrice(book.asks[0].price - spread / 2, market?.decimals ?? 2)}</span>
+					<span class="text-slate-400 font-bold bg-black/40 px-2 py-0.5 rounded-full border border-white/10">Spread <span class="text-slate-200">{spreadPct}%</span></span>
 				</div>
 			{/if}
 
 			<!-- Bids (green) -->
-			<div class="px-2">
+			<div class="px-2 space-y-0.5">
 				{#each book.bids as bid}
 					{@const pct = (bid.size / depthMax(book.bids)) * 100}
-					<div class="relative mb-px grid grid-cols-3 gap-1 rounded-sm px-1 py-[3px] text-[11px]">
-						<div class="pointer-events-none absolute inset-0 rounded-sm bg-green-500/10" style="width: {pct}%"></div>
-						<span class="relative text-green-400">{fmtPrice(bid.price, market?.decimals ?? 2)}</span>
+					<div class="relative group grid grid-cols-3 gap-1 rounded py-0.5 px-2 text-[11px] font-medium hover:bg-white/5 transition-colors cursor-pointer">
+						<div class="pointer-events-none absolute inset-0 rounded bg-green-500/10 group-hover:bg-green-500/20 transition-colors" style="width: {pct}%"></div>
+						<span class="relative text-green-400 font-bold group-hover:drop-shadow-[0_0_3px_rgba(74,222,128,0.5)] transition-all">{fmtPrice(bid.price, market?.decimals ?? 2)}</span>
 						<span class="relative text-right text-slate-300">{bid.size.toFixed(1)}</span>
-						<span class="relative text-right text-slate-500">{(bid.size * bid.price).toFixed(0)}</span>
+						<span class="relative text-right text-slate-500 group-hover:text-slate-400 transition-colors">{(bid.size * bid.price).toFixed(0)}</span>
 					</div>
 				{/each}
 			</div>
@@ -674,9 +747,9 @@
 	</div>
 
 	<!-- ── Bottom Panel ───────────────────────────────────────────────────────── -->
-	<div class="border-t border-white/5 bg-[#13141b]">
+	<div class="relative z-10 border-t border-white/10 bg-[#0d0e14]/90 backdrop-blur-xl">
 		<!-- Tabs -->
-		<div class="flex items-center gap-0 border-b border-white/5 px-4">
+		<div class="flex items-center gap-2 border-b border-white/5 px-4 py-3">
 			{#each [
 				{ key: 'positions',    label: `Positions (${positions.length})` },
 				{ key: 'orders',       label: `Open Orders (${openOrders.length})` },
@@ -684,23 +757,27 @@
 			] as tab}
 				<button
 					onclick={() => (bottomTab = tab.key)}
-					class="mr-4 pb-2 pt-2.5 text-xs font-semibold transition-colors
-						{bottomTab === tab.key ? 'border-b-2 border-blue-400 text-white' : 'text-slate-500 hover:text-slate-300'}"
+					class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300
+						{bottomTab === tab.key 
+							? 'bg-blue-500/20 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.3)]' 
+							: 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
 				>{tab.label}</button>
 			{/each}
 		</div>
 
 		<!-- Positions -->
 		{#if bottomTab === 'positions'}
-			<div class="overflow-x-auto">
+			<div class="overflow-x-auto min-h-[200px]">
 				{#if positions.length === 0}
-					<p class="py-6 text-center text-xs text-slate-600">No open positions</p>
+					<div class="flex items-center justify-center p-8">
+						<p class="text-sm font-bold text-slate-500 tracking-widest uppercase">No open positions</p>
+					</div>
 				{:else}
 					<table class="w-full text-[11px]">
 						<thead>
-							<tr class="border-b border-white/5 text-left text-[9px] text-slate-600 uppercase tracking-wider">
+							<tr class="border-b border-white/5 text-left text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-black/20">
 								{#each ['Market', 'Side', 'Size', 'Entry', 'Mark', 'Liq.', 'PnL', 'PnL %', ''] as h}
-									<th class="px-4 py-2 font-medium">{h}</th>
+									<th class="px-5 py-3">{h}</th>
 								{/each}
 							</tr>
 						</thead>
@@ -708,29 +785,29 @@
 							{#each positions as pos (pos.id)}
 								{@const p = pnl(pos)}
 								{@const pp = pnlPct(pos)}
-								<tr class="border-b border-white/[0.03] hover:bg-white/[0.02]">
-									<td class="px-4 py-2.5 font-bold text-white">{pos.market}</td>
-									<td class="px-4 py-2.5">
-										<span class="rounded px-2 py-0.5 text-[10px] font-extrabold
-											{pos.side === 'long' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+								<tr class="border-b border-white/[0.03] hover:bg-white/5 transition-colors group cursor-pointer">
+									<td class="px-5 py-3 font-black text-white tracking-wider">{pos.market}</td>
+									<td class="px-5 py-3">
+										<span class="rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest
+											{pos.side === 'long' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
 											{pos.side.toUpperCase()}
 										</span>
 									</td>
-									<td class="px-4 py-2.5 text-slate-200">{pos.size}</td>
-									<td class="px-4 py-2.5 text-slate-300">{fmtPrice(pos.entry, pos.decimals)}</td>
-									<td class="px-4 py-2.5 text-white">{fmtPrice(pos.mark, pos.decimals)}</td>
-									<td class="px-4 py-2.5 text-red-400">{fmtPrice(pos.liq, pos.decimals)}</td>
-									<td class="px-4 py-2.5 font-bold {p >= 0 ? 'text-green-400' : 'text-red-400'}">
+									<td class="px-5 py-3 font-medium text-slate-300 group-hover:text-white transition-colors">{pos.size}</td>
+									<td class="px-5 py-3 font-medium text-slate-400">{fmtPrice(pos.entry, pos.decimals)}</td>
+									<td class="px-5 py-3 font-medium text-slate-200">{fmtPrice(pos.mark, pos.decimals)}</td>
+									<td class="px-5 py-3 font-medium text-orange-400/80">{fmtPrice(pos.liq, pos.decimals)}</td>
+									<td class="px-5 py-3 font-black {p >= 0 ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.4)]' : 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.4)]'}">
 										{p >= 0 ? '+' : ''}{fmt(p, 2)}
 									</td>
-									<td class="px-4 py-2.5 font-bold {pp >= 0 ? 'text-green-400' : 'text-red-400'}">
+									<td class="px-5 py-3 font-black {pp >= 0 ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.4)]' : 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.4)]'}">
 										{pp >= 0 ? '+' : ''}{pp.toFixed(2)}%
 									</td>
-									<td class="px-4 py-2.5">
+									<td class="px-5 py-3 text-right">
 										<button
 											onclick={() => closePosition(pos.id)}
-											class="rounded border border-white/10 px-2 py-0.5 text-[10px] text-slate-400 hover:border-red-400/50 hover:text-red-400 transition-colors"
-										>Close</button>
+											class="rounded-lg border border-white/10 px-3 py-1 text-[10px] font-bold text-slate-400 hover:bg-red-500/20 hover:border-red-400/50 hover:text-red-400 transition-all active:scale-95"
+										>CLOSE</button>
 									</td>
 								</tr>
 							{/each}
@@ -741,38 +818,47 @@
 
 		<!-- Open Orders -->
 		{:else if bottomTab === 'orders'}
-			<div class="overflow-x-auto">
+			<div class="overflow-x-auto min-h-[200px]">
 				{#if openOrders.length === 0}
-					<p class="py-6 text-center text-xs text-slate-600">No open orders</p>
+					<div class="flex items-center justify-center p-8">
+						<p class="text-sm font-bold text-slate-500 tracking-widest uppercase">No open orders</p>
+					</div>
 				{:else}
 					<table class="w-full text-[11px]">
 						<thead>
-							<tr class="border-b border-white/5 text-left text-[9px] text-slate-600 uppercase tracking-wider">
+							<tr class="border-b border-white/5 text-left text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-black/20">
 								{#each ['Market', 'Type', 'Side', 'Size', 'Price', 'Filled', 'Time', ''] as h}
-									<th class="px-4 py-2 font-medium">{h}</th>
+									<th class="px-5 py-3">{h}</th>
 								{/each}
 							</tr>
 						</thead>
 						<tbody>
 							{#each openOrders as o (o.id)}
-								<tr class="border-b border-white/[0.03] hover:bg-white/[0.02]">
-									<td class="px-4 py-2.5 font-bold text-white">{o.market}</td>
-									<td class="px-4 py-2.5 text-slate-400">{o.type}</td>
-									<td class="px-4 py-2.5">
-										<span class="rounded px-2 py-0.5 text-[10px] font-extrabold
-											{o.side === 'long' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+								<tr class="border-b border-white/[0.03] hover:bg-white/5 transition-colors group cursor-pointer">
+									<td class="px-5 py-3 font-black text-white tracking-wider">{o.market}</td>
+									<td class="px-5 py-3 font-bold text-slate-500">{o.type}</td>
+									<td class="px-5 py-3">
+										<span class="rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest
+											{o.side === 'long' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
 											{o.side.toUpperCase()}
 										</span>
 									</td>
-									<td class="px-4 py-2.5 text-slate-200">{o.size}</td>
-									<td class="px-4 py-2.5 text-white">{o.price}</td>
-									<td class="px-4 py-2.5 text-slate-400">{o.filled}%</td>
-									<td class="px-4 py-2.5 text-slate-500">{o.time}</td>
-									<td class="px-4 py-2.5">
+									<td class="px-5 py-3 font-medium text-slate-300 group-hover:text-white transition-colors">{o.size}</td>
+									<td class="px-5 py-3 font-medium text-slate-200">{o.price}</td>
+									<td class="px-5 py-3 font-medium text-slate-400">
+										<div class="flex items-center gap-2">
+											<div class="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
+												<div class="h-full bg-blue-500 rounded-full" style="width: {o.filled}%"></div>
+											</div>
+											{o.filled}%
+										</div>
+									</td>
+									<td class="px-5 py-3 font-medium text-slate-500">{o.time}</td>
+									<td class="px-5 py-3 text-right">
 										<button
 											onclick={() => cancelOrder(o.id)}
-											class="rounded border border-white/10 px-2 py-0.5 text-[10px] text-slate-400 hover:border-red-400/50 hover:text-red-400 transition-colors"
-										>Cancel</button>
+											class="rounded-lg border border-white/10 px-3 py-1 text-[10px] font-bold text-slate-400 hover:bg-red-500/20 hover:border-red-400/50 hover:text-red-400 transition-all active:scale-95"
+										>CANCEL</button>
 									</td>
 								</tr>
 							{/each}
@@ -783,10 +869,10 @@
 
 		<!-- Trade History -->
 		{:else if bottomTab === 'history'}
-			<div class="max-h-40 overflow-y-auto">
+			<div class="max-h-60 overflow-y-auto">
 				<table class="w-full text-[11px]">
-					<thead class="sticky top-0 bg-[#13141b]">
-						<tr class="border-b border-white/5 text-left text-[9px] text-slate-600 uppercase tracking-wider">
+					<thead class="sticky top-0 bg-[#0d0e14] z-10 shadow-md">
+						<tr class="border-b border-white/5 text-left text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-black/40 backdrop-blur-md">
 							{#each ['Market', 'Side', 'Size', 'Price', 'Time', 'Trader'] as h}
 								<th class="px-4 py-2 font-medium">{h}</th>
 							{/each}

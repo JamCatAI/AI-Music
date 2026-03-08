@@ -13,6 +13,7 @@
 		{ label: '📊 Perps', href: '/perps' },
 		{ label: '🔮 Predict', href: '/predict' },
 		{ label: '🎮 Play', href: '/play' },
+		{ label: '📰 News', href: '/news' },
 	];
 </script>
 
