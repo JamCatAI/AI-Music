@@ -85,6 +85,10 @@
 	let betSuccess = $state(false);
 	let toast = $state('');
 
+	// Live News state
+	let newsFeed = $state([]);
+	let newsLoading = $state(true);
+
 	// ── Derived ───────────────────────────────────────────────────────────────────
 	let filtered = $derived(() => {
 		let list = markets.filter(m => {
@@ -146,6 +150,25 @@
 
 	// ── Lifecycle ─────────────────────────────────────────────────────────────────
 	onMount(() => {
+		// Fetch Live News
+		fetch('https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss')
+			.then(res => res.json())
+			.then(data => {
+				if (data.status === 'ok') {
+					newsFeed = data.items.slice(0, 5).map(item => ({
+						title: item.title,
+						link: item.link,
+						time: new Date(item.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+						source: 'Cointelegraph'
+					}));
+				}
+				newsLoading = false;
+			})
+			.catch(err => {
+				console.error('Error fetching news:', err);
+				newsLoading = false;
+			});
+
 		// Seed activity
 		for (let i = 0; i < 12; i++) {
 			const m = markets[randInt(0, markets.length)];
@@ -270,35 +293,45 @@
 
 				<!-- Featured markets -->
 				{#if activeCategory === 'All' && !searchQuery}
-					<div class="mb-6">
-						<p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">🔥 Featured</p>
-						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<div class="mb-8">
+						<p class="mb-4 text-xs font-black uppercase tracking-widest text-[#4f7cff] drop-shadow-sm">🔥 Featured Markets</p>
+						<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 							{#each featured() as m (m.id)}
 								<button
 									onclick={() => openMarket(m)}
-									class="group flex flex-col rounded-2xl border border-white/8 bg-[#1a1b1f] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4f7cff]/30 hover:shadow-lg hover:shadow-[#4f7cff]/10"
+									class="group relative flex flex-col overflow-hidden rounded-[2rem] border border-[#4f7cff]/20 bg-white/5 p-6 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#4f7cff]/50 hover:shadow-[0_0_30px_rgba(79,124,255,0.15)]"
 								>
-									<div class="mb-3 flex items-start justify-between">
-										<span class="rounded-full px-2 py-0.5 text-[10px] font-bold {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
-										<span class="text-[10px] text-slate-500">🔥 Hot · {fmtVol(m.vol)}</span>
+									<div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-[#4f7cff]/10 blur-[40px] transition-all duration-500 group-hover:bg-[#4f7cff]/20"></div>
+									
+									<div class="relative z-10 mb-4 flex items-start justify-between">
+										<span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
+										<span class="flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold text-orange-400 backdrop-blur-sm">
+											<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500"></span>
+											HOT · {fmtVol(m.vol)}
+										</span>
 									</div>
-									<p class="mb-4 text-sm font-bold leading-snug text-white">{m.q}</p>
+									<p class="relative z-10 mb-5 text-lg font-extrabold leading-tight text-white drop-shadow-sm group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-gray-400 group-hover:bg-clip-text transition-colors">{m.q}</p>
+									
 									<!-- Probability bar -->
-									<div class="mb-2 flex items-center gap-2 text-xs font-bold">
-										<span class="text-green-400">{m.yes}%</span>
-										<div class="relative flex-1 overflow-hidden rounded-full h-2 bg-red-500/30">
-											<div class="absolute left-0 top-0 h-full rounded-full bg-green-400 transition-all duration-700" style="width:{m.yes}%"></div>
+									<div class="relative z-10 mb-3 flex items-center gap-3 text-sm font-black">
+										<span class="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.4)]">{m.yes}%</span>
+										<div class="relative flex-1 overflow-hidden rounded-full h-2.5 bg-black/40 shadow-inner">
+											<div class="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-700" style="width:{m.yes}%">
+												<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+											</div>
 										</div>
-										<span class="text-red-400">{100 - m.yes}%</span>
+										<span class="text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.4)]">{100 - m.yes}%</span>
 									</div>
-									<div class="flex gap-2 text-[10px] text-slate-500">
-										<span>YES · {m.yes}¢</span>
-										<span>·</span>
-										<span>NO · {100 - m.yes}¢</span>
+									
+									<div class="relative z-10 flex gap-2 text-[10px] font-semibold text-slate-400">
+										<span class="tracking-wider">YES · {m.yes}¢</span>
+										<span>•</span>
+										<span class="tracking-wider">NO · {100 - m.yes}¢</span>
 									</div>
-									<div class="mt-4 grid grid-cols-2 gap-2">
-										<div class="rounded-xl border border-green-400/20 bg-green-400/10 py-1.5 text-center text-xs font-bold text-green-400 transition-colors group-hover:bg-green-400/15">Buy YES</div>
-										<div class="rounded-xl border border-red-400/20 bg-red-400/10 py-1.5 text-center text-xs font-bold text-red-400 transition-colors group-hover:bg-red-400/15">Buy NO</div>
+									
+									<div class="relative z-10 mt-5 grid grid-cols-2 gap-3">
+										<div class="flex items-center justify-center rounded-xl bg-gradient-to-b from-green-400/20 to-green-500/10 py-2.5 text-xs font-black tracking-wide text-green-400 border border-green-400/30 shadow-[0_4px_15px_rgba(74,222,128,0.1)] transition-all group-hover:bg-green-400/20 group-hover:scale-[1.03]">Buy YES</div>
+										<div class="flex items-center justify-center rounded-xl bg-gradient-to-b from-red-400/20 to-red-500/10 py-2.5 text-xs font-black tracking-wide text-red-400 border border-red-400/30 shadow-[0_4px_15px_rgba(248,113,113,0.1)] transition-all group-hover:bg-red-400/20 group-hover:scale-[1.03]">Buy NO</div>
 									</div>
 								</button>
 							{/each}
@@ -321,36 +354,38 @@
 				</div>
 
 				<!-- Market grid -->
-				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 					{#each filtered() as m (m.id)}
 						<button
 							onclick={() => openMarket(m)}
-							class="group flex flex-col rounded-2xl border border-white/8 bg-[#1a1b1f] p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4f7cff]/30 hover:shadow-md hover:shadow-[#4f7cff]/10"
+							class="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#4f7cff]/40 hover:shadow-xl hover:shadow-[#4f7cff]/15"
 						>
+							<div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#4f7cff]/5 blur-[30px] transition-all duration-500 group-hover:bg-[#4f7cff]/10"></div>
+							
 							<!-- Badge -->
-							<div class="mb-2 flex items-center justify-between">
-								<span class="rounded-full px-2 py-0.5 text-[9px] font-bold {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
-								<span class="text-[9px] text-slate-600">ends {m.end}</span>
+							<div class="relative z-10 mb-3 flex items-center justify-between">
+								<span class="rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
+								<span class="text-[9px] font-bold text-slate-500">ends <span class="text-slate-400">{m.end}</span></span>
 							</div>
 							<!-- Question -->
-							<p class="mb-3 line-clamp-2 text-xs font-semibold leading-snug text-white">{m.q}</p>
+							<p class="relative z-10 mb-4 line-clamp-2 text-sm font-extrabold leading-snug text-white drop-shadow-sm transition-colors group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text">{m.q}</p>
 							<!-- Prob bar -->
-							<div class="mb-1 flex items-center gap-1.5 text-[11px] font-bold">
-								<span class="text-green-400 w-8">{m.yes}%</span>
-								<div class="relative flex-1 overflow-hidden rounded-full h-1.5 bg-red-500/25">
-									<div class="absolute left-0 top-0 h-full rounded-full bg-green-400 transition-all duration-700" style="width:{m.yes}%"></div>
+							<div class="relative z-10 mb-2 flex items-center gap-2 text-xs font-black">
+								<span class="text-green-400 w-8 drop-shadow-[0_0_5px_rgba(74,222,128,0.3)]">{m.yes}%</span>
+								<div class="relative flex-1 overflow-hidden rounded-full h-1.5 bg-black/50 shadow-inner">
+									<div class="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-700" style="width:{m.yes}%"></div>
 								</div>
-								<span class="text-red-400 w-8 text-right">{100 - m.yes}%</span>
+								<span class="text-red-400 w-8 text-right drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]">{100 - m.yes}%</span>
 							</div>
 							<!-- Stats -->
-							<div class="mb-3 flex gap-3 text-[9px] text-slate-500">
-								<span>Vol {fmtVol(m.vol)}</span>
-								<span>{m.traders.toLocaleString()} traders</span>
+							<div class="relative z-10 mb-5 flex justify-between border-b border-white/5 pb-3 text-[10px] font-medium text-slate-500">
+								<span>Vol <span class="font-bold text-slate-300">{fmtVol(m.vol)}</span></span>
+								<span><span class="font-bold text-slate-300">{m.traders.toLocaleString()}</span> traders</span>
 							</div>
 							<!-- Buttons -->
-							<div class="mt-auto grid grid-cols-2 gap-1.5">
-								<div class="rounded-lg border border-green-400/20 bg-green-400/8 py-1 text-center text-[10px] font-bold text-green-400">Yes {m.yes}¢</div>
-								<div class="rounded-lg border border-red-400/20 bg-red-400/8 py-1 text-center text-[10px] font-bold text-red-400">No {100 - m.yes}¢</div>
+							<div class="relative z-10 mt-auto grid grid-cols-2 gap-2">
+								<div class="rounded-xl border border-green-400/20 bg-green-400/10 py-1.5 text-center text-[10px] font-bold text-green-400 transition-all group-hover:bg-green-400/20">Yes {m.yes}¢</div>
+								<div class="rounded-xl border border-red-400/20 bg-red-400/10 py-1.5 text-center text-[10px] font-bold text-red-400 transition-all group-hover:bg-red-400/20">No {100 - m.yes}¢</div>
 							</div>
 						</button>
 					{/each}
@@ -362,40 +397,68 @@
 				<div class="lg:sticky lg:top-20 flex flex-col gap-4">
 
 					<!-- Volume Leaders -->
-					<div class="rounded-2xl border border-white/8 bg-[#1a1b1f] p-4">
-						<p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">📊 Volume Leaders</p>
-						<div class="space-y-2">
+					<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-xl">
+						<div class="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#4f7cff]/20 blur-[30px]"></div>
+						<p class="relative z-10 mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+							<span class="text-base">📊</span> Volume Leaders
+						</p>
+						<div class="relative z-10 space-y-2.5">
 							{#each volumeLeaders() as m, i}
-								<button onclick={() => openMarket(m)} class="group flex w-full items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-white/5">
-									<span class="w-4 text-[10px] font-bold text-slate-600">#{i + 1}</span>
-									<div class="min-w-0 flex-1">
-										<p class="truncate text-[11px] text-slate-300 group-hover:text-white">{m.q.slice(0, 40)}…</p>
-										<div class="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-white/5">
-											<div class="h-1 rounded-full bg-[#4f7cff]" style="width:{(m.vol / volumeLeaders()[0].vol * 100).toFixed(0)}%"></div>
+								<button onclick={() => openMarket(m)} class="group flex w-full items-center gap-3 rounded-xl p-2 transition-all hover:bg-white/10 hover:shadow-lg">
+									<span class="flex h-5 w-5 items-center justify-center rounded-full bg-[#4f7cff]/20 text-[10px] font-black text-[#4f7cff] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">#{i + 1}</span>
+									<div class="min-w-0 flex-1 text-left">
+										<p class="truncate text-[11px] font-semibold text-slate-300 transition-colors group-hover:text-white">{m.q}</p>
+										<div class="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-black/40 shadow-inner">
+											<div class="h-1 rounded-full bg-gradient-to-r from-[#4f7cff] to-cyan-400" style="width:{(m.vol / volumeLeaders()[0].vol * 100).toFixed(0)}%"></div>
 										</div>
 									</div>
-									<span class="shrink-0 text-[10px] font-bold text-[#4f7cff]">{fmtVol(m.vol)}</span>
+									<span class="shrink-0 text-[10px] font-black text-[#4f7cff] drop-shadow-[0_0_5px_rgba(79,124,255,0.4)]">{fmtVol(m.vol)}</span>
 								</button>
 							{/each}
 						</div>
 					</div>
 
+					<!-- Live News 📰 -->
+					<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-xl">
+						<div class="absolute -left-10 -bottom-10 h-24 w-24 rounded-full bg-yellow-500/10 blur-[30px]"></div>
+						<p class="relative z-10 mb-4 flex items-center justify-between text-xs font-black uppercase tracking-widest text-slate-400">
+							<span class="flex items-center gap-2"><span class="text-base">📰</span> Latest News</span>
+							{#if newsLoading}
+								<span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-500 border-t-white"></span>
+							{/if}
+						</p>
+						<div class="relative z-10 space-y-3">
+							{#each newsFeed as item}
+								<a href={item.link} target="_blank" rel="noopener noreferrer" class="group block rounded-xl border border-white/5 bg-black/20 p-3 transition-all hover:-translate-y-0.5 hover:border-yellow-500/30 hover:bg-white/5 hover:shadow-[0_0_15px_rgba(234,179,8,0.1)]">
+									<p class="mb-1.5 line-clamp-2 text-[11px] font-semibold leading-relaxed text-slate-200 group-hover:text-yellow-400 transition-colors">{item.title}</p>
+									<div class="flex items-center justify-between text-[9px] font-medium text-slate-500">
+										<span>{item.source}</span>
+										<span>{item.time}</span>
+									</div>
+								</a>
+							{/each}
+						</div>
+					</div>
+
 					<!-- Your Positions -->
-					<div class="rounded-2xl border border-white/8 bg-[#1a1b1f] p-4">
-						<p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">💼 Your Positions</p>
-						<div class="space-y-3">
+					<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-xl">
+						<div class="absolute -right-10 -bottom-10 h-24 w-24 rounded-full bg-emerald-500/10 blur-[30px]"></div>
+						<p class="relative z-10 mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+							<span class="text-base">💼</span> Your Positions
+						</p>
+						<div class="relative z-10 space-y-3">
 							{#each positions as pos}
 								{@const m = markets.find(x => x.q === pos.market)}
 								{@const pnl = pos.current - pos.shares * pos.avgPrice}
-								<div class="rounded-xl border border-white/5 bg-white/3 p-3">
-									<p class="mb-1 text-[10px] text-slate-400 line-clamp-1">{pos.market.slice(0, 45)}…</p>
-									<div class="flex items-center justify-between">
-										<span class="rounded px-1.5 py-0.5 text-[9px] font-bold bg-green-400/20 text-green-400">{pos.side}</span>
-										<span class="font-mono text-xs font-bold text-white">${pos.current.toFixed(2)}</span>
+								<div class="rounded-xl border border-white/5 bg-black/20 p-3 transition-colors hover:bg-black/40">
+									<p class="mb-1.5 text-[10px] font-semibold text-slate-300 line-clamp-1">{pos.market}</p>
+									<div class="flex items-center justify-between border-b border-white/5 pb-2">
+										<span class="rounded bg-green-400/20 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-green-400 border border-green-400/30">{pos.side}</span>
+										<span class="font-mono text-xs font-bold text-white shadow-sm">${pos.current.toFixed(2)}</span>
 									</div>
-									<div class="mt-1 flex justify-between text-[9px]">
-										<span class="text-slate-500">{pos.shares} shares @ {pos.avgPrice}¢</span>
-										<span class="{pnl >= 0 ? 'text-green-400' : 'text-red-400'} font-mono font-semibold">
+									<div class="mt-2 flex justify-between text-[9px] font-medium">
+										<span class="text-slate-500"><span class="font-bold text-slate-400">{pos.shares}</span> sh @ {pos.avgPrice}¢</span>
+										<span class="{pnl >= 0 ? 'text-green-400' : 'text-red-400'} font-mono font-bold drop-shadow-sm">
 											{pnl >= 0 ? '+' : ''}{pnl.toFixed(2)}
 										</span>
 									</div>
@@ -405,22 +468,25 @@
 					</div>
 
 					<!-- Live Activity -->
-					<div class="rounded-2xl border border-white/8 bg-[#1a1b1f] p-4">
-						<p class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-							⚡ Live Activity
-							<span class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"></span>
+					<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-xl">
+						<p class="relative z-10 mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+							<span class="text-base">⚡</span> Live Activity
+							<span class="flex h-1.5 w-1.5 relative ml-auto">
+								<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+								<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
+							</span>
 						</p>
-						<div class="max-h-72 space-y-2 overflow-y-auto pr-1">
+						<div class="relative z-10 flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
 							{#each activity as a (a.id)}
-								<div class="rounded-lg border border-white/5 bg-white/3 px-2.5 py-2 text-[10px]">
+								<div class="group rounded-xl border border-white/5 bg-black/20 px-3 py-2.5 transition-colors hover:bg-white/5">
 									<div class="flex items-center justify-between">
-										<span class="font-bold text-slate-300">{a.user}</span>
-										<span class="font-mono font-bold {a.side === 'YES' ? 'text-green-400' : 'text-red-400'}">
-											{a.side} · ${a.amt}
+										<span class="text-[11px] font-bold text-slate-300">{a.user}</span>
+										<span class="font-mono text-[10px] font-black {a.side === 'YES' ? 'text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.3)]' : 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]'}">
+											{a.side} · <span class="text-white">${a.amt}</span>
 										</span>
 									</div>
-									<p class="mt-0.5 text-slate-500 line-clamp-1">{a.market}</p>
-									<p class="mt-0.5 text-slate-600">{a.ts}</p>
+									<p class="mt-1 text-[10px] font-medium text-slate-500 line-clamp-1">{a.market}</p>
+									<p class="mt-0.5 text-[9px] text-slate-600">{a.ts}</p>
 								</div>
 							{/each}
 						</div>
@@ -436,105 +502,113 @@
 	<button
 		class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
 		onclick={() => (selectedMarket = null)}
+		aria-label="Close modal"
 	></button>
 
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-		<div class="relative flex w-full max-w-2xl flex-col rounded-3xl border border-white/10 bg-[#15161b] shadow-2xl shadow-black/50 overflow-hidden max-h-[90vh] overflow-y-auto">
+		<div class="relative flex w-full max-w-2xl flex-col rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl shadow-blue-900/20 overflow-hidden max-h-[90vh] overflow-y-auto">
+
+			<div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#4f7cff]/20 blur-[80px] pointer-events-none"></div>
 
 			<!-- Modal header -->
-			<div class="border-b border-white/8 p-5">
-				<button onclick={() => (selectedMarket = null)} class="absolute right-4 top-4 text-slate-400 hover:text-white text-lg">✕</button>
-				<div class="mb-2 flex items-center gap-2">
-					<span class="rounded-full px-2 py-0.5 text-[10px] font-bold {CAT_COLORS[selectedMarket.cat] ?? 'bg-white/10 text-white'}">{selectedMarket.cat}</span>
-					<span class="text-[10px] text-slate-500">Ends {selectedMarket.end} · {selectedMarket.traders.toLocaleString()} traders</span>
+			<div class="relative z-10 border-b border-white/10 bg-black/40 p-6">
+				<button onclick={() => (selectedMarket = null)} class="absolute right-5 top-5 text-slate-400 hover:text-white transition-colors text-xl" aria-label="Close modal">✕</button>
+				<div class="mb-3 flex items-center gap-3">
+					<span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[selectedMarket.cat] ?? 'bg-white/10 text-white'}">{selectedMarket.cat}</span>
+					<span class="text-[10px] font-bold text-slate-400">Ends {selectedMarket.end} <span class="mx-1">•</span> <span class="text-slate-300">{selectedMarket.traders.toLocaleString()}</span> traders</span>
 				</div>
-				<h2 class="text-base font-extrabold leading-snug text-white pr-6">{selectedMarket.q}</h2>
-				<div class="mt-2 flex gap-4 text-xs text-slate-400">
-					<span>Vol <span class="font-bold text-white">{fmtVol(selectedMarket.vol)}</span></span>
-					<span>YES <span class="font-bold text-green-400">{selectedMarket.yes}¢</span></span>
-					<span>NO <span class="font-bold text-red-400">{100 - selectedMarket.yes}¢</span></span>
+				<h2 class="text-xl font-black leading-tight text-white pr-8 drop-shadow-sm">{selectedMarket.q}</h2>
+				<div class="mt-4 flex flex-wrap gap-5 text-xs text-slate-400 font-medium">
+					<span class="flex items-center gap-1">Vol <span class="font-bold text-white tracking-wide">{fmtVol(selectedMarket.vol)}</span></span>
+					<span class="flex items-center gap-1">YES <span class="font-bold text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.3)]">{selectedMarket.yes}¢</span></span>
+					<span class="flex items-center gap-1">NO <span class="font-bold text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]">{100 - selectedMarket.yes}¢</span></span>
 				</div>
 			</div>
 
 			<!-- Probability chart -->
-			<div class="border-b border-white/8 p-5">
-				<p class="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Probability Over Time</p>
-				<svg viewBox="0 0 {CW} {CH}" class="w-full rounded-xl bg-black/20" preserveAspectRatio="none">
+			<div class="relative z-10 border-b border-white/5 bg-black/20 p-6">
+				<p class="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Probability Over Time</p>
+				<svg viewBox="0 0 {CW} {CH}" class="w-full rounded-2xl bg-black/40 border border-white/5 shadow-inner" preserveAspectRatio="none">
 					<!-- Grid -->
 					{#each [0.25, 0.5, 0.75] as r}
-						<line x1={PAD} y1={PAD + r*(CH-PAD*2)} x2={CW-PAD} y2={PAD + r*(CH-PAD*2)} stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+						<line x1={PAD} y1={PAD + r*(CH-PAD*2)} x2={CW-PAD} y2={PAD + r*(CH-PAD*2)} stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
 					{/each}
 					<!-- YES line -->
 					<polyline
 						points={chartPoints(selectedMarket.history, 'yes')}
-						fill="none" stroke="#4ade80" stroke-width="2" stroke-linejoin="round"
+						fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+						style="filter: drop-shadow(0 0 4px rgba(74, 222, 128, 0.4));"
 					/>
 					<!-- NO line -->
 					<polyline
 						points={chartPoints(selectedMarket.history, 'no')}
-						fill="none" stroke="#f87171" stroke-width="2" stroke-linejoin="round"
+						fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+						style="filter: drop-shadow(0 0 4px rgba(248, 113, 113, 0.4));"
 					/>
 					<!-- Legend -->
-					<rect x={CW-80} y={8} width={8} height={8} rx="2" fill="#4ade80"/>
-					<text x={CW-68} y={16} fill="rgba(255,255,255,0.5)" font-size="9">YES</text>
-					<rect x={CW-80} y={22} width={8} height={8} rx="2" fill="#f87171"/>
-					<text x={CW-68} y={30} fill="rgba(255,255,255,0.5)" font-size="9">NO</text>
+					<rect x={CW-80} y={12} width={8} height={8} rx="2" fill="#4ade80"/>
+					<text x={CW-66} y={19} fill="rgba(255,255,255,0.7)" font-size="9" font-weight="bold">YES</text>
+					<rect x={CW-80} y={26} width={8} height={8} rx="2" fill="#f87171"/>
+					<text x={CW-66} y={33} fill="rgba(255,255,255,0.7)" font-size="9" font-weight="bold">NO</text>
 				</svg>
 			</div>
 
 			<!-- Buy panel -->
-			<div class="p-5">
+			<div class="relative z-10 bg-black/40 p-6">
 				{#if betSuccess}
-					<div class="rounded-2xl border border-green-400/20 bg-green-400/10 py-8 text-center">
-						<p class="text-3xl mb-2">🎉</p>
-						<p class="font-bold text-green-400">Bet placed!</p>
-						<p class="text-xs text-slate-400 mt-1">Good luck, ser.</p>
+					<div class="rounded-2xl border border-green-400/30 bg-gradient-to-br from-green-400/20 to-emerald-500/10 py-10 text-center shadow-[0_0_30px_rgba(74,222,128,0.1)]">
+						<p class="text-4xl mb-3 animate-bounce">🎉</p>
+						<p class="text-lg font-black tracking-tight text-green-400">Bet placed successfully!</p>
+						<p class="text-sm font-medium text-slate-400 mt-2">Good luck, ser.</p>
 					</div>
 				{:else}
 					<!-- YES / NO toggle -->
-					<div class="mb-4 grid grid-cols-2 gap-2 rounded-xl bg-black/30 p-1">
+					<div class="mb-5 grid grid-cols-2 gap-3 rounded-2xl bg-black/50 p-1.5 border border-white/5 shadow-inner">
 						<button
 							onclick={() => (betSide = 'yes')}
-							class="rounded-lg py-2.5 text-sm font-extrabold transition-all
-								{betSide === 'yes' ? 'bg-green-500 text-white shadow-md shadow-green-500/30' : 'text-slate-400 hover:text-green-300'}"
-						>✅ YES · {selectedMarket.yes}¢</button>
+							class="rounded-xl py-3 text-sm font-black transition-all duration-200
+								{betSide === 'yes' ? 'bg-gradient-to-b from-green-400 to-green-600 text-white shadow-[0_0_15px_rgba(74,222,128,0.4)] scale-[1.02]' : 'bg-transparent text-slate-400 hover:bg-white/5 hover:text-green-300'}"
+						>✅ YES <span class="opacity-80 ml-1">· {selectedMarket.yes}¢</span></button>
 						<button
 							onclick={() => (betSide = 'no')}
-							class="rounded-lg py-2.5 text-sm font-extrabold transition-all
-								{betSide === 'no' ? 'bg-red-500 text-white shadow-md shadow-red-500/30' : 'text-slate-400 hover:text-red-300'}"
-						>❌ NO · {100 - selectedMarket.yes}¢</button>
+							class="rounded-xl py-3 text-sm font-black transition-all duration-200
+								{betSide === 'no' ? 'bg-gradient-to-b from-red-400 to-red-600 text-white shadow-[0_0_15px_rgba(248,113,113,0.4)] scale-[1.02]' : 'bg-transparent text-slate-400 hover:bg-white/5 hover:text-red-300'}"
+						>❌ NO <span class="opacity-80 ml-1">· {100 - selectedMarket.yes}¢</span></button>
 					</div>
 
 					<!-- Amount -->
-					<div class="mb-3">
-						<label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">Amount (USDC)</label>
+					<div class="mb-4">
+						<label for="bet-amount" class="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400">Amount (USDC)</label>
 						<div class="flex gap-2">
 							<input
+								id="bet-amount"
 								bind:value={betAmount}
 								type="number"
-								class="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-[#4f7cff]/60"
+								class="flex-1 rounded-2xl border border-white/10 bg-black/40 px-5 py-3 text-base font-bold text-white outline-none transition-all focus:border-[#4f7cff] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(79,124,255,0.2)]"
 							/>
-							{#each [10, 50, 100, 500] as q}
-								<button onclick={() => (betAmount = String(q))} class="rounded-xl border border-white/10 bg-white/5 px-2 text-xs text-slate-400 hover:border-[#4f7cff]/40 hover:text-white">${q}</button>
-							{/each}
+							<div class="flex gap-2">
+								{#each [10, 50, 100, 500] as q}
+									<button onclick={() => (betAmount = String(q))} class="rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-bold text-slate-300 transition-colors hover:border-[#4f7cff]/50 hover:bg-[#4f7cff]/10 hover:text-white">${q}</button>
+								{/each}
+							</div>
 						</div>
 					</div>
 
 					<!-- Potential return -->
 					{#if parseFloat(betAmount) > 0}
 						{@const ret = potentialReturn()}
-						<div class="mb-4 rounded-xl border border-white/5 bg-black/20 p-3 text-xs">
-							<div class="flex justify-between">
-								<span class="text-slate-500">Potential return</span>
-								<span class="font-bold text-white">${ret.payout} <span class="text-green-400">(+{ret.pct}%)</span></span>
+						<div class="mb-5 rounded-2xl border border-white/5 bg-black/30 p-4 text-xs shadow-inner">
+							<div class="flex justify-between items-center mb-1.5">
+								<span class="text-slate-400 font-medium">Potential return</span>
+								<span class="font-black text-white text-sm">${ret.payout} <span class="text-green-400 text-xs ml-0.5">(+{ret.pct}%)</span></span>
 							</div>
-							<div class="mt-1 flex justify-between">
-								<span class="text-slate-500">Profit if correct</span>
+							<div class="flex justify-between items-center mb-1.5">
+								<span class="text-slate-400 font-medium">Profit if correct</span>
 								<span class="font-bold text-green-400">+${ret.profit}</span>
 							</div>
-							<div class="mt-1 flex justify-between">
-								<span class="text-slate-500">Shares</span>
-								<span class="font-mono text-white">{((parseFloat(betAmount) || 0) / (betSide === 'yes' ? selectedMarket.yes : 100 - selectedMarket.yes) * 100).toFixed(1)}</span>
+							<div class="flex justify-between items-center">
+								<span class="text-slate-400 font-medium">Shares</span>
+								<span class="font-mono text-slate-300 font-bold">{((parseFloat(betAmount) || 0) / (betSide === 'yes' ? selectedMarket.yes : 100 - selectedMarket.yes) * 100).toFixed(1)}</span>
 							</div>
 						</div>
 					{/if}
@@ -542,15 +616,19 @@
 					<button
 						onclick={placeBet}
 						disabled={!betAmount || parseFloat(betAmount) <= 0 || betLoading}
-						class="w-full rounded-xl py-3 text-sm font-extrabold transition-all disabled:cursor-not-allowed disabled:opacity-40 active:scale-95
+						class="group/btn relative w-full overflow-hidden rounded-2xl p-[2px] transition-all disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]
 							{betSide === 'yes'
-								? 'bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400'
-								: 'bg-red-500 text-white shadow-lg shadow-red-500/30 hover:bg-red-400'}"
+								? 'bg-gradient-to-br from-green-300 to-green-600 shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:shadow-[0_0_30px_rgba(74,222,128,0.4)]'
+								: 'bg-gradient-to-br from-red-300 to-red-600 shadow-[0_0_20px_rgba(248,113,113,0.3)] hover:shadow-[0_0_30px_rgba(248,113,113,0.4)]'}"
 					>
-						{betLoading ? '⏳ Placing bet…' : `Place ${betSide.toUpperCase()} · $${betAmount || 0}`}
+						<div class="relative flex items-center justify-center rounded-xl bg-black/20 px-4 py-3.5 backdrop-blur-sm transition-colors group-hover/btn:bg-transparent">
+							<span class="text-base font-black text-white drop-shadow-md">
+								{betLoading ? '⏳ Placing bet…' : `Place ${betSide.toUpperCase()} · $${betAmount || 0}`}
+							</span>
+						</div>
 					</button>
 
-					<p class="mt-2 text-center text-[10px] text-slate-600">Resolves {selectedMarket.end} · JamCat Markets</p>
+					<p class="mt-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">Resolves {selectedMarket.end} · JamCat Markets</p>
 				{/if}
 			</div>
 		</div>
@@ -559,7 +637,7 @@
 
 <!-- ── Toast ──────────────────────────────────────────────────────────────────── -->
 {#if toast}
-	<div class="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-xl border border-white/10 bg-[#1a1b1f] px-5 py-3 text-sm font-semibold text-white shadow-2xl">
+	<div class="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 rounded-full border border-white/20 bg-black/80 backdrop-blur-xl px-6 py-3 text-sm font-bold tracking-wide text-white shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-center gap-2">
 		{toast}
 	</div>
 {/if}
