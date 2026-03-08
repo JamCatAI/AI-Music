@@ -342,12 +342,20 @@
 		<!-- ── Stats bar ───────────────────────────────────────────────────────── -->
 		<div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
 			{#each [
-				{ icon: '🤖', label: 'Total Agents', value: stats.totalAgents.toLocaleString() },
-				{ icon: '🟢', label: 'Active Now', value: stats.activeNow.toLocaleString() },
-				{ icon: '⚡', label: 'Tasks Today', value: stats.tasksToday.toLocaleString() },
-				{ icon: '📡', label: 'Network Uptime', value: stats.networkUptime + '%' },
-			] as s}
-				<div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+				{ icon: '🤖', label: 'Total Agents', value: stats.totalAgents.toLocaleString(), trend: '+12.5K', color: 'from-blue-500 to-cyan-500', key: 'agents' },
+				{ icon: '🟢', label: 'Active Now', value: stats.activeNow.toLocaleString(), trend: '+8', color: 'from-green-500 to-emerald-500', key: 'active' },
+				{ icon: '⚡', label: 'Tasks Today', value: stats.tasksToday.toLocaleString(), trend: '+2.8K', color: 'from-purple-500 to-pink-500', key: 'tasks' },
+				{ icon: '📡', label: 'Network Uptime', value: stats.networkUptime + '%', trend: 'stable', color: 'from-amber-500 to-orange-500', key: 'uptime' },
+			] as s (s.key)}
+				<div class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md transition-all hover:scale-[1.02] hover:shadow-lg">
+					<div class="absolute right-2 top-2">
+						<span class="text-[10px] font-bold text-green-400">{s.trend}</span>
+					</div>
+					<div class="mb-2 h-8 flex items-end gap-0.5">
+						{#each Array.from({length: 8}, () => Math.random() * 100) as height (height)}
+							<div class="flex-1 bg-gradient-to-t {s.color} rounded-t opacity-30" style="height: {height}%"></div>
+						{/each}
+					</div>
 					<p class="text-xs text-slate-400">{s.icon} {s.label}</p>
 					<p class="mt-1 font-mono text-xl font-extrabold text-white">{s.value}</p>
 				</div>
@@ -360,7 +368,7 @@
 			<div class="min-w-0 flex-1">
 				<!-- Filter + Search row -->
 				<div class="mb-5 flex flex-wrap items-center gap-2">
-					{#each categories as cat}
+					{#each categories as cat (cat.key)}
 						<button
 							onclick={() => (activeCategory = cat.key)}
 							class="rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-150
@@ -385,101 +393,128 @@
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						{#each filteredAgents as agent (agent.id)}
 							<div
-								class="group flex flex-col rounded-2xl border bg-white/5 p-4 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg {agent.color.border} {agent.color.glow} shadow-md"
+								class="group relative flex flex-col rounded-2xl border bg-white/5 p-4 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:shadow-xl {agent.color.border} {agent.color.glow} shadow-md"
 							>
+								<!-- Performance Badge -->
+								{#if agent.tasksCompleted > 10000}
+									<div class="absolute top-3 right-3 z-10">
+										<span class="rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2 py-0.5 text-[9px] font-bold text-white">TOP</span>
+									</div>
+								{/if}
+								
 								<!-- Top row: avatar + name + status -->
 								<div class="mb-3 flex items-start justify-between">
 									<div class="flex items-center gap-3">
 										<div
-											class="flex h-10 w-10 items-center justify-center rounded-xl text-2xl ring-2 {agent.color.ring} {agent.color.bg}"
+											class="relative flex h-12 w-12 items-center justify-center rounded-xl text-2xl ring-2 {agent.color.ring} {agent.color.bg} transition-transform group-hover:scale-110"
 										>
 											{agent.avatar}
+											<!-- Status indicator on avatar -->
+											<div class="absolute -bottom-1 -right-1">
+												{#if agent.status === 'running'}
+													<span class="flex h-3 w-3">
+														<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+														<span class="relative inline-flex h-3 w-3 rounded-full bg-green-400 border-2 border-slate-950"></span>
+													</span>
+												{:else if agent.status === 'busy'}
+													<span class="flex h-3 w-3">
+														<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>
+														<span class="relative inline-flex h-3 w-3 rounded-full bg-yellow-400 border-2 border-slate-950"></span>
+													</span>
+												{:else}
+													<span class="h-3 w-3 rounded-full bg-slate-400 border-2 border-slate-950"></span>
+												{/if}
+											</div>
 										</div>
 										<div>
 											<p class="{agent.color.text} text-sm font-bold">{agent.name}</p>
 											<p class="text-xs text-slate-400">{agent.specialty}</p>
 										</div>
 									</div>
-									<!-- Status dot -->
-									<div class="relative flex items-center gap-1.5 pt-0.5">
-										{#if agent.status === 'running'}
-											<span class="relative flex h-2.5 w-2.5">
-												<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-60"></span>
-												<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400"></span>
-											</span>
-											<span class="text-xs text-green-400">running</span>
-										{:else if agent.status === 'busy'}
-											<span class="relative flex h-2.5 w-2.5">
-												<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-60"></span>
-												<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-yellow-400"></span>
-											</span>
-											<span class="text-xs text-yellow-400">busy</span>
-										{:else if agent.status === 'idle'}
-											<span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
-											<span class="text-xs text-slate-400">idle</span>
-										{:else}
-											<span class="h-2.5 w-2.5 rounded-full bg-slate-600"></span>
-											<span class="text-xs text-slate-500">sleeping</span>
+									<!-- Enhanced status badge -->
+									<div class="flex flex-col items-end gap-1">
+										<span class="rounded-full {agent.status === 'running' ? 'bg-green-400/20 text-green-400' : agent.status === 'busy' ? 'bg-yellow-400/20 text-yellow-400' : 'bg-slate-400/20 text-slate-400'} px-2 py-1 text-[10px] font-semibold">
+											{agent.status.toUpperCase()}
+										</span>
+										<!-- Efficiency indicator -->
+										{#if agent.successRate >= 95}
+											<span class="rounded bg-green-400/20 px-1.5 py-0.5 text-[8px] font-bold text-green-400">HIGH EFFICIENCY</span>
 										{/if}
 									</div>
 								</div>
 
 								<!-- Platforms + model -->
-								<div class="mb-3 flex flex-wrap gap-1">
-									{#each agent.platforms as p}
-										<span class="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">{p}</span>
-									{/each}
-									<span class="rounded-full {agent.color.badge} px-2 py-0.5 text-[10px] font-semibold">
-										{agent.model}
-									</span>
+								<div class="mb-3">
+									<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Platforms & Model</p>
+									<div class="flex flex-wrap gap-1">
+										{#each agent.platforms as p (p)}
+											<span class="rounded-lg bg-white/5 px-2 py-1 text-[10px] text-slate-300 transition-colors hover:bg-white/10">{p}</span>
+										{/each}
+										<span class="rounded-full {agent.color.badge} px-2 py-1 text-[10px] font-semibold">
+											🧠 {agent.model}
+										</span>
+									</div>
 								</div>
 
 								<!-- Capabilities -->
-								<div class="mb-3 flex flex-wrap gap-1">
-									{#each agent.capabilities as cap}
-										<span class="rounded border {agent.color.border} {agent.color.bg} {agent.color.text} px-2 py-0.5 text-[10px] font-medium">{cap}</span>
-									{/each}
+								<div class="mb-3">
+									<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Capabilities</p>
+									<div class="grid grid-cols-2 gap-1">
+										{#each agent.capabilities as cap (cap)}
+											<span class="rounded-lg border {agent.color.border} {agent.color.bg} {agent.color.text} px-2 py-1 text-[10px] font-medium text-center transition-colors hover:opacity-80">{cap}</span>
+										{/each}
+									</div>
 								</div>
 
 								<!-- Last action -->
-								<p class="mb-3 text-[11px] italic text-slate-400 line-clamp-1">"{agent.lastAction}"</p>
+								<div class="mb-3 rounded-lg bg-black/30 p-3">
+									<p class="mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Recent Activity</p>
+									<p class="text-[11px] italic text-slate-300 line-clamp-2">"{agent.lastAction}"</p>
+								</div>
 
 								<!-- Stats row -->
-								<div class="mb-4 grid grid-cols-3 gap-2 text-center">
-									<div>
-										<p class="font-mono text-sm font-bold text-white">{agent.tasksCompleted.toLocaleString()}</p>
-										<p class="text-[10px] text-slate-500">tasks done</p>
-									</div>
-									<div>
-										<p class="font-mono text-sm font-bold text-white">{agent.costPerTask} <span class="text-[10px] font-normal text-slate-400">mSOL</span></p>
-										<p class="text-[10px] text-slate-500">per task</p>
-									</div>
-									<div>
-										<p class="font-mono text-sm font-bold text-white">{agent.successRate}%</p>
-										<p class="text-[10px] text-slate-500">success</p>
-									</div>
+								<div class="mb-4 grid grid-cols-3 gap-2">
+									{#each [
+										{ value: agent.tasksCompleted.toLocaleString(), label: 'tasks done', icon: '✓', color: 'text-green-400', key: 'tasks' },
+										{ value: `${agent.costPerTask} mSOL`, label: 'per task', icon: '💰', color: 'text-yellow-400', key: 'cost' },
+										{ value: `${agent.successRate}%`, label: 'success', icon: '🎯', color: 'text-cyan-400', key: 'success' },
+									] as stat (stat.key)}
+										<div class="rounded-lg bg-black/30 p-2 text-center transition-colors group-hover:bg-black/40">
+											<p class="font-mono text-sm font-bold {stat.color}">{stat.value}</p>
+											<p class="text-[10px] text-slate-500">{stat.icon} {stat.label}</p>
+										</div>
+									{/each}
 								</div>
 
-								<!-- Uptime bar -->
+								<!-- Enhanced uptime bar -->
 								<div class="mb-4">
-									<div class="mb-1 flex justify-between text-[10px] text-slate-500">
-										<span>⏱ Uptime {fmtUptime(agent.uptime)}</span>
-										<span>{agent.successRate}%</span>
+									<div class="mb-2 flex justify-between items-center">
+										<span class="text-[10px] font-semibold text-slate-400">⏱ Uptime {fmtUptime(agent.uptime)}</span>
+										<div class="flex items-center gap-2">
+											<span class="rounded-full {agent.successRate >= 95 ? 'bg-green-400/20 text-green-400' : agent.successRate >= 85 ? 'bg-yellow-400/20 text-yellow-400' : 'bg-red-400/20 text-red-400'} px-2 py-0.5 text-[9px] font-bold">
+												{agent.successRate}% Success
+											</span>
+										</div>
 									</div>
-									<div class="h-1 w-full rounded-full bg-white/10">
+									<div class="relative h-2 w-full rounded-full bg-white/10 overflow-hidden">
 										<div
-											class="h-1 rounded-full {agent.color.bg} border {agent.color.border}"
+											class="h-full rounded-full {agent.color.bg} border {agent.color.border} transition-all duration-500"
 											style="width: {agent.successRate}%"
 										></div>
+										<!-- Animated pulse overlay for high performance -->
+										{#if agent.successRate >= 95}
+											<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+										{/if}
 									</div>
 								</div>
 
-								<!-- Deploy button -->
+								<!-- Enhanced deploy button -->
 								<button
 									onclick={() => openModal(agent)}
-									class="mt-auto w-full rounded-xl border {agent.color.border} {agent.color.bg} {agent.color.text} py-2 text-xs font-semibold transition-all duration-150 hover:opacity-80 active:scale-95"
+									class="mt-auto w-full rounded-xl border {agent.color.border} bg-gradient-to-r {agent.color.bg} to-transparent {agent.color.text} py-2.5 text-xs font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
 								>
-									Deploy {agent.name} →
+									<span>Deploy {agent.name}</span>
+									<span class="text-lg">→</span>
 								</button>
 							</div>
 						{/each}
@@ -555,8 +590,9 @@
 <!-- ── Deploy Modal ───────────────────────────────────────────────────────────── -->
 {#if showModal}
 	<button
-		class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
 		onclick={() => (showModal = false)}
+		class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+		aria-label="Close modal"
 	></button>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
@@ -565,6 +601,7 @@
 			<button
 				onclick={() => (showModal = false)}
 				class="absolute right-4 top-4 text-slate-400 hover:text-white"
+				aria-label="Close modal"
 			>✕</button>
 
 			{#if deploySuccess}
@@ -577,8 +614,9 @@
 				<h2 class="mb-5 text-lg font-extrabold text-white">🦾 Deploy New Agent</h2>
 				<div class="space-y-4">
 					<div>
-						<label class="mb-1 block text-xs font-semibold text-slate-400">Agent Name *</label>
+						<label for="agent-name" class="mb-1 block text-xs font-semibold text-slate-400">Agent Name *</label>
 						<input
+							id="agent-name"
 							bind:value={form.name}
 							placeholder="e.g. MyEmailClaw"
 							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-purple-400/60"
@@ -586,48 +624,51 @@
 					</div>
 					<div class="grid grid-cols-2 gap-3">
 						<div>
-							<label class="mb-1 block text-xs font-semibold text-slate-400">AI Model</label>
+							<label for="ai-model" class="mb-1 block text-xs font-semibold text-slate-400">AI Model</label>
 							<select
+								id="ai-model"
 								bind:value={form.model}
 								class="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-400/60"
 							>
-								{#each ['Claude', 'GPT-4', 'DeepSeek', 'Gemini'] as m}
+								{#each ['Claude', 'GPT-4', 'DeepSeek', 'Gemini'] as m (m)}
 									<option value={m}>{m}</option>
 								{/each}
 							</select>
 						</div>
 						<div>
-							<label class="mb-1 block text-xs font-semibold text-slate-400">Category</label>
+							<label for="category" class="mb-1 block text-xs font-semibold text-slate-400">Category</label>
 							<select
+								id="category"
 								bind:value={form.category}
 								class="w-full rounded-xl border border-white/10 bg-slate-800 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-400/60"
 							>
-								{#each categories.slice(1) as cat}
+								{#each categories.slice(1) as cat (cat.key)}
 									<option value={cat.key}>{cat.label}</option>
 								{/each}
 							</select>
 						</div>
 					</div>
 					<div>
-						<label class="mb-1 block text-xs font-semibold text-slate-400">Description</label>
+						<label for="description" class="mb-1 block text-xs font-semibold text-slate-400">Description</label>
 						<textarea
+							id="description"
 							bind:value={form.description}
 							placeholder="What should your agent do?"
 							rows="3"
 							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-purple-400/60 resize-none"
 						></textarea>
 					</div>
-					<div>
-						<label class="mb-2 block text-xs font-semibold text-slate-400">Platforms</label>
+					<fieldset>
+						<legend class="mb-2 block text-xs font-semibold text-slate-400">Platforms</legend>
 						<div class="flex flex-wrap gap-2">
-							{#each ['Gmail', 'Telegram', 'Discord', 'GitHub', 'Twitter', 'Slack'] as plat}
+							{#each ['Gmail', 'Telegram', 'Discord', 'GitHub', 'Twitter', 'Slack'] as plat (plat)}
 								<label class="flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 hover:border-purple-400/40">
 									<input type="checkbox" class="accent-purple-400" bind:group={form.platforms} value={plat} />
 									{plat}
 								</label>
 							{/each}
 						</div>
-					</div>
+					</fieldset>
 					<button
 						onclick={handleDeploy}
 						disabled={!form.name || deployLoading}
