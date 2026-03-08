@@ -85,7 +85,7 @@
 	let txFeed = $state(
 		Array.from({ length: 8 }, (_, i) => {
 			const svc = services[i % services.length];
-			return { id: i, agent: agentNames[i % 8], color: agentColors[i % agentColors.length],
+			return { id: `initial-${i}`, agent: agentNames[i % 8], color: agentColors[i % agentColors.length],
 				service: svc.name, icon: svc.icon, amount: svc.cost, time: `${(i+1)*3}s ago` };
 		})
 	);
@@ -129,7 +129,7 @@
 			});
 			const ag = pick(agents);
 			const svc = pick(services);
-			txFeed = [{ id: tick, agent: ag.name, color: ag.color,
+			txFeed = [{ id: `new-${tick}`, agent: ag.name, color: ag.color,
 				service: svc.name, icon: svc.icon, amount: svc.cost, time: 'just now' },
 				...txFeed.slice(0, 9)];
 			stats.totalTx += Math.floor(Math.random() * 4) + 1;
@@ -188,7 +188,7 @@
 					<p class="text-2xl font-extrabold {s.hi ? 'text-green-400' : 'text-white'}">{s.value}</p>
 					<!-- Mini sparkline -->
 					<div class="mt-2 h-8 flex items-end gap-0.5">
-						{#each sparklineData as height (height)}
+						{#each sparklineData as height, idx (idx)}
 							<div class="flex-1 bg-gradient-to-t from-green-400/20 to-green-400/40 rounded-t" style="height: {height}%"></div>
 						{/each}
 					</div>
