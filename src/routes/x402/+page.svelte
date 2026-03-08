@@ -105,6 +105,8 @@
 	let topAgent = $derived(agents.reduce((b,a) => a.tasksCompleted > b.tasksCompleted ? a : b, agents[0]));
 	const fmtUp = (m) => { const h = Math.floor(m/60), mm = m%60; return h>0 ? `${h}h ${mm}m` : `${mm}m`; };
 
+	let sparklineData = $state(Array.from({length: 12}, () => Math.random() * 100));
+
 	let tick = 0;
 	onMount(() => {
 		const id = setInterval(() => {
@@ -134,6 +136,8 @@
 			stats.solSpent = +(stats.solSpent + Math.random() * 0.02).toFixed(3);
 			stats.tasksDone += Math.random() < 0.3 ? 1 : 0;
 			if (tick % 12 === 0) agents = agents.map(a => a.balance < 0.1 ? { ...a, balance: +(a.balance + 2).toFixed(4) } : a);
+			// Update sparkline data periodically
+			if (tick % 3 === 0) sparklineData = sparklineData.map(() => Math.random() * 100);
 		}, 1000);
 		return () => clearInterval(id);
 	});
@@ -171,14 +175,23 @@
 		<!-- Stats -->
 		<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
 			{#each [
-				{ label: 'Active Agents',  value: stats.activeAgents,              hi: true  },
-				{ label: 'Total Txns',     value: stats.totalTx.toLocaleString()             },
-				{ label: 'SOL Spent',      value: `${stats.solSpent.toFixed(2)} SOL`         },
-				{ label: 'Tasks Done',     value: stats.tasksDone.toLocaleString()            },
-			] as s}
-				<div class="rounded-xl border {s.hi ? 'border-green-400/30 bg-green-400/5' : 'border-white/5 bg-white/[0.03]'} p-4">
+				{ label: 'Active Agents',  value: stats.activeAgents,              hi: true,  trend: '+2', key: 'agents'  },
+				{ label: 'Total Txns',     value: stats.totalTx.toLocaleString(), trend: '+142', key: 'txns' },
+				{ label: 'SOL Spent',      value: `${stats.solSpent.toFixed(2)} SOL`, trend: '+0.24', key: 'sol' },
+				{ label: 'Tasks Done',     value: stats.tasksDone.toLocaleString(), trend: '+8',    key: 'tasks' },
+			] as s (s.key)}
+				<div class="group relative overflow-hidden rounded-xl border {s.hi ? 'border-green-400/30 bg-green-400/5' : 'border-white/5 bg-white/[0.03]'} p-4 transition-all hover:scale-[1.02] hover:shadow-lg">
+					<div class="absolute right-2 top-2">
+						<span class="text-[10px] font-bold text-green-400">{s.trend}</span>
+					</div>
 					<p class="text-[10px] text-gray-500 mb-1">{s.label}</p>
 					<p class="text-2xl font-extrabold {s.hi ? 'text-green-400' : 'text-white'}">{s.value}</p>
+					<!-- Mini sparkline -->
+					<div class="mt-2 h-8 flex items-end gap-0.5">
+						{#each sparklineData as height (height)}
+							<div class="flex-1 bg-gradient-to-t from-green-400/20 to-green-400/40 rounded-t" style="height: {height}%"></div>
+						{/each}
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -212,11 +225,11 @@
 						</div>
 						<div class="mt-4 grid grid-cols-4 gap-2 text-center text-[10px]">
 							{#each [
-								{ label: 'Balance', value: `${topAgent.balance} SOL` },
-								{ label: 'Earned',  value: `${topAgent.earned} SOL`  },
-								{ label: 'Spent',   value: `${topAgent.spent} SOL`   },
-								{ label: 'Uptime',  value: fmtUp(topAgent.uptime)    },
-							] as m}
+								{ label: 'Balance', value: `${topAgent.balance} SOL`, key: 'balance' },
+								{ label: 'Earned',  value: `${topAgent.earned} SOL`,  key: 'earned'  },
+								{ label: 'Spent',   value: `${topAgent.spent} SOL`,   key: 'spent'   },
+								{ label: 'Uptime',  value: fmtUp(topAgent.uptime),    key: 'uptime'  },
+							] as m (m.key)}
 								<div class="rounded-lg border border-white/5 bg-black/30 py-2">
 									<p class="font-bold text-white">{m.value}</p>
 									<p class="text-gray-600">{m.label}</p>
@@ -229,35 +242,53 @@
 				<!-- Agent Grid -->
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					{#each agents as agent (agent.id)}
-						<div class="flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 transition hover:border-green-400/20 hover:bg-green-400/[0.02]">
+						<div class="group relative overflow-hidden flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] transition-all hover:border-green-400/20 hover:bg-green-400/[0.02] hover:shadow-lg hover:shadow-green-500/10">
+							<!-- Performance indicator -->
+							{#if agent.tasksCompleted > 100}
+								<div class="absolute top-2 right-2">
+									<span class="rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-2 py-0.5 text-[9px] font-black text-white">TOP</span>
+								</div>
+							{/if}
+							
 							<div class="flex items-center gap-3">
-								<div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border {agent.color.ring} ring-1 {agent.color.bg}">
+								<div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border {agent.color.ring} ring-1 {agent.color.bg} transition-transform group-hover:scale-110">
 									<span class="text-sm font-black {agent.color.text}">{agent.name[0]}</span>
-									<span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full {statusDot(agent.status)} border border-[#020c14]"></span>
+									<span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full {statusDot(agent.status)} border-2 border-[#020c14]"></span>
 								</div>
 								<div class="min-w-0 flex-1">
-									<p class="text-sm font-bold {agent.color.text}">AGENT_{agent.name}</p>
+									<div class="flex items-center gap-2">
+										<p class="text-sm font-bold {agent.color.text}">AGENT_{agent.name}</p>
+										<!-- Efficiency badge -->
+										{#if agent.balance > 2}
+											<span class="rounded bg-green-400/20 px-1.5 py-0.5 font-bold text-green-400">PROFITABLE</span>
+										{/if}
+									</div>
 									<p class="text-[10px] text-gray-600">{agent.wallet}</p>
 								</div>
-								<span class="shrink-0 text-xs font-semibold {statusColor(agent.status)}">{statusLabel(agent.status)}</span>
+								<div class="text-right">
+									<span class="inline-flex items-center gap-1 rounded-full {agent.status === 'running' ? 'bg-green-400/10' : agent.status === 'paying' ? 'bg-yellow-400/10' : 'bg-gray-400/10'} px-2 py-1 text-xs font-semibold {statusColor(agent.status)}">
+										<span class="h-1.5 w-1.5 rounded-full {statusDot(agent.status).replace('animate-', '')}"></span>
+										{statusLabel(agent.status)}
+									</span>
+								</div>
 							</div>
 
 							<div class="rounded-lg border border-white/5 bg-black/30 px-3 py-2">
-								<p class="text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-0.5">Task</p>
+								<p class="text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-0.5">Current Task</p>
 								<p class="truncate text-[11px] text-green-300/80">↳ {agent.task}</p>
 							</div>
 
 							<div class="grid grid-cols-4 gap-1 text-center text-[10px]">
 								{#each [
-									{ v: agent.tasksCompleted, l: 'tasks' },
-									{ v: agent.txCount,        l: 'txns'  },
-									{ v: agent.balance,        l: 'SOL', warn: agent.balance < 0.2 },
-									{ v: fmtUp(agent.uptime),  l: 'up'   },
-								] as m}
-									<div class="rounded-lg bg-black/20 py-1.5">
+									{ v: agent.tasksCompleted, l: 'tasks', icon: '✓', key: 'tasks' },
+									{ v: agent.txCount,        l: 'txns',  icon: '⚡', key: 'txns'  },
+									{ v: agent.balance,        l: 'SOL',   icon: '₿', warn: agent.balance < 0.2, key: 'sol' },
+									{ v: fmtUp(agent.uptime),  l: 'up',    icon: '⏱', key: 'uptime' },
+								] as m (m.key)}
+									<div class="rounded-lg bg-black/20 py-1.5 transition-colors group-hover:bg-black/30">
 										<p class="font-bold {m.warn ? 'text-red-400' : 'text-white'}">{m.v}</p>
-										<p class="text-gray-600">{m.l}</p>
-									</div>
+										<p class="text-gray-600">{m.icon} {m.l}</p>
+								</div>
 								{/each}
 							</div>
 						</div>
@@ -271,19 +302,25 @@
 				<!-- Tx Feed -->
 				<div class="overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02]">
 					<div class="flex items-center justify-between border-b border-white/5 px-4 py-3">
-						<p class="text-sm font-bold text-white">⚡ x402 Transactions</p>
-						<span class="flex items-center gap-1 text-[10px] text-green-400">
-							<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"></span>live
-						</span>
+						<div class="flex items-center gap-2">
+							<p class="text-sm font-bold text-white">⚡ x402 Transactions</p>
+							<span class="rounded-full bg-green-400/20 px-2 py-0.5 text-[9px] font-black text-green-400">LIVE</span>
+						</div>
+						<button class="text-[10px] text-gray-500 hover:text-white transition-colors">Clear All</button>
 					</div>
 					<ul class="max-h-80 divide-y divide-white/[0.04] overflow-hidden">
 						{#each txFeed as tx (tx.id)}
-							<li class="px-4 py-2.5 text-[11px]">
+							<li class="group px-4 py-2.5 text-[11px] transition-colors hover:bg-white/[0.02]">
 								<div class="flex items-center justify-between">
-									<span class="font-bold {tx.color.text}">AGENT_{tx.agent}</span>
-									<span class="font-bold text-yellow-300">−{tx.amount} SOL</span>
+									<div class="flex items-center gap-2">
+										<div class="h-6 w-6 rounded-full {tx.color.bg} border {tx.color.ring} flex items-center justify-center">
+											<span class="text-[8px] font-black {tx.color.text}">{tx.agent[0]}</span>
+										</div>
+										<span class="font-bold {tx.color.text}">AGENT_{tx.agent}</span>
+									</div>
+									<span class="rounded bg-red-400/20 px-1.5 py-0.5 font-bold text-red-400">−{tx.amount} SOL</span>
 								</div>
-								<div class="mt-0.5 flex items-center justify-between">
+								<div class="mt-1 flex items-center justify-between">
 									<span class="text-gray-500">{tx.icon} {tx.service}</span>
 									<span class="text-gray-600">{tx.time}</span>
 								</div>
@@ -295,14 +332,30 @@
 				<!-- Service Catalog -->
 				<div class="overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02]">
 					<div class="border-b border-white/5 px-4 py-3">
-						<p class="text-sm font-bold text-white">🛒 Service Catalog</p>
-						<p class="mt-0.5 text-[10px] text-gray-500">Auto-purchased via HTTP 402</p>
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-sm font-bold text-white">🛒 Service Catalog</p>
+								<p class="mt-0.5 text-[10px] text-gray-500">Auto-purchased via HTTP 402</p>
+							</div>
+							<select class="rounded border border-white/10 bg-black/30 px-2 py-1 text-[10px] text-white focus:border-green-400/50 focus:outline-none">
+								<option>All Services</option>
+								<option>AI/ML</option>
+								<option>Data</option>
+								<option>Blockchain</option>
+							</select>
+						</div>
 					</div>
 					<ul class="divide-y divide-white/[0.04]">
-						{#each services as svc}
-							<li class="flex items-center justify-between px-4 py-2 text-[12px]">
-								<span class="text-gray-400">{svc.icon} {svc.name}</span>
-								<span class="font-bold text-yellow-300">{svc.cost} SOL</span>
+						{#each services as svc (svc.name)}
+							<li class="group flex items-center justify-between px-4 py-2 text-[12px] transition-colors hover:bg-white/[0.02]">
+								<div class="flex items-center gap-2">
+									<span class="text-lg">{svc.icon}</span>
+									<span class="text-gray-400">{svc.name}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="rounded bg-yellow-400/20 px-1.5 py-0.5 font-bold text-yellow-300">{svc.cost} SOL</span>
+									<button class="opacity-0 group-hover:opacity-100 text-[10px] text-green-400 hover:text-green-300 transition-opacity">Use</button>
+								</div>
 							</li>
 						{/each}
 					</ul>
@@ -312,12 +365,12 @@
 				<div class="rounded-2xl border border-green-400/10 bg-green-400/[0.03] p-4 space-y-2">
 					<p class="text-xs font-bold text-green-400">⚙️ How x402 Works</p>
 					{#each [
-						['1', 'Agent requests a paid API endpoint'],
-						['2', 'Server returns HTTP 402 + payment address'],
-						['3', 'Agent signs & broadcasts micropayment'],
-						['4', 'Server verifies on-chain, returns resource'],
-						['5', 'Agent continues mission autonomously 🤖'],
-					] as [n, txt]}
+						['1', 'Agent requests a paid API endpoint', 'request'],
+						['2', 'Server returns HTTP 402 + payment address', 'response'],
+						['3', 'Agent signs & broadcasts micropayment', 'payment'],
+						['4', 'Server verifies on-chain, returns resource', 'verify'],
+						['5', 'Agent continues mission autonomously 🤖', 'continue'],
+				] as [n, txt, key] (key)}
 						<div class="flex items-start gap-2 text-[11px]">
 							<span class="mt-0.5 shrink-0 rounded bg-green-400/20 px-1.5 py-0.5 text-[9px] font-black text-green-400">{n}</span>
 							<p class="text-gray-400">{txt}</p>
@@ -347,18 +400,18 @@
 			{:else}
 				<div class="space-y-4">
 					<div>
-						<label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Codename *</label>
-						<input bind:value={deployForm.name} type="text" placeholder="e.g. ORION"
+						<label for="codename" class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Codename *</label>
+						<input id="codename" bind:value={deployForm.name} type="text" placeholder="e.g. ORION"
 							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm uppercase font-bold text-green-400 placeholder-gray-700 focus:border-green-400/50 focus:outline-none" />
 					</div>
 					<div>
-						<label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Mission Brief</label>
-						<textarea bind:value={deployForm.mission} rows="3" placeholder="What should this agent do?"
+						<label for="mission" class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Mission Brief</label>
+						<textarea id="mission" bind:value={deployForm.mission} rows="3" placeholder="What should this agent do?"
 							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-gray-700 focus:border-green-400/50 focus:outline-none resize-none"></textarea>
 					</div>
 					<div>
-						<label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Starting Budget (SOL)</label>
-						<input bind:value={deployForm.budget} type="number" min="0.1" step="0.1"
+						<label for="budget" class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500">Starting Budget (SOL)</label>
+						<input id="budget" bind:value={deployForm.budget} type="number" min="0.1" step="0.1"
 							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white focus:border-green-400/50 focus:outline-none" />
 					</div>
 					<div class="rounded-xl border border-white/5 bg-black/30 p-3 text-[11px] text-gray-500 space-y-1.5">
