@@ -10,6 +10,13 @@
 		{ key: 'creative', label: '🎨 Creative' },
 		{ key: 'research', label: '🔬 Research' },
 		{ key: 'social', label: '💬 Social' },
+		{ key: 'defi', label: '💎 DeFi' },
+		{ key: 'security', label: '🛡️ Security' },
+	];
+
+	const viewModes = [
+		{ key: 'grid', label: '⊞ Grid' },
+		{ key: 'leaderboard', label: '🏆 Leaderboard' },
 	];
 
 	const agentTemplates = [
@@ -193,6 +200,36 @@
 			uptime: 86400, successRate: 100,
 			color: { ring: 'ring-emerald-400', border: 'border-emerald-400/30', glow: 'shadow-emerald-500/40', text: 'text-emerald-400', bg: 'bg-emerald-400/10', badge: 'bg-emerald-400/20 text-emerald-300' },
 		},
+		{
+			id: 19, name: 'SentimentClaw', avatar: '🧠', specialty: 'Tracks on-chain & social sentiment',
+			category: 'research', status: 'running',
+			platforms: ['🐦 Twitter', '📊 LunarCrush', '📡 Santiment'], model: 'Gemini',
+			capabilities: ['Fear & Greed', 'Social Score', 'Whale Alert', 'Trend Map'],
+			tasksCompleted: 38920, costPerTask: 1.8,
+			lastAction: 'Detected sentiment reversal on BTC, signaled extreme greed',
+			uptime: 86400, successRate: 97,
+			color: { ring: 'ring-blue-400', border: 'border-blue-400/30', glow: 'shadow-blue-500/40', text: 'text-blue-400', bg: 'bg-blue-400/10', badge: 'bg-blue-400/20 text-blue-300' },
+		},
+		{
+			id: 20, name: 'AuditClaw', avatar: '🕵️', specialty: 'Audits smart contracts for exploits',
+			category: 'security', status: 'running',
+			platforms: ['⛓️ Solana', '🦊 Ethereum', '📄 GitHub'], model: 'DeepSeek',
+			capabilities: ['Reentrancy', 'Overflow', 'Access Control', 'Rugpull Detect'],
+			tasksCompleted: 5440, costPerTask: 24.0,
+			lastAction: 'Detected 2 critical vulns in new DEX contract, flagged',
+			uptime: 12960, successRate: 100,
+			color: { ring: 'ring-red-400', border: 'border-red-400/30', glow: 'shadow-red-500/40', text: 'text-red-400', bg: 'bg-red-400/10', badge: 'bg-red-400/20 text-red-300' },
+		},
+		{
+			id: 21, name: 'YieldClaw', avatar: '🌾', specialty: 'Maximizes DeFi yield across protocols',
+			category: 'defi', status: 'running',
+			platforms: ['🌊 Kamino', '⚡ Marginfi', '🔮 Drift'], model: 'GPT-4',
+			capabilities: ['Auto-Compound', 'Rebalance', 'LP Manage', 'Rate Hunt'],
+			tasksCompleted: 22760, costPerTask: 8.0,
+			lastAction: 'Auto-compounded $42K positions across 3 pools at 28% APY',
+			uptime: 43200, successRate: 95,
+			color: { ring: 'ring-green-300', border: 'border-green-300/30', glow: 'shadow-green-400/40', text: 'text-green-300', bg: 'bg-green-300/10', badge: 'bg-green-300/20 text-green-200' },
+		},
 	];
 
 	const activityTemplates = [
@@ -210,11 +247,13 @@
 
 	let agents = $state(agentTemplates.map((a) => ({ ...a })));
 	let activeCategory = $state('all');
+	let viewMode = $state('grid');
 	let searchQuery = $state('');
 	let activityFeed = $state([]);
 	let showModal = $state(false);
 	let deploySuccess = $state(false);
 	let deployLoading = $state(false);
+	let selectedAgent = $state(null);
 
 	let stats = $state({
 		totalAgents: 1_512_847,
@@ -241,6 +280,14 @@
 			const matchSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
 			return matchCat && matchSearch;
 		})
+	);
+
+	let leaderboard = $derived(
+		[...agents].sort((a, b) => b.tasksCompleted - a.tasksCompleted)
+	);
+
+	let topEarners = $derived(
+		[...agents].sort((a, b) => (b.tasksCompleted * b.costPerTask) - (a.tasksCompleted * a.costPerTask)).slice(0, 5)
 	);
 
 	// ── Helpers ───────────────────────────────────────────────────────────────────
@@ -366,7 +413,7 @@
 		<div class="flex flex-col gap-6 lg:flex-row">
 			<!-- LEFT: agent catalog -->
 			<div class="min-w-0 flex-1">
-				<!-- Filter + Search row -->
+				<!-- Filter + Search + View Toggle row -->
 				<div class="mb-5 flex flex-wrap items-center gap-2">
 					{#each categories as cat (cat.key)}
 						<button
@@ -379,15 +426,55 @@
 							{cat.label}
 						</button>
 					{/each}
-					<input
-						bind:value={searchQuery}
-						placeholder="🔍 Search agents…"
-						class="ml-auto rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 backdrop-blur-md outline-none focus:border-purple-400/60"
-					/>
+					<div class="ml-auto flex items-center gap-2">
+						<!-- View Mode Toggle -->
+						<div class="flex items-center rounded-xl border border-white/10 bg-black/30 p-0.5">
+							{#each viewModes as vm (vm.key)}
+								<button
+									onclick={() => (viewMode = vm.key)}
+									class="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150
+										{viewMode === vm.key
+											? 'bg-purple-500 text-white shadow-md'
+											: 'text-slate-400 hover:text-slate-200'}"
+								>{vm.label}</button>
+							{/each}
+						</div>
+						<input
+							bind:value={searchQuery}
+							placeholder="🔍 Search agents…"
+							class="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 backdrop-blur-md outline-none focus:border-purple-400/60"
+						/>
+					</div>
 				</div>
 
-				<!-- Agent grid -->
-				{#if filteredAgents.length === 0}
+				<!-- Agent grid / Leaderboard -->
+				{#if viewMode === 'leaderboard'}
+					<!-- Leaderboard Table -->
+					<div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+						<div class="grid grid-cols-[2rem_1fr_auto_auto_auto] gap-x-4 border-b border-white/10 bg-black/30 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+							<span>#</span>
+							<span>Agent</span>
+							<span class="text-right">Tasks</span>
+							<span class="text-right">Success</span>
+							<span class="text-right">Total Earned</span>
+						</div>
+						{#each leaderboard as agent, i (agent.id)}
+							<div class="group grid grid-cols-[2rem_1fr_auto_auto_auto] gap-x-4 border-b border-white/5 px-4 py-3 transition-colors hover:bg-white/5 items-center">
+								<span class="font-mono text-sm font-black {i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-orange-600' : 'text-slate-500'}">{i + 1}</span>
+								<div class="flex items-center gap-3">
+									<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl ring-1 {agent.color.ring} {agent.color.bg}">{agent.avatar}</div>
+									<div>
+										<p class="text-sm font-bold {agent.color.text}">{agent.name}</p>
+										<p class="text-[10px] text-slate-500">{agent.specialty}</p>
+									</div>
+								</div>
+								<span class="font-mono text-sm font-bold text-white text-right">{agent.tasksCompleted.toLocaleString()}</span>
+								<span class="font-mono text-sm font-bold text-right {agent.successRate >= 95 ? 'text-green-400' : agent.successRate >= 85 ? 'text-yellow-400' : 'text-red-400'}">{agent.successRate}%</span>
+								<span class="font-mono text-sm font-bold text-amber-400 text-right">{(agent.tasksCompleted * agent.costPerTask / 1000).toFixed(1)}K mSOL</span>
+							</div>
+						{/each}
+					</div>
+				{:else if filteredAgents.length === 0}
 					<div class="py-16 text-center text-slate-500">No agents found.</div>
 				{:else}
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -563,7 +650,26 @@
 						</button>
 					</div>
 
-					<!-- Live Activity Feed -->
+			<!-- Top Earners Widget -->
+				<div class="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4 backdrop-blur-md">
+					<p class="mb-3 text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-2">
+						🏆 Top Earners
+					</p>
+					<div class="space-y-2">
+						{#each topEarners as agent, i (agent.id)}
+							<div class="flex items-center justify-between gap-2">
+								<span class="font-mono text-xs font-black shrink-0 {i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-300' : 'text-slate-500'}">{i + 1}</span>
+								<div class="flex items-center gap-2 flex-1 min-w-0">
+									<span class="text-sm shrink-0">{agent.avatar}</span>
+									<span class="text-xs font-semibold {agent.color.text} truncate">{agent.name}</span>
+								</div>
+								<span class="font-mono text-xs font-bold text-amber-300 shrink-0">{(agent.tasksCompleted * agent.costPerTask / 1000).toFixed(1)}K mSOL</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Live Activity Feed -->
 					<div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
 						<p class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
 							⚡ Live Activity
