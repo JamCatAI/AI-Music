@@ -1,5 +1,6 @@
 <svelte:head>
 	<title>Predict | JamCat Markets</title>
+	<meta name="description" content="Bet on crypto, memes & culture. Powered by JamCat Markets." />
 </svelte:head>
 
 <script>
@@ -42,7 +43,21 @@
 		{ id: 24, q: 'Will an AI agent autonomously manage a $10M hedge fund?',    cat: 'AI',          yes: 31, vol:  4400000, end: 'Dec 31', traders: 15200,  hot: false },
 		// SPORTS
 		{ id: 25, q: 'Will the 2026 FIFA World Cup be held as scheduled?',         cat: 'Sports',      yes: 91, vol:  7400000, end: 'Jun 30', traders: 26100,  hot: false },
-		{ id: 26, q: 'Will an NBA player publicly shill a meme coin in Q2 2026?',  cat: 'Sports',      yes: 64, vol:  2100000, end: 'Jun 30', traders:  7400,  hot: false },
+		{ id: 26, q: 'Will an NBA player publicly shill a meme coin in Q2 2026?',  cat: 'Sports',      yes: 64, vol:  2100000, end: 'Jun 30', traders:  7400,  hot: false, momentum: 'up' },
+	];
+
+	// Ticker items for the scrolling marquee
+	const TICKER_ITEMS = [
+		{ label: 'BTC $150k', prob: 52, cat: 'Crypto' },
+		{ label: 'US Strikes Iran', prob: 62, cat: 'Geopolitics' },
+		{ label: 'ETH $7k', prob: 58, cat: 'Crypto' },
+		{ label: 'SOL $250', prob: 46, cat: 'Solana' },
+		{ label: 'AI beats Claude', prob: 44, cat: 'AI' },
+		{ label: 'Alpenglow Mainnet', prob: 72, cat: 'Solana' },
+		{ label: 'FIFA 2026 scheduled', prob: 91, cat: 'Sports' },
+		{ label: 'Stablecoin regulation', prob: 73, cat: 'Politics' },
+		{ label: 'TRUMP coin top-5', prob: 71, cat: 'Memes' },
+		{ label: 'Khamenei Supreme Leader', prob: 38, cat: 'Geopolitics' },
 	];
 
 	// ── Helpers ───────────────────────────────────────────────────────────────────
@@ -68,6 +83,7 @@
 	let markets = $state(INITIAL_MARKETS.map(m => ({
 		...m,
 		history: makeProbHistory(m.yes),
+		momentum: ['up','down','flat'][Math.floor(Math.random()*3)],
 	})));
 
 	let activeCategory = $state('All');
@@ -107,6 +123,14 @@
 		[...markets].sort((a, b) => b.vol - a.vol).slice(0, 5)
 	);
 
+	let categoryCounts = $derived(() => {
+		const counts = {};
+		for (const m of markets) counts[m.cat] = (counts[m.cat] ?? 0) + 1;
+		return counts;
+	});
+
+	let tickerItems = $state([...TICKER_ITEMS]);
+
 	// ── Positions (mock) ──────────────────────────────────────────────────────────
 	let positions = $state([
 		{ market: 'Will the US strike Iran before April 15, 2026?', side: 'YES', shares: 210, avgPrice: 0.58, current: 0 },
@@ -139,13 +163,14 @@
 
 	// ── Cat badge colours ─────────────────────────────────────────────────────────
 	const CAT_COLORS = {
-		Crypto:       'bg-orange-400/20 text-orange-300',
-		Memes:        'bg-pink-400/20 text-pink-300',
-		Solana:       'bg-purple-400/20 text-purple-300',
-		AI:           'bg-cyan-400/20 text-cyan-300',
-		Politics:     'bg-blue-400/20 text-blue-300',
-		'Pop Culture':'bg-yellow-400/20 text-yellow-300',
-		Sports:       'bg-green-400/20 text-green-300',
+		Crypto:       'bg-orange-400/20 text-orange-300  border-orange-400/20',
+		Memes:        'bg-pink-400/20   text-pink-300    border-pink-400/20',
+		Solana:       'bg-purple-400/20 text-purple-300  border-purple-400/20',
+		AI:           'bg-cyan-400/20   text-cyan-300    border-cyan-400/20',
+		Politics:     'bg-blue-400/20   text-blue-300    border-blue-400/20',
+		'Pop Culture':'bg-yellow-400/20 text-yellow-300  border-yellow-400/20',
+		Sports:       'bg-green-400/20  text-green-300   border-green-400/20',
+		Geopolitics:  'bg-rose-400/20   text-rose-300    border-rose-400/20',
 	};
 
 	// ── Lifecycle ─────────────────────────────────────────────────────────────────
@@ -188,10 +213,12 @@
 			// Drift probabilities
 			markets = markets.map(m => {
 				const drift = rand(-0.6, 0.6);
+				const prevYes = m.yes;
 				const newYes = clamp(m.yes + drift, 2, 98);
 				const newHistory = [...m.history.slice(1), +newYes.toFixed(1)];
 				const volBump = Math.random() < 0.3 ? randInt(200, 2000) : 0;
-				return { ...m, yes: +newYes.toFixed(1), history: newHistory, vol: m.vol + volBump };
+				const momentum = drift > 0.15 ? 'up' : drift < -0.15 ? 'down' : 'flat';
+				return { ...m, yes: +newYes.toFixed(1), history: newHistory, vol: m.vol + volBump, momentum };
 			});
 
 			// Update position values
@@ -242,8 +269,29 @@
 </script>
 
 <!-- ── Root ──────────────────────────────────────────────────────────────────── -->
-<div class="min-h-screen bg-[#0f1011] text-white">
-	<div class="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+<div class="relative min-h-screen overflow-hidden bg-[#09090f] text-white">
+
+	<!-- ambient background orbs -->
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
+		<div class="absolute -top-32 left-1/4 h-[400px] w-[400px] rounded-full bg-[#4f7cff]/8 blur-[130px]"></div>
+		<div class="absolute top-1/3 right-0 h-[300px] w-[300px] rounded-full bg-violet-500/6 blur-[120px]"></div>
+		<div class="absolute bottom-0 left-1/3 h-[300px] w-[300px] rounded-full bg-cyan-500/5 blur-[100px]"></div>
+	</div>
+
+	<!-- Live ticker marquee -->
+	<div class="relative overflow-hidden border-b border-white/5 bg-black/40 backdrop-blur-sm py-2">
+		<div class="flex animate-[marquee_40s_linear_infinite] gap-8 whitespace-nowrap will-change-transform">
+			{#each [...tickerItems, ...tickerItems] as item, i (i)}
+				<span class="inline-flex items-center gap-2 text-[11px] font-semibold">
+					<span class="text-slate-500">{item.label}</span>
+					<span class="font-black {item.prob >= 60 ? 'text-green-400' : item.prob >= 40 ? 'text-amber-300' : 'text-red-400'}">{item.prob}% YES</span>
+					<span class="mx-2 text-white/10">|</span>
+				</span>
+			{/each}
+		</div>
+	</div>
+
+	<div class="relative mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
 
 		<!-- ── Page header ────────────────────────────────────────────────────── -->
 		<div class="mb-6 flex flex-wrap items-center gap-3">
@@ -275,13 +323,14 @@
 		<!-- ── Category pills ─────────────────────────────────────────────────── -->
 		<div class="mb-6 flex flex-wrap gap-2">
 			{#each CATEGORIES as cat}
+				{@const cnt = cat === 'All' ? markets.length : (categoryCounts()[cat] ?? 0)}
 				<button
 					onclick={() => (activeCategory = cat)}
-					class="rounded-full border px-4 py-1.5 text-xs font-semibold transition-all
+					class="flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all
 						{activeCategory === cat
 							? 'border-[#4f7cff] bg-[#4f7cff] text-white shadow-md shadow-[#4f7cff]/30'
 							: 'border-white/10 bg-white/5 text-slate-400 hover:border-[#4f7cff]/40 hover:text-white'}"
-				>{cat}</button>
+				>{cat}<span class="rounded-full {activeCategory === cat ? 'bg-white/20' : 'bg-white/5'} px-1.5 py-0.5 text-[9px] font-black">{cnt}</span></button>
 			{/each}
 		</div>
 
@@ -304,11 +353,16 @@
 									<div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-[#4f7cff]/10 blur-[40px] transition-all duration-500 group-hover:bg-[#4f7cff]/20"></div>
 									
 									<div class="relative z-10 mb-4 flex items-start justify-between">
-										<span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
-										<span class="flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold text-orange-400 backdrop-blur-sm">
-											<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500"></span>
-											HOT · {fmtVol(m.vol)}
-										</span>
+										<span class="rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white border-white/10'}">{m.cat}</span>
+										<div class="flex flex-col items-end gap-1.5">
+											<span class="flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold text-orange-400 backdrop-blur-sm">
+												<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500"></span>
+												HOT · {fmtVol(m.vol)}
+											</span>
+											{#if m.momentum === 'up'}
+												<span class="rounded-full bg-green-400/10 border border-green-400/20 px-2.5 py-1 text-[9px] font-black text-green-400 shadow-[0_0_10px_rgba(74,222,128,0.1)]">↑ {randInt(5,15)}% MOMENTUM</span>
+											{/if}
+										</div>
 									</div>
 									<p class="relative z-10 mb-5 text-lg font-extrabold leading-tight text-white drop-shadow-sm group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-gray-400 group-hover:bg-clip-text transition-colors">{m.q}</p>
 									
@@ -356,27 +410,43 @@
 				<!-- Market grid -->
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 					{#each filtered() as m (m.id)}
+						{@const pts = m.history.slice(-15)}
+						{@const mn = Math.min(...pts)}
+						{@const mx = Math.max(...pts)}
+						{@const rng = mx - mn || 1}
+						{@const coords = pts.map((v, i) => `${(i / (pts.length-1)) * 120},${28 - ((v - mn) / rng) * 24}`).join(' ')}
 						<button
 							onclick={() => openMarket(m)}
 							class="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#4f7cff]/40 hover:shadow-xl hover:shadow-[#4f7cff]/15"
 						>
-							<div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#4f7cff]/5 blur-[30px] transition-all duration-500 group-hover:bg-[#4f7cff]/10"></div>
-							
-							<!-- Badge -->
-							<div class="relative z-10 mb-3 flex items-center justify-between">
-								<span class="rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white'}">{m.cat}</span>
-								<span class="text-[9px] font-bold text-slate-500">ends <span class="text-slate-400">{m.end}</span></span>
-							</div>
-							<!-- Question -->
-							<p class="relative z-10 mb-4 line-clamp-2 text-sm font-extrabold leading-snug text-white drop-shadow-sm transition-colors group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text">{m.q}</p>
-							<!-- Prob bar -->
-							<div class="relative z-10 mb-2 flex items-center gap-2 text-xs font-black">
-								<span class="text-green-400 w-8 drop-shadow-[0_0_5px_rgba(74,222,128,0.3)]">{m.yes}%</span>
-								<div class="relative flex-1 overflow-hidden rounded-full h-1.5 bg-black/50 shadow-inner">
-									<div class="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-700" style="width:{m.yes}%"></div>
+								<!-- Badge row -->
+								<div class="relative z-10 mb-3 flex items-center justify-between">
+									<span class="rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider shadow-sm {CAT_COLORS[m.cat] ?? 'bg-white/10 text-white border-white/10'}">{m.cat}</span>
+									<div class="flex items-center gap-1.5">
+										{#if m.momentum === 'up'}
+											<span class="rounded-full bg-green-400/10 border border-green-400/20 px-2 py-0.5 text-[9px] font-black text-green-400">↑ HOT</span>
+										{:else if m.momentum === 'down'}
+											<span class="rounded-full bg-red-400/10 border border-red-400/20 px-2 py-0.5 text-[9px] font-black text-red-400">↓ COOLING</span>
+										{/if}
+										<span class="text-[9px] font-bold text-slate-500">ends <span class="text-slate-400">{m.end}</span></span>
+									</div>
 								</div>
-								<span class="text-red-400 w-8 text-right drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]">{100 - m.yes}%</span>
-							</div>
+								<!-- Question -->
+								<p class="relative z-10 mb-4 line-clamp-2 text-sm font-extrabold leading-snug text-white drop-shadow-sm transition-colors group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text">{m.q}</p>
+								<!-- Prob bar -->
+								<div class="relative z-10 mb-2 flex items-center gap-2 text-xs font-black">
+									<span class="text-green-400 w-8 drop-shadow-[0_0_5px_rgba(74,222,128,0.3)]">{m.yes}%</span>
+									<div class="relative flex-1 overflow-hidden rounded-full h-1.5 bg-black/50 shadow-inner">
+										<div class="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-700" style="width:{m.yes}%"></div>
+									</div>
+									<span class="text-red-400 w-8 text-right drop-shadow-[0_0_5px_rgba(248,113,113,0.3)]">{100 - m.yes}%</span>
+								</div>
+								<!-- Inline mini sparkline -->
+								<div class="relative z-10 mb-3 h-8 overflow-hidden">
+									<svg viewBox="0 0 120 30" class="w-full h-full" preserveAspectRatio="none">
+										<polyline points={coords} fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 3px rgba(74,222,128,0.4));"/>
+									</svg>
+								</div>
 							<!-- Stats -->
 							<div class="relative z-10 mb-5 flex justify-between border-b border-white/5 pb-3 text-[10px] font-medium text-slate-500">
 								<span>Vol <span class="font-bold text-slate-300">{fmtVol(m.vol)}</span></span>
@@ -499,6 +569,9 @@
 
 <!-- ── Market Detail Modal ────────────────────────────────────────────────────── -->
 {#if selectedMarket}
+	{@const yesPoints = chartPoints(selectedMarket.history, 'yes')}
+	{@const firstX = PAD}
+	{@const lastX = CW - PAD}
 	<button
 		class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
 		onclick={() => (selectedMarket = null)}
@@ -525,17 +598,22 @@
 				</div>
 			</div>
 
-			<!-- Probability chart -->
+			<!-- Probability chart with area fill -->
 			<div class="relative z-10 border-b border-white/5 bg-black/20 p-6">
 				<p class="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Probability Over Time</p>
 				<svg viewBox="0 0 {CW} {CH}" class="w-full rounded-2xl bg-black/40 border border-white/5 shadow-inner" preserveAspectRatio="none">
 					<!-- Grid -->
 					{#each [0.25, 0.5, 0.75] as r}
-						<line x1={PAD} y1={PAD + r*(CH-PAD*2)} x2={CW-PAD} y2={PAD + r*(CH-PAD*2)} stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+						<line x1={PAD} y1={PAD + r*(CH-PAD*2)} x2={CW-PAD} y2={PAD + r*(CH-PAD*2)} stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
 					{/each}
+					<!-- YES area fill -->
+					<polygon
+						points="{firstX},{CH-PAD} {yesPoints} {lastX},{CH-PAD}"
+						fill="url(#yesGradient)" opacity="0.3"
+					/>
 					<!-- YES line -->
 					<polyline
-						points={chartPoints(selectedMarket.history, 'yes')}
+						points={yesPoints}
 						fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
 						style="filter: drop-shadow(0 0 4px rgba(74, 222, 128, 0.4));"
 					/>
@@ -545,6 +623,13 @@
 						fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
 						style="filter: drop-shadow(0 0 4px rgba(248, 113, 113, 0.4));"
 					/>
+					<!-- Gradient def -->
+					<defs>
+						<linearGradient id="yesGradient" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stop-color="#4ade80" stop-opacity="0.5"/>
+							<stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+						</linearGradient>
+					</defs>
 					<!-- Legend -->
 					<rect x={CW-80} y={12} width={8} height={8} rx="2" fill="#4ade80"/>
 					<text x={CW-66} y={19} fill="rgba(255,255,255,0.7)" font-size="9" font-weight="bold">YES</text>

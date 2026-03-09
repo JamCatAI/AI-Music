@@ -125,7 +125,7 @@
 
 	let sparklineData = $state(Array.from({length: 12}, () => Math.random() * 100));
 
-	let tick = 0;
+	let tick = $state(0);
 	onMount(() => {
 		const id = setInterval(() => {
 			tick++;
