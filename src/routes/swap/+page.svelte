@@ -7,21 +7,21 @@
 
 	// ── Token list ────────────────────────────────────────────────────────────────
 	const ALL_TOKENS = [
-		{ symbol: 'SOL',     name: 'Solana',               price: 185.42,     change:  2.34,  logo: '◎',  color: 'text-purple-400' },
-		{ symbol: 'USDC',    name: 'USD Coin',              price: 1.0000,     change:  0.00,  logo: '💵', color: 'text-blue-400'   },
-		{ symbol: 'USDT',    name: 'Tether',                price: 1.0000,     change:  0.00,  logo: '💲', color: 'text-green-400'  },
-		{ symbol: 'JUP',     name: 'Jupiter',               price: 0.8921,     change:  3.12,  logo: '🪐', color: 'text-orange-400' },
-		{ symbol: 'RAY',     name: 'Raydium',               price: 3.4100,     change: -1.44,  logo: '⚡', color: 'text-blue-300'   },
-		{ symbol: 'ORCA',    name: 'Orca',                  price: 2.8700,     change:  0.87,  logo: '🐋', color: 'text-teal-400'   },
-		{ symbol: 'WIF',     name: 'dogwifhat',             price: 2.1840,     change:  7.34,  logo: '🐕', color: 'text-yellow-400' },
-		{ symbol: 'BONK',    name: 'Bonk',                  price: 0.00002847, change: -4.12,  logo: '🔨', color: 'text-red-400'    },
-		{ symbol: 'POPCAT',  name: 'Popcat',                price: 0.6213,     change: 12.77,  logo: '🐱', color: 'text-pink-400'   },
-		{ symbol: 'MYRO',    name: 'Myro',                  price: 0.0724,     change: -8.55,  logo: '🐶', color: 'text-amber-400'  },
-		{ symbol: 'MOODENG', name: 'Moo Deng',              price: 0.1492,     change:  3.21,  logo: '🦛', color: 'text-cyan-400'   },
-		{ symbol: 'PNUT',    name: 'Peanut the Squirrel',   price: 0.3381,     change: -1.88,  logo: '🐿️', color: 'text-orange-300' },
-		{ symbol: 'BOME',    name: 'Book of Meme',          price: 0.0082,     change:  5.44,  logo: '📖', color: 'text-violet-400' },
-		{ symbol: 'SLERF',   name: 'Slerf',                 price: 0.1124,     change: -2.31,  logo: '😴', color: 'text-slate-400'  },
-		{ symbol: 'PONKE',   name: 'Ponke',                 price: 0.2341,     change:  9.18,  logo: '🐵', color: 'text-lime-400'   },
+		{ symbol: 'SOL',     name: 'Solana',               price: 185.42,     change:  2.34,  logo: '◎',  color: 'text-purple-400', cgId: 'solana' },
+		{ symbol: 'USDC',    name: 'USD Coin',              price: 1.0000,     change:  0.00,  logo: '💵', color: 'text-blue-400',   cgId: 'usd-coin' },
+		{ symbol: 'USDT',    name: 'Tether',                price: 1.0000,     change:  0.00,  logo: '💲', color: 'text-green-400',  cgId: 'tether' },
+		{ symbol: 'JUP',     name: 'Jupiter',               price: 0.8921,     change:  3.12,  logo: '🪐', color: 'text-orange-400', cgId: 'jupiter-exchange-solana' },
+		{ symbol: 'RAY',     name: 'Raydium',               price: 3.4100,     change: -1.44,  logo: '⚡', color: 'text-blue-300',   cgId: 'raydium' },
+		{ symbol: 'ORCA',    name: 'Orca',                  price: 2.8700,     change:  0.87,  logo: '🐋', color: 'text-teal-400',   cgId: 'orca' },
+		{ symbol: 'WIF',     name: 'dogwifhat',             price: 2.1840,     change:  7.34,  logo: '🐕', color: 'text-yellow-400', cgId: 'dogwifcoin' },
+		{ symbol: 'BONK',    name: 'Bonk',                  price: 0.00002847, change: -4.12,  logo: '🔨', color: 'text-red-400',    cgId: 'bonk' },
+		{ symbol: 'POPCAT',  name: 'Popcat',                price: 0.6213,     change: 12.77,  logo: '🐱', color: 'text-pink-400',   cgId: 'popcat' },
+		{ symbol: 'MYRO',    name: 'Myro',                  price: 0.0724,     change: -8.55,  logo: '🐶', color: 'text-amber-400',  cgId: 'myro' },
+		{ symbol: 'MOODENG', name: 'Moo Deng',              price: 0.1492,     change:  3.21,  logo: '🦛', color: 'text-cyan-400',   cgId: 'moo-deng' },
+		{ symbol: 'PNUT',    name: 'Peanut the Squirrel',   price: 0.3381,     change: -1.88,  logo: '🐿️', color: 'text-orange-300', cgId: 'peanut-the-squirrel' },
+		{ symbol: 'BOME',    name: 'Book of Meme',          price: 0.0082,     change:  5.44,  logo: '📖', color: 'text-violet-400', cgId: 'book-of-meme' },
+		{ symbol: 'SLERF',   name: 'Slerf',                 price: 0.1124,     change: -2.31,  logo: '😴', color: 'text-slate-400',  cgId: 'slerf' },
+		{ symbol: 'PONKE',   name: 'Ponke',                 price: 0.2341,     change:  9.18,  logo: '🐵', color: 'text-lime-400',   cgId: 'ponke' },
 	];
 
 	const POPULAR = ['SOL', 'USDC', 'WIF', 'BONK', 'POPCAT'];
@@ -232,6 +232,26 @@
 		setTimeout(() => (toast = ''), 3000);
 	}
 
+	async function fetchPrices() {
+		try {
+			const ids = ALL_TOKENS.map(t => t.cgId).filter(Boolean).join(',');
+			const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+			if (!res.ok) throw new Error('CG API fail');
+			const data = await res.json();
+			tokens = tokens.map(t => {
+				if (t.cgId && data[t.cgId]) {
+					const price = data[t.cgId].usd;
+					const change = data[t.cgId].usd_24h_change ?? t.change;
+					const history = [...t.history.slice(1), price];
+					return { ...t, price, change, history };
+				}
+				return t;
+			});
+		} catch (e) {
+			console.warn('Price fetch failed. Using fallback drift.', e);
+		}
+	}
+
 	// ── Lifecycle ─────────────────────────────────────────────────────────────────
 	onMount(() => {
 		// Seed recent swaps
@@ -249,10 +269,13 @@
 			});
 		}
 
+		fetchPrices(); // Initial fetch
+		const priceInterval = setInterval(fetchPrices, 30000); // Sync data every 30s
+
 		const id = setInterval(() => {
-			// Tick prices
+			// Subtle drift for UI liveliness between API updates
 			tokens = tokens.map(t => {
-				const drift = t.price * rand(-0.0015, 0.002);
+				const drift = t.price * rand(-0.0004, 0.0005);
 				const newPrice = Math.max(t.price * 0.5, t.price + drift);
 				const newHistory = [...t.history.slice(1), newPrice];
 				return { ...t, price: newPrice, history: newHistory };
@@ -273,16 +296,24 @@
 			}
 		}, 2000);
 
-		return () => clearInterval(id);
+		return () => {
+			clearInterval(id);
+			clearInterval(priceInterval);
+		};
 	});
 </script>
 
 <!-- ── Root ──────────────────────────────────────────────────────────────────── -->
-<div
-	class="relative min-h-screen overflow-hidden bg-[#131722] text-white"
-	style="background: radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(20,241,149,0.05) 0%, transparent 55%), #131722"
->
-	<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+<div class="relative min-h-screen overflow-hidden bg-[#09090f] text-white">
+
+	<!-- ambient background orbs -->
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
+		<div class="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-[120px]"></div>
+		<div class="absolute top-1/2 -right-32 h-[400px] w-[400px] rounded-full bg-[#14f195]/5 blur-[100px]"></div>
+		<div class="absolute bottom-0 left-1/3 h-[400px] w-[400px] rounded-full bg-blue-600/5 blur-[130px]"></div>
+	</div>
+
+	<div class="relative mx-auto max-w-6xl px-4 py-8 sm:px-6">
 
 		<!-- ── Header ─────────────────────────────────────────────────────────── -->
 		<div class="mb-8 flex items-center justify-between">
@@ -294,7 +325,7 @@
 				<button
 					onclick={() => (showSettings = true)}
 					class="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-400 transition-colors hover:border-white/20 hover:text-white"
-					title="Settings"
+					aria-label="Swap Settings"
 				>⚙️</button>
 				<button
 					onclick={() => (walletConnected = !walletConnected)}
@@ -313,18 +344,18 @@
 
 			<!-- LEFT: Swap card -->
 			<div class="w-full lg:w-[420px] lg:shrink-0">
-				<div class="rounded-3xl border border-white/10 bg-[#1b1d2a] p-4 shadow-2xl shadow-black/40">
+				<div class="rounded-[2.5rem] border border-white/10 bg-white/5 p-5 backdrop-blur-2xl shadow-2xl shadow-black/40">
 
 					<!-- From -->
-					<div class="mb-1 rounded-2xl border border-white/8 bg-black/30 p-4">
-						<div class="mb-3 flex items-center justify-between text-xs text-slate-500">
+					<div class="group mb-1 rounded-[1.8rem] border border-white/5 bg-black/40 p-5 transition-all focus-within:border-[#14f195]/40 focus-within:shadow-[0_0_20px_rgba(20,241,149,0.05)]">
+						<div class="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
 							<span>You Pay</span>
 							{#if fromToken}
-								<span>
-									Balance: <span class="text-white">{fromToken.balance.toLocaleString()}</span>
+								<span class="flex items-center gap-2">
+									Balance: <span class="font-mono font-bold text-slate-300">{fromToken.balance.toLocaleString()}</span>
 									<button
 										onclick={() => (fromAmt = String(fromToken.balance))}
-										class="ml-1 rounded px-1 py-0.5 text-[10px] font-bold text-[#14f195] border border-[#14f195]/30 hover:bg-[#14f195]/10"
+										class="rounded-lg bg-white/5 px-2 py-1 text-[10px] font-black text-[#14f195] border border-[#14f195]/20 hover:bg-[#14f195]/10 active:scale-95 transition-all"
 									>MAX</button>
 								</span>
 							{/if}
@@ -333,59 +364,62 @@
 							<!-- Token selector -->
 							<button
 								onclick={() => { showTokenModal = 'from'; tokenSearch = ''; }}
-								class="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/8 px-3 py-2 transition-colors hover:border-white/20"
+								class="flex shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 transition-all hover:bg-white/10 hover:border-white/30 active:scale-95"
 							>
-								<span class="text-xl">{fromToken?.logo ?? '?'}</span>
-								<span class="font-bold text-white">{fromSym}</span>
-								<span class="text-slate-400">▾</span>
+								<span class="text-2xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">{fromToken?.logo ?? '?'}</span>
+								<span class="text-lg font-black tracking-tight text-white">{fromSym}</span>
+								<span class="text-slate-500 text-xs">▼</span>
 							</button>
 							<!-- Amount input -->
 							<input
 								bind:value={fromAmt}
 								type="number"
-								placeholder="0"
-								class="min-w-0 flex-1 bg-transparent text-right text-2xl font-bold text-white placeholder-slate-600 outline-none"
+								placeholder="0.00"
+								class="min-w-0 flex-1 bg-transparent text-right text-3xl font-black text-white placeholder-slate-700 outline-none"
 							/>
 						</div>
 						{#if fromAmt && fromToken}
-							<p class="mt-1 text-right text-xs text-slate-500">
-								≈ ${(parseFloat(fromAmt) * fromToken.price).toFixed(2)}
+							<p class="mt-2 text-right text-[11px] font-bold text-slate-500">
+								≈ <span class="text-slate-400">${(parseFloat(fromAmt) * fromToken.price).toFixed(2)}</span>
 							</p>
 						{/if}
 					</div>
 
 					<!-- Flip button -->
-					<div class="relative flex justify-center py-1 z-10">
+					<div class="relative -my-4 flex justify-center z-10">
 						<button
 							onclick={flipTokens}
-							class="rounded-xl border border-white/10 bg-[#1b1d2a] p-2 text-slate-400 shadow-md transition-all duration-300 hover:border-[#14f195]/40 hover:text-[#14f195] hover:scale-110"
-							style="transform: rotate({rotated ? 180 : 0}deg)"
-						>⇅</button>
+							class="group/flip rounded-2xl border border-white/10 bg-[#09090f] p-3 text-slate-400 shadow-xl transition-all duration-500 hover:border-[#14f195]/50 hover:text-[#14f195] hover:shadow-[0_0_15px_rgba(20,241,149,0.2)] active:scale-90"
+							style="transform: rotate({rotated ? 360 : 0}deg)"
+							aria-label="Flip tokens"
+						>
+							<span class="block transition-transform group-hover/flip:scale-110">⇅</span>
+						</button>
 					</div>
 
 					<!-- To -->
-					<div class="mb-4 rounded-2xl border border-white/8 bg-black/30 p-4">
-						<div class="mb-3 flex items-center justify-between text-xs text-slate-500">
+					<div class="mb-4 rounded-[1.8rem] border border-white/5 bg-black/40 p-5">
+						<div class="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
 							<span>You Receive</span>
 							{#if toToken}
-								<span>Balance: <span class="text-white">{toToken.balance.toLocaleString()}</span></span>
+								<span class="font-mono">Balance: <span class="font-bold text-slate-300">{toToken.balance.toLocaleString()}</span></span>
 							{/if}
 						</div>
 						<div class="flex items-center gap-3">
 							<button
 								onclick={() => { showTokenModal = 'to'; tokenSearch = ''; }}
-								class="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/8 px-3 py-2 transition-colors hover:border-white/20"
+								class="flex shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 transition-all hover:bg-white/10 hover:border-white/30 active:scale-95"
 							>
-								<span class="text-xl">{toToken?.logo ?? '?'}</span>
-								<span class="font-bold text-white">{toSym}</span>
-								<span class="text-slate-400">▾</span>
+								<span class="text-2xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">{toToken?.logo ?? '?'}</span>
+								<span class="text-lg font-black tracking-tight text-white">{toSym}</span>
+								<span class="text-slate-500 text-xs">▼</span>
 							</button>
 							<div class="min-w-0 flex-1 text-right">
-								<p class="text-2xl font-bold {toAmt() ? 'text-[#14f195]' : 'text-slate-600'}">{toAmt() || '0'}</p>
+								<p class="truncate text-3xl font-black {toAmt() ? 'text-[#14f195] drop-shadow-[0_0_10px_rgba(20,241,149,0.3)]' : 'text-slate-700'}">{toAmt() || '0.00'}</p>
 							</div>
 						</div>
 						{#if toUSD()}
-							<p class="mt-1 text-right text-xs text-slate-500">≈ ${toUSD()}</p>
+							<p class="mt-2 text-right text-[11px] font-bold text-slate-500">≈ <span class="text-slate-400">${toUSD()}</span></p>
 						{/if}
 					</div>
 
@@ -419,17 +453,17 @@
 
 					<!-- Swap details accordion -->
 					{#if fromAmt && parseFloat(fromAmt) > 0}
-						<div class="mb-4 space-y-1.5 rounded-xl border border-white/5 bg-white/3 px-3 py-2.5 text-xs">
+						<div class="mb-6 space-y-2 rounded-2xl border border-white/5 bg-white/3 px-4 py-3.5 text-[11px]">
 							{#each [
 								{ label: 'Price Impact',   value: priceImpact() < 0.1 ? '< 0.1%' : priceImpact().toFixed(2) + '%',
 								  color: priceImpact() < 0.5 ? 'text-green-400' : priceImpact() < 2 ? 'text-yellow-400' : 'text-red-400' },
-								{ label: 'Min Received',   value: `${minReceived()} ${toSym}`,          color: 'text-white' },
-								{ label: 'Network Fee',    value: '~0.000025 SOL',                       color: 'text-white' },
-								{ label: 'Slippage',       value: slippage + '%',                        color: 'text-white' },
+								{ label: 'Min Received',   value: `${minReceived()} ${toSym}`,          color: 'text-slate-300' },
+								{ label: 'Network Fee',    value: '~0.000025 SOL',                       color: 'text-slate-300' },
+								{ label: 'Slippage',       value: slippage + '%',                        color: 'text-slate-300' },
 							] as row}
-								<div class="flex justify-between">
-									<span class="text-slate-500">{row.label}</span>
-									<span class="font-mono font-semibold {row.color}">{row.value}</span>
+								<div class="flex justify-between items-center">
+									<span class="text-slate-500 font-medium">{row.label}</span>
+									<span class="font-bold {row.color}">{row.value}</span>
 								</div>
 							{/each}
 						</div>
@@ -439,22 +473,29 @@
 					{#if !walletConnected}
 						<button
 							onclick={() => (walletConnected = true)}
-							class="w-full rounded-2xl bg-[#14f195] py-3.5 text-base font-extrabold text-black shadow-lg shadow-[#14f195]/20 transition-all hover:opacity-90 active:scale-95"
+							class="w-full rounded-[1.8rem] bg-[#14f195] py-4 text-base font-black text-black shadow-xl shadow-[#14f195]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
 						>Connect Wallet</button>
 					{:else if swapSuccess}
-						<div class="w-full rounded-2xl bg-[#14f195]/20 border border-[#14f195]/30 py-3.5 text-center text-base font-extrabold text-[#14f195]">
+						<div class="w-full rounded-[1.8rem] bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 py-4 text-center text-base font-black text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
 							✅ Swap Complete!
 						</div>
 					{:else}
 						<button
 							onclick={doSwap}
 							disabled={!fromAmt || parseFloat(fromAmt) <= 0 || swapping}
-							class="w-full rounded-2xl py-3.5 text-base font-extrabold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-40
+							class="w-full rounded-[1.8rem] py-4 text-base font-black transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40
 								{fromAmt && parseFloat(fromAmt) > 0
-									? 'bg-[#14f195] text-black shadow-lg shadow-[#14f195]/20 hover:opacity-90'
-									: 'bg-white/10 text-slate-400'}"
+									? 'bg-[#14f195] text-black shadow-xl shadow-[#14f195]/20 hover:scale-[1.02] hover:shadow-[#14f195]/30'
+									: 'bg-white/5 text-slate-500 border border-white/10'}"
 						>
-							{swapping ? '⏳ Swapping…' : fromAmt && parseFloat(fromAmt) > 0 ? `Swap ${fromSym} → ${toSym}` : 'Enter an amount'}
+							{#if swapping}
+								<span class="flex items-center justify-center gap-2">
+									<span class="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></span>
+									Swapping…
+								</span>
+							{:else}
+								{fromAmt && parseFloat(fromAmt) > 0 ? `Swap ${fromSym} → ${toSym}` : 'Enter an amount'}
+							{/if}
 						</button>
 					{/if}
 				</div>
@@ -474,39 +515,55 @@
 			<div class="flex min-w-0 flex-1 flex-col gap-4">
 
 				<!-- Token chart -->
-				<div class="rounded-2xl border border-white/10 bg-[#1b1d2a] p-4">
-					<div class="mb-1 flex items-center justify-between">
+				<div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+					<div class="mb-4 flex items-center justify-between">
 						<div>
-							<span class="text-lg font-bold text-white">{chartToken?.logo} {fromSym}</span>
-							<span class="ml-2 font-mono text-lg font-extrabold text-white">${fmtUSD(chartToken?.price ?? 0)}</span>
-							<span class="ml-2 text-xs font-semibold {(chartToken?.change ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}">
-								{(chartToken?.change ?? 0) >= 0 ? '+' : ''}{(chartToken?.change ?? 0).toFixed(2)}%
-							</span>
+							<div class="flex items-center gap-2 mb-1">
+								<span class="text-2xl">{chartToken?.logo}</span>
+								<span class="text-xl font-black text-white">{fromSym}</span>
+								<span class="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-black text-slate-500 border border-white/10">1H</span>
+							</div>
+							<div class="flex items-end gap-2">
+								<span class="font-mono text-2xl font-black text-white">${fmtUSD(chartToken?.price ?? 0)}</span>
+								<span class="mb-1 text-xs font-bold {(chartToken?.change ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'} flex items-center gap-0.5">
+									{(chartToken?.change ?? 0) >= 0 ? '▲' : '▼'} {(Math.abs(chartToken?.change ?? 0)).toFixed(2)}%
+								</span>
+							</div>
 						</div>
-						<div class="flex gap-1">
+						<div class="flex gap-1.5 rounded-xl bg-black/40 p-1 border border-white/5">
 							{#each ['1H','24H','7D'] as tf}
 								<button
 									onclick={() => (chartTf = tf)}
-									class="rounded-lg px-2.5 py-1 text-[10px] font-bold transition-colors
-										{chartTf === tf ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}"
+									class="rounded-lg px-3 py-1.5 text-[10px] font-black transition-all
+										{chartTf === tf ? 'bg-[#14f195] text-black shadow-[0_0_15px_rgba(20,241,149,0.2)]' : 'text-slate-500 hover:text-white'}"
 								>{tf}</button>
 							{/each}
 						</div>
 					</div>
 
 					<!-- SVG line chart -->
-					<svg viewBox="0 0 {CW} {CH}" class="w-full rounded-xl" preserveAspectRatio="none">
-						<defs>
-							<linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="0%" stop-color="#14f195" stop-opacity="0.3"/>
-								<stop offset="100%" stop-color="#14f195" stop-opacity="0"/>
-							</linearGradient>
-						</defs>
-						<!-- Fill -->
-						<path d={chartFill(chartHistory())} fill="url(#chartGrad)"/>
-						<!-- Line -->
-						<path d={chartPath(chartHistory())} fill="none" stroke="#14f195" stroke-width="1.5" stroke-linejoin="round"/>
-					</svg>
+					<div class="relative h-40 w-full rounded-2xl border border-white/5 bg-black/40 overflow-hidden shadow-inner">
+						<svg viewBox="0 0 {CW} {CH}" class="absolute inset-0 h-full w-full" preserveAspectRatio="none">
+							<defs>
+								<linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+									<stop offset="0%" stop-color="#14f195" stop-opacity="0.25"/>
+									<stop offset="100%" stop-color="#14f195" stop-opacity="0"/>
+								</linearGradient>
+							</defs>
+							<!-- Fill -->
+							<path d={chartFill(chartHistory())} fill="url(#chartGrad)"/>
+							<!-- Line -->
+							<path
+								d={chartPath(chartHistory())}
+								fill="none"
+								stroke="#14f195"
+								stroke-width="2.5"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+								style="filter: drop-shadow(0 0 8px rgba(20, 241, 149, 0.5));"
+							/>
+						</svg>
+					</div>
 				</div>
 
 				<!-- Market stats -->
@@ -518,30 +575,33 @@
 							{ label: '24h Change',   value: `${fromToken.change >= 0 ? '+' : ''}${fromToken.change.toFixed(2)}%`, color: fromToken.change >= 0 ? 'text-green-400' : 'text-red-400' },
 							{ label: 'Price',        value: `$${fmtUSD(fromToken.price)}` },
 						] as s}
-							<div class="rounded-xl border border-white/8 bg-[#1b1d2a] p-3">
-								<p class="text-[10px] text-slate-500">{s.label}</p>
-								<p class="mt-1 font-mono text-sm font-bold {s.color ?? 'text-white'}">{s.value}</p>
+							<div class="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:bg-white/10">
+								<p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">{s.label}</p>
+								<p class="font-mono text-sm font-black {s.color ?? 'text-white'}">{s.value}</p>
 							</div>
 						{/each}
 					</div>
 				{/if}
 
 				<!-- Recent swaps feed -->
-				<div class="rounded-2xl border border-white/10 bg-[#1b1d2a] p-4">
-					<p class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-						⚡ Recent Swaps
-						<span class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#14f195]"></span>
-					</p>
-					<div class="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+				<div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+					<div class="mb-4 flex items-center justify-between">
+						<p class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+							<span class="h-2 w-2 animate-pulse rounded-full bg-[#14f195]"></span>
+							Live Transactions
+						</p>
+						<span class="text-[10px] font-bold text-slate-600">Solana Mainnet</span>
+					</div>
+					<div class="space-y-2 max-h-72 overflow-y-auto pr-1">
 						{#each recentSwaps as s (s.id)}
-							<div class="flex items-center justify-between rounded-lg border border-white/5 bg-white/3 px-3 py-2 text-[11px]">
-								<span class="font-mono text-slate-400">{s.addr}</span>
-								<span class="text-slate-300">
-									<span class="font-bold text-white">{s.fromAmt} {s.from}</span>
-									<span class="mx-1 text-slate-600">→</span>
-									<span class="font-bold text-[#14f195]">{s.toAmt} {s.to}</span>
-								</span>
-								<span class="text-slate-600">{s.ts}</span>
+							<div class="group flex items-center justify-between rounded-xl border border-white/5 bg-black/40 px-4 py-3 text-[11px] transition-all hover:bg-white/5 hover:border-white/10">
+								<span class="font-mono text-slate-500 group-hover:text-slate-300 transition-colors">{s.addr}</span>
+								<div class="flex items-center gap-2">
+									<span class="font-black text-white">{s.fromAmt} <span class="text-slate-500 uppercase">{s.from}</span></span>
+									<span class="text-slate-700">→</span>
+									<span class="font-black text-[#14f195] drop-shadow-[0_0_8px_rgba(20,241,149,0.2)]">{s.toAmt} <span class="text-[#14f195]/60 uppercase">{s.to}</span></span>
+								</div>
+								<span class="text-[10px] font-bold text-slate-600">{s.ts}</span>
 							</div>
 						{/each}
 					</div>
@@ -553,52 +613,69 @@
 
 <!-- ── Token Selector Modal ───────────────────────────────────────────────────── -->
 {#if showTokenModal}
-	<button class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onclick={() => (showTokenModal = null)}></button>
+	<button
+		class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md"
+		onclick={() => (showTokenModal = null)}
+		aria-label="Close"
+	></button>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-		<div class="relative w-full max-w-sm rounded-3xl border border-white/10 bg-[#1b1d2a] shadow-2xl">
-			<div class="border-b border-white/8 p-4">
-				<p class="mb-3 text-sm font-bold text-white">Select Token</p>
-				<input
-					bind:value={tokenSearch}
-					placeholder="Search name or symbol…"
-					autofocus
-					class="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-[#14f195]/50"
-				/>
+		<div class="relative w-full max-w-sm overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#09090f] shadow-2xl shadow-black/60">
+			<!-- Glow -->
+			<div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-indigo-500/10 blur-[80px]"></div>
+
+			<div class="relative z-10 border-b border-white/5 bg-white/3 p-6">
+				<div class="flex items-center justify-between mb-4">
+					<p class="text-base font-black text-white">Select Token</p>
+					<button onclick={() => (showTokenModal = null)} class="text-slate-500 hover:text-white transition-colors" aria-label="Close">✕</button>
+				</div>
+				<div class="relative">
+					<input
+						bind:value={tokenSearch}
+						placeholder="Search name or symbol…"
+						class="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-3.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-[#14f195]/50 focus:bg-white/5"
+					/>
+					<span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600">🔍</span>
+				</div>
 			</div>
+
 			<!-- Popular -->
 			{#if !tokenSearch}
-				<div class="border-b border-white/8 p-3">
-					<p class="mb-2 text-[10px] font-bold uppercase text-slate-600">Popular</p>
+				<div class="relative z-10 border-b border-white/5 p-5">
+					<p class="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Popular</p>
 					<div class="flex flex-wrap gap-2">
 						{#each POPULAR as sym}
 							{@const t = tokens.find(x => x.symbol === sym)}
 							{#if t && sym !== (showTokenModal === 'from' ? toSym : fromSym)}
 								<button
 									onclick={() => selectToken(sym)}
-									class="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white hover:border-[#14f195]/40 transition-colors"
+									class="group flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 hover:border-[#14f195]/40 active:scale-95"
 								>
-									<span>{t.logo}</span> {sym}
+									<span class="text-lg group-hover:scale-110 transition-transform">{t.logo}</span>
+									<span>{sym}</span>
 								</button>
 							{/if}
 						{/each}
 					</div>
 				</div>
 			{/if}
+
 			<!-- Full list -->
-			<div class="max-h-72 overflow-y-auto p-2">
+			<div class="relative z-10 max-h-[40vh] overflow-y-auto p-3">
 				{#each filteredTokens as t}
 					<button
 						onclick={() => selectToken(t.symbol)}
-						class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+						class="group flex w-full items-center gap-4 rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5 active:scale-[0.98]"
 					>
-						<span class="text-2xl">{t.logo}</span>
+						<div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:border-[#14f195]/30">
+							<span class="text-2xl">{t.logo}</span>
+						</div>
 						<div class="min-w-0 flex-1">
-							<p class="text-sm font-bold text-white">{t.symbol}</p>
-							<p class="text-xs text-slate-500 truncate">{t.name}</p>
+							<p class="text-sm font-black text-white">{t.symbol}</p>
+							<p class="text-[10px] font-bold text-slate-500 truncate">{t.name}</p>
 						</div>
 						<div class="text-right">
-							<p class="font-mono text-xs text-white">{t.balance.toLocaleString()}</p>
-							<p class="text-[10px] {t.change >= 0 ? 'text-green-400' : 'text-red-400'}">
+							<p class="font-mono text-xs font-bold text-slate-300">{t.balance.toLocaleString()}</p>
+							<p class="text-[10px] font-black {t.change >= 0 ? 'text-green-400' : 'text-red-400'}">
 								{t.change >= 0 ? '+' : ''}{t.change.toFixed(2)}%
 							</p>
 						</div>
@@ -611,15 +688,15 @@
 
 <!-- ── Settings Modal ─────────────────────────────────────────────────────────── -->
 {#if showSettings}
-	<button class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onclick={() => (showSettings = false)}></button>
+	<button class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onclick={() => (showSettings = false)} aria-label="Close settings"></button>
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div class="relative w-full max-w-sm rounded-3xl border border-white/10 bg-[#1b1d2a] p-5 shadow-2xl">
-			<button onclick={() => (showSettings = false)} class="absolute right-4 top-4 text-slate-400 hover:text-white">✕</button>
+			<button onclick={() => (showSettings = false)} class="absolute right-4 top-4 text-slate-400 hover:text-white" aria-label="Close settings">✕</button>
 			<h2 class="mb-5 text-base font-extrabold text-white">⚙️ Swap Settings</h2>
 
 			<!-- Slippage -->
 			<div class="mb-5">
-				<label class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Slippage Tolerance</label>
+				<label for="slippage-custom" class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Slippage Tolerance</label>
 				<div class="flex gap-2">
 					{#each ['0.1', '0.5', '1.0'] as s}
 						<button
@@ -631,6 +708,7 @@
 						>{s}%</button>
 					{/each}
 					<input
+						id="slippage-custom"
 						bind:value={slippageCustom}
 						oninput={() => { if (slippageCustom) slippage = slippageCustom; }}
 						type="number" placeholder="Custom"
@@ -641,7 +719,7 @@
 
 			<!-- Speed -->
 			<div class="mb-5">
-				<label class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Transaction Speed</label>
+				<p class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Transaction Speed</p>
 				<div class="grid grid-cols-3 gap-2">
 					{#each ['Fast', 'Turbo', 'Ultra'] as s}
 						<button
