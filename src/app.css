@@ -23,4 +23,9 @@
 .animate-cloud5 { animation: cloud5 24s linear infinite; }
 .animate-cloud6 { animation: cloud6 26s linear infinite; }
 .animate-cloud7 { animation: cloud7 20s linear infinite; }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 }
