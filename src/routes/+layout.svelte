@@ -25,6 +25,7 @@
 		{ label: 'Airdrop',   emoji: '🪂', href: '/airdrop',   category: 'Platform' },
 		{ label: 'Memes',     emoji: '🤣', href: '/memes',     category: 'Entertainment' },
 		{ label: 'News',      emoji: '📰', href: '/news',      category: 'Entertainment' },
+		{ label: 'Forbes',    emoji: '🔴', href: '/forbes',    category: 'Market' },
 	];
 
 	const MORE_GROUPS = [
@@ -191,7 +192,7 @@
 							<span class="text-[13px]">···</span>
 							<span>More</span>
 						{/if}
-						<span class="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/[0.08] px-1.5 text-[9px] font-bold text-white/60 transition-transform duration-200 {moreOpen ? 'rotate-180' : ''}">
+						<span class="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/[0.08] px-1.5 text-[9px] font-bold text-white/60 transition-all duration-200 {moreOpen ? 'scale-110 bg-white/15 text-white/80' : ''}">
 							{MORE_ITEMS.length}
 						</span>
 					</button>
