@@ -1,168 +1,493 @@
 <script>
 	import '../app.css';
 	import { page } from '$app/stores';
-	import { fly, fade } from 'svelte/transition';
+	import { fly, fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import { onMount, tick } from 'svelte';
 
 	let { children } = $props();
 
+	// ── Navigation Data ──
 	const PRIMARY = [
-		{ label: 'NFT',       emoji: '🎵', href: '/drops'     },
-		{ label: 'Jam.fun',   emoji: '🚀', href: '/jam'       },
-		{ label: 'Play',      emoji: '🎮', href: '/play'      },
-		{ label: 'Swap',      emoji: '🔄', href: '/swap'      },
-		{ label: 'CoinGecko', emoji: '🦎', href: '/coingecko' },
-		{ label: 'Coinbase',  emoji: '🔵', href: '/coinbase'  },
-		{ label: 'DEX',       emoji: '📊', href: '/dex'       },
-		{ label: 'AI',        emoji: '🧠', href: '/ai'        },
-		{ label: 'LLM',       emoji: '💬', href: '/llm'       },
-		{ label: 'GPU',       emoji: '🖥️', href: '/gpu'       },
+		{ label: 'NFT',       emoji: '🎵', href: '/drops',     category: 'Platform' },
+		{ label: 'Jam.fun',   emoji: '🚀', href: '/jam',       category: 'Platform' },
+		{ label: 'Play',      emoji: '🎮', href: '/play',      category: 'Entertainment' },
+		{ label: 'Swap',      emoji: '🔄', href: '/swap',      category: 'Trading' },
+		{ label: 'CoinGecko', emoji: '🦎', href: '/coingecko', category: 'Market' },
+		{ label: 'Coinbase',  emoji: '🔵', href: '/coinbase',  category: 'Market' },
+		{ label: 'Portfolio', emoji: '💼', href: '/portfolio', category: 'Account' },
+	];
+
+	const SECONDARY = [
+		{ label: 'Staking',   emoji: '💎', href: '/staking',   category: 'DeFi' },
+		{ label: 'DEX',       emoji: '📊', href: '/dex',       category: 'DeFi' },
+		{ label: 'AI',        emoji: '🧠', href: '/ai',        category: 'Tech' },
+		{ label: 'Airdrop',   emoji: '🪂', href: '/airdrop',   category: 'Platform' },
+		{ label: 'Memes',     emoji: '🤣', href: '/memes',     category: 'Entertainment' },
+		{ label: 'News',      emoji: '📰', href: '/news',      category: 'Entertainment' },
 	];
 
 	const MORE_GROUPS = [
 		{
-			label: 'Platform',
-			tabs: [
-				{ label: 'Airdrop',   emoji: '🪂', href: '/airdrop'   },
-				{ label: 'Memes',     emoji: '🔥', href: '/memes'     },
-				{ label: 'News',      emoji: '📰', href: '/news'      },
+			label: 'Tech',
+			color: 'from-emerald-500/20 to-cyan-500/20',
+			icon: '🧬',
+			items: [
+				{ label: 'LLM',       emoji: '💬', href: '/llm'       },
+				{ label: 'GPU',       emoji: '🖥️', href: '/gpu'       },
+				{ label: 'Subagents', emoji: '🧬', href: '/subagents' },
+				{ label: 'NVIDIA',    emoji: '�', href: '/nvidia'    },
+				{ label: 'x402',      emoji: '🤖', href: '/x402'      },
+				{ label: 'OpenClaw',  emoji: '�', href: '/openclaw'  },
 			]
 		},
 		{
 			label: 'Trading',
-			tabs: [
-				{ label: 'Perps',     emoji: '📈', href: '/perps'     },
-				{ label: 'Predict',   emoji: '🔮', href: '/predict'   },
-				{ label: 'Alpha',     emoji: '📡', href: '/alpha'     },
-			]
-		},
-		{
-			label: 'Tech',
-			tabs: [
-				{ label: 'Subagents', emoji: '🧬', href: '/subagents' },
-				{ label: 'NVIDIA',    emoji: '🟢', href: '/nvidia'    },
-				{ label: 'x402',      emoji: '🤖', href: '/x402'      },
-				{ label: 'OpenClaw',  emoji: '🦾', href: '/openclaw'  },
+			color: 'from-amber-500/20 to-orange-500/20',
+			icon: '📈',
+			items: [
+				{ label: 'Perps',   emoji: '�', href: '/perps'   },
+				{ label: 'Predict', emoji: '🔮', href: '/predict' },
+				{ label: 'Alpha',   emoji: '📡', href: '/alpha'   },
 			]
 		},
 	];
 
-	const ALL_MORE = MORE_GROUPS.flatMap(g => g.tabs);
+	const MORE_ITEMS = MORE_GROUPS.flatMap(g => g.items);
 
+	const ALL_NAV_ITEMS = [...PRIMARY, ...SECONDARY, ...MORE_ITEMS];
+
+	// ── State ──
 	let moreOpen = $state(false);
+	let searchOpen = $state(false);
+	let mobileMenuOpen = $state(false);
+	let searchQuery = $state('');
+	let selectedIndex = $state(0);
+	let secondaryVisible = $state(true);
+	let lastScrollY = $state(0);
+	let searchInputEl = $state(null);
 
-	let activeInMore = $derived(ALL_MORE.some(t => t.href === $page.url.pathname));
-	let activeMoreTab = $derived(ALL_MORE.find(t => t.href === $page.url.pathname));
+	// ── Derived ──
+	let activeInMore = $derived(MORE_ITEMS.some(t => t.href === $page.url.pathname));
+	let activeMoreTab = $derived(MORE_ITEMS.find(t => t.href === $page.url.pathname));
 
+	let filteredItems = $derived(
+		searchQuery.trim() === ''
+			? ALL_NAV_ITEMS
+			: ALL_NAV_ITEMS.filter(item =>
+				item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				item.category.toLowerCase().includes(searchQuery.toLowerCase())
+			)
+	);
+
+	// ── Event Handlers ──
 	function handleOutside(e) {
 		if (!e.target.closest('[data-more]')) moreOpen = false;
 	}
+
+	function handleKeydown(e) {
+		// Cmd/Ctrl + K to open search
+		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+			e.preventDefault();
+			searchOpen = true;
+			tick().then(() => searchInputEl?.focus());
+		}
+
+		// Escape to close modals
+		if (e.key === 'Escape') {
+			searchOpen = false;
+			mobileMenuOpen = false;
+			moreOpen = false;
+		}
+
+		// Search navigation
+		if (searchOpen) {
+			if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				selectedIndex = (selectedIndex + 1) % filteredItems.length;
+			}
+			if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				selectedIndex = (selectedIndex - 1 + filteredItems.length) % filteredItems.length;
+			}
+			if (e.key === 'Enter' && filteredItems[selectedIndex]) {
+				e.preventDefault();
+				window.location.href = filteredItems[selectedIndex].href;
+				searchOpen = false;
+			}
+		}
+	}
+
+	function handleScroll() {
+		const currentScrollY = window.scrollY;
+		if (currentScrollY > lastScrollY && currentScrollY > 100) {
+			secondaryVisible = false;
+		} else {
+			secondaryVisible = true;
+		}
+		lastScrollY = currentScrollY;
+	}
+
+	function selectItem(index) {
+		selectedIndex = index;
+	}
+
+	onMount(() => {
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
 </script>
 
-<svelte:window onclick={handleOutside} />
+<svelte:window onclick={handleOutside} onkeydown={handleKeydown} />
 
 <div class="min-h-screen bg-[#020207] text-white">
 
+	<!-- ── Primary Navbar ── -->
 	<nav class="sticky top-0 z-50 border-b border-white/[0.06] bg-black/80 backdrop-blur-2xl">
-		<!-- subtle top accent line -->
 		<div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
-		<div class="mx-auto flex max-w-7xl items-center px-4 py-2.5">
+		<div class="mx-auto flex max-w-7xl items-center px-4 py-3">
 
-			<!-- ── Logo ── -->
+			<!-- Logo -->
 			<a href="/"
-				class="group mr-5 flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80">
-				<span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 text-sm shadow-lg shadow-pink-500/30">😺</span>
-				<span class="text-[15px] font-black tracking-tight text-white">JamCat</span>
+				class="group mr-5 flex shrink-0 items-center gap-2.5 transition-all duration-300 hover:scale-[1.02]">
+				<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 text-sm shadow-lg shadow-pink-500/30 transition-shadow duration-300 group-hover:shadow-pink-500/50">😺</span>
+				<span class="text-[16px] font-black tracking-tight text-white">JamCat</span>
 			</a>
 
-			<!-- ── divider ── -->
-			<div class="mr-4 h-5 w-px shrink-0 bg-white/10"></div>
+			<!-- Divider -->
+			<div class="mr-4 h-6 w-px shrink-0 bg-white/10"></div>
 
-			<!-- ── Primary tabs ── -->
-			<div class="flex min-w-0 flex-1 items-center gap-0.5">
+			<!-- Primary Tabs (Desktop) -->
+			<div class="hidden min-w-0 flex-1 items-center gap-1 md:flex">
 				{#each PRIMARY as tab (tab.href)}
 					{@const active = $page.url.pathname === tab.href}
 					<a href={tab.href}
-						class="group relative flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-150
+						class="group relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-[12px] font-semibold transition-all duration-200
 							{active
-							? 'bg-white/10 text-white'
-							: 'text-white/40 hover:bg-white/5 hover:text-white/80'}">
-						<span class="text-[12px] leading-none">{tab.emoji}</span>
+							? 'bg-white/[0.08] text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+							: 'text-white/50 hover:bg-white/[0.04] hover:text-white/90'}">
+						<span class="text-[13px] leading-none transition-transform duration-200 group-hover:scale-110">{tab.emoji}</span>
 						<span>{tab.label}</span>
 						{#if active}
-							<span class="absolute inset-x-2 bottom-0 h-[2px] rounded-full bg-white/60"></span>
+							<span class="absolute inset-x-3 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-transparent via-white/60 to-transparent"></span>
 						{/if}
 					</a>
 				{/each}
 
-				<!-- ── More button ── -->
-				<div class="relative ml-1 shrink-0" data-more>
+				<!-- More Button -->
+				<div class="relative ml-2 shrink-0" data-more>
 					<button
 						onclick={() => moreOpen = !moreOpen}
 						data-more
-						class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-150
+						class="flex items-center gap-2 rounded-xl px-3 py-2 text-[12px] font-semibold transition-all duration-200
 							{moreOpen || activeInMore
-							? 'bg-white/10 text-white'
-							: 'text-white/40 hover:bg-white/5 hover:text-white/80'}">
+							? 'bg-white/[0.08] text-white'
+							: 'text-white/50 hover:bg-white/[0.04] hover:text-white/90'}">
 						{#if activeInMore && activeMoreTab}
-							<span class="text-[12px]">{activeMoreTab.emoji}</span>
+							<span class="text-[13px]">{activeMoreTab.emoji}</span>
 							<span>{activeMoreTab.label}</span>
 						{:else}
-							<span class="text-[12px]">···</span>
+							<span class="text-[13px]">···</span>
 							<span>More</span>
 						{/if}
-						<!-- badge -->
-						<span class="flex h-4 min-w-4 items-center justify-center rounded-full bg-white/10 px-1 text-[8px] font-black text-white/50
-							{moreOpen ? 'rotate-180' : ''}">
-							{ALL_MORE.length}
+						<span class="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/[0.08] px-1.5 text-[9px] font-bold text-white/60 transition-transform duration-200 {moreOpen ? 'rotate-180' : ''}">
+							{MORE_ITEMS.length}
 						</span>
 					</button>
 
-					<!-- ── Dropdown ── -->
+					<!-- More Dropdown -->
 					{#if moreOpen}
 						<div
-							class="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f17] shadow-2xl shadow-black/60"
+							class="absolute right-0 top-[calc(100%+12px)] w-80 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12]/98 shadow-2xl shadow-black/80 backdrop-blur-xl"
 							data-more
-							in:fly={{ y: -6, duration: 180, easing: cubicOut }}
+							in:fly={{ y: -8, duration: 200, easing: cubicOut }}
 							out:fade={{ duration: 100 }}>
 
-							<!-- dropdown top accent -->
-							<div class="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+							<div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-							<div class="p-2">
-								{#each MORE_GROUPS as group, gi (group.label)}
-									{#if gi > 0}
-										<div class="my-1.5 h-px bg-white/5"></div>
-									{/if}
-									<p class="mb-1 px-2 pt-1 text-[9px] font-black uppercase tracking-widest text-white/20">{group.label}</p>
-									<div class="grid grid-cols-2 gap-0.5">
-										{#each group.tabs as tab (tab.href)}
-											{@const active = $page.url.pathname === tab.href}
-											<a href={tab.href}
-												onclick={() => moreOpen = false}
-												class="flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold transition-all
-													{active
-													? 'bg-white/10 text-white'
-													: 'text-white/40 hover:bg-white/6 hover:text-white/80'}">
-												<span class="text-[13px]">{tab.emoji}</span>
-												<span>{tab.label}</span>
-											</a>
-										{/each}
-									</div>
-								{/each}
-							</div>
+							<div class="p-1">
+								<!-- Header -->
+								<div class="mb-2 flex items-center justify-between px-3 py-2">
+									<span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-white/40">
+										<span class="flex h-5 w-5 items-center justify-center rounded-md bg-white/5 text-[12px]">📦</span>
+										More Apps
+									</span>
+									<span class="flex items-center gap-1 text-[10px] text-white/20">
+										<kbd class="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px]">⌘</kbd>
+										<kbd class="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px]">K</kbd>
+									</span>
+								</div>
 
-							<div class="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-							<div class="px-3 py-2">
-								<p class="text-[9px] text-white/15">{ALL_MORE.length} more pages · use More to navigate</p>
+								<!-- Grouped Items -->
+								<div class="space-y-2">
+									{#each MORE_GROUPS as group (group.label)}
+										<div class="rounded-xl bg-white/[0.02] p-1.5">
+											<!-- Group Header -->
+											<div class="mb-1 flex items-center gap-2 px-2 py-1.5">
+												<div class="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br {group.color} text-[11px]">
+													{group.icon}
+												</div>
+												<span class="text-[10px] font-semibold uppercase tracking-wider text-white/50">{group.label}</span>
+												<div class="flex-1"></div>
+												<span class="rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] font-medium text-white/30">{group.items.length}</span>
+											</div>
+
+											<!-- Items Grid -->
+											<div class="grid grid-cols-2 gap-1">
+												{#each group.items as tab (tab.href)}
+													{@const active = $page.url.pathname === tab.href}
+													<a href={tab.href}
+														onclick={() => moreOpen = false}
+														class="group flex items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-150
+															{active
+															? 'bg-white/[0.08] text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]'
+															: 'text-white/50 hover:bg-white/[0.04] hover:text-white/90'}">
+														<span class="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.04] text-[13px] transition-transform duration-200 group-hover:scale-110">
+															{tab.emoji}
+														</span>
+														<span class="truncate">{tab.label}</span>
+														{#if active}
+															<svg class="ml-auto h-3.5 w-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+															</svg>
+														{/if}
+													</a>
+												{/each}
+											</div>
+										</div>
+									{/each}
+								</div>
+
+								<!-- Search CTA -->
+								<button
+									onclick={() => { moreOpen = false; searchOpen = true; }}
+									class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[12px] font-medium text-white/40 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white/70">
+									<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+									</svg>
+									<span>Open Full Search</span>
+									<svg class="h-3.5 w-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+									</svg>
+								</button>
 							</div>
 						</div>
 					{/if}
 				</div>
+
+				<!-- Spacer -->
+				<div class="flex-1"></div>
+
+				<!-- Search Trigger -->
+				<button
+					onclick={() => { searchOpen = true; tick().then(() => searchInputEl?.focus()); }}
+					class="group ml-4 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2 text-[12px] text-white/40 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white/70">
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+					</svg>
+					<span class="hidden lg:inline">Search...</span>
+					<span class="hidden items-center gap-1 lg:flex">
+						<kbd class="ml-2 rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px]">⌘</kbd>
+						<kbd class="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px]">K</kbd>
+					</span>
+				</button>
+			</div>
+
+			<!-- Mobile: Search + Hamburger -->
+			<div class="flex items-center gap-2 md:hidden">
+				<button
+					onclick={() => { searchOpen = true; tick().then(() => searchInputEl?.focus()); }}
+					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+					</svg>
+				</button>
+				<button
+					onclick={() => mobileMenuOpen = !mobileMenuOpen}
+					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						{#if mobileMenuOpen}
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						{:else}
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+						{/if}
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<!-- ── Secondary Navbar (Desktop) ── -->
+		<div class="hidden border-t border-white/[0.04] bg-black/40 transition-all duration-300 md:block {secondaryVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}">
+			<div class="mx-auto flex max-w-7xl items-center gap-1 px-4 py-2">
+				{#each SECONDARY as tab (tab.href)}
+					{@const active = $page.url.pathname === tab.href}
+					<a href={tab.href}
+						class="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200
+							{active
+							? 'bg-white/[0.06] text-white'
+							: 'text-white/40 hover:bg-white/[0.03] hover:text-white/80'}">
+						<span class="text-[12px] transition-transform duration-200 group-hover:scale-110">{tab.emoji}</span>
+						<span>{tab.label}</span>
+					</a>
+				{/each}
 			</div>
 		</div>
 	</nav>
+
+	<!-- ── Search Modal ── -->
+	{#if searchOpen}
+		<div
+			class="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 pt-[15vh] backdrop-blur-sm"
+			transition:fade={{ duration: 150 }}
+			onclick={(e) => { if (e.target === e.currentTarget) searchOpen = false; }}>
+
+			<div
+				class="w-full max-w-xl overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-2xl"
+				in:scale={{ start: 0.95, duration: 200, easing: cubicOut }}
+				out:fade={{ duration: 100 }}>
+
+				<!-- Search Input -->
+				<div class="flex items-center gap-3 border-b border-white/[0.06] px-4 py-4">
+					<svg class="h-5 w-5 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+					</svg>
+					<input
+						bind:this={searchInputEl}
+						bind:value={searchQuery}
+						type="text"
+						placeholder="Search pages..."
+						class="flex-1 bg-transparent text-[15px] text-white placeholder-white/30 outline-none"
+					/>
+					<span class="flex items-center gap-1 text-[11px] text-white/30">
+						<kbd class="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono">↑↓</kbd>
+						<span>to navigate</span>
+						<kbd class="ml-2 rounded bg-white/[0.06] px-1.5 py-0.5 font-mono">Enter</kbd>
+						<span>to select</span>
+					</span>
+				</div>
+
+				<!-- Results -->
+				<div class="max-h-[50vh] overflow-y-auto py-2">
+					{#if filteredItems.length === 0}
+						<div class="px-4 py-8 text-center text-[13px] text-white/30">
+							No pages found matching "{searchQuery}"
+						</div>
+					{:else}
+						{#each filteredItems as item, i (item.href)}
+							<a
+								href={item.href}
+								onclick={() => searchOpen = false}
+								onmouseenter={() => selectItem(i)}
+								class="group mx-2 flex items-center justify-between rounded-xl px-3 py-3 text-[13px] transition-all duration-150
+									{selectedIndex === i ? 'bg-white/[0.08] text-white' : 'text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
+								<div class="flex items-center gap-3">
+									<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] text-[15px]">
+										{item.emoji}
+									</span>
+									<div class="flex flex-col">
+										<span class="font-medium">{item.label}</span>
+										<span class="text-[10px] text-white/30">{item.category}</span>
+									</div>
+								</div>
+								{#if $page.url.pathname === item.href}
+									<span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+								{/if}
+							</a>
+						{/each}
+					{/if}
+				</div>
+
+				<!-- Footer -->
+				<div class="border-t border-white/[0.06] px-4 py-3">
+					<div class="flex items-center justify-between text-[11px] text-white/20">
+						<span>{filteredItems.length} pages available</span>
+						<button
+							onclick={() => searchOpen = false}
+							class="rounded px-2 py-1 transition-colors hover:bg-white/[0.04] hover:text-white/50">
+							Press ESC to close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- ── Mobile Menu ── -->
+	{#if mobileMenuOpen}
+		<div
+			class="fixed inset-0 top-[60px] z-40 bg-[#020207] md:hidden"
+			transition:fly={{ y: -20, duration: 200, easing: cubicOut }}>
+
+			<div class="mx-auto max-w-7xl px-4 py-6">
+				<!-- Primary Section -->
+				<div class="mb-6">
+					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">Primary</p>
+					<div class="grid grid-cols-2 gap-2">
+						{#each PRIMARY as tab (tab.href)}
+							{@const active = $page.url.pathname === tab.href}
+							<a href={tab.href}
+								onclick={() => mobileMenuOpen = false}
+								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
+									{active
+									? 'bg-white/[0.08] text-white'
+									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
+								<span class="text-[18px]">{tab.emoji}</span>
+								<span>{tab.label}</span>
+								{#if active}
+									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
+								{/if}
+							</a>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Secondary Section -->
+				<div class="mb-6">
+					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">Secondary</p>
+					<div class="grid grid-cols-2 gap-2">
+						{#each SECONDARY as tab (tab.href)}
+							{@const active = $page.url.pathname === tab.href}
+							<a href={tab.href}
+								onclick={() => mobileMenuOpen = false}
+								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
+									{active
+									? 'bg-white/[0.08] text-white'
+									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
+								<span class="text-[18px]">{tab.emoji}</span>
+								<span>{tab.label}</span>
+								{#if active}
+									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
+								{/if}
+							</a>
+						{/each}
+					</div>
+				</div>
+
+				<!-- More Section -->
+				<div>
+					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">More</p>
+					<div class="grid grid-cols-2 gap-2">
+						{#each MORE_ITEMS as tab (tab.href)}
+							{@const active = $page.url.pathname === tab.href}
+							<a href={tab.href}
+								onclick={() => mobileMenuOpen = false}
+								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
+									{active
+									? 'bg-white/[0.08] text-white'
+									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
+								<span class="text-[18px]">{tab.emoji}</span>
+								<span>{tab.label}</span>
+								{#if active}
+									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
+								{/if}
+							</a>
+						{/each}
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<main class="relative">
 		{@render children()}
@@ -173,5 +498,23 @@
 	:global(body) {
 		background-color: #020207;
 		margin: 0;
+	}
+
+	/* Custom scrollbar for search modal */
+	::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.2);
 	}
 </style>
