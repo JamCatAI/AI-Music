@@ -131,12 +131,108 @@
 	}
 
 	let activeFilter  = $state('all');
+	let searchQuery   = $state('');
+	let sortBy        = $state('featured'); // featured | price-asc | price-desc | ending-soon | newest
+	let selectedGenres = $state([]);
+	let priceRange    = $state({ min: 0, max: 100 });
 	const FILTERS = [
 		{ key: 'all', label: 'All' }, { key: 'live', label: '🔴 Live' },
 		{ key: 'upcoming', label: '⏳ Soon' }, { key: 'sold_out', label: '✅ Sold Out' }
 	];
+	const SORT_OPTIONS = [
+		{ key: 'featured', label: '⭐ Featured' },
+		{ key: 'price-asc', label: 'Price: Low to High' },
+		{ key: 'price-desc', label: 'Price: High to Low' },
+		{ key: 'ending-soon', label: '⏰ Ending Soon' },
+		{ key: 'newest', label: '🆕 Newest' }
+	];
+	const GENRES = ['Dark Trap', 'Lo-Fi Chill', 'Jazz Fusion', 'Ambient House', 'Phonk', 'Neo-Soul'];
 
-	let visibleDrops = $derived(activeFilter === 'all' ? DROPS : DROPS.filter(d => d.status === activeFilter));
+	// Derived filtered and sorted drops
+	let filteredDrops = $derived.by(() => {
+		let result = [...DROPS];
+		
+		// Status filter
+		if (activeFilter !== 'all') {
+			result = result.filter(d => d.status === activeFilter);
+		}
+		
+		// Search filter
+		if (searchQuery.trim()) {
+			const q = searchQuery.toLowerCase();
+			result = result.filter(d => 
+				d.title.toLowerCase().includes(q) ||
+				d.artist.toLowerCase().includes(q) ||
+				d.genre.toLowerCase().includes(q)
+			);
+		}
+		
+		// Genre filter
+		if (selectedGenres.length > 0) {
+			result = result.filter(d => selectedGenres.includes(d.genre));
+		}
+		
+		// Price range filter
+		result = result.filter(d => d.price >= priceRange.min && d.price <= priceRange.max);
+		
+		return result;
+	});
+	
+	// Sorted drops (after filtering)
+	let visibleDrops = $derived.by(() => {
+		const sorted = [...filteredDrops];
+		switch (sortBy) {
+			case 'price-asc':
+				sorted.sort((a, b) => a.price - b.price);
+				break;
+			case 'price-desc':
+				sorted.sort((a, b) => b.price - a.price);
+				break;
+			case 'ending-soon':
+				sorted.sort((a, b) => timers[a.id - 1] - timers[b.id - 1]);
+				break;
+			case 'newest':
+				sorted.sort((a, b) => b.id - a.id);
+				break;
+			default: // featured - keep original order with featured first
+				sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+				break;
+		}
+		return sorted;
+	});
+	
+	// Non-featured drops for grid
+	let gridDrops = $derived.by(() => visibleDrops.filter(d => !d.featured));
+	
+	// Active filter count for badge
+	let activeFilterCount = $derived.by(() => {
+		let count = 0;
+		if (activeFilter !== 'all') count++;
+		if (searchQuery.trim()) count++;
+		if (selectedGenres.length > 0) count++;
+		if (priceRange.min > 0 || priceRange.max < 100) count++;
+		return count;
+	});
+	
+	// Mobile states
+	let showMobileFilters = $state(false);
+	let isLoading = $state(false);
+
+	function clearFilters() {
+		activeFilter = 'all';
+		searchQuery = '';
+		selectedGenres = [];
+		priceRange = { min: 0, max: 100 };
+		sortBy = 'featured';
+	}
+
+	function toggleGenre(genre) {
+		if (selectedGenres.includes(genre)) {
+			selectedGenres = selectedGenres.filter(g => g !== genre);
+		} else {
+			selectedGenres = [...selectedGenres, genre];
+		}
+	}
 
 	let playingId    = $state(null);
 	function togglePlay(id) { playingId = playingId === id ? null : id; }
@@ -190,15 +286,22 @@
 <svelte:head><title>NFT Music | JamCat</title></svelte:head>
 
 <!-- TICKER -->
-<div class="overflow-hidden border-b border-white/5 bg-black/40 py-2.5 backdrop-blur-xl">
+<div class="overflow-hidden border-b border-white/5 bg-black/40 py-2.5 backdrop-blur-xl relative z-10">
 	<div class="flex whitespace-nowrap" style="animation:marquee 38s linear infinite">
 		{#each [TICKER,TICKER] as t}
-			<span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em]" style="color:#a855f7">{t}</span>
+			<span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em] bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t}</span>
 		{/each}
 	</div>
 </div>
 
 <div class="relative min-h-screen overflow-hidden bg-[#080810]">
+
+	<!-- Animated background orbs -->
+	<div class="pointer-events-none fixed inset-0 overflow-hidden">
+		<div class="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-purple-500/20 blur-[100px] animate-pulse"></div>
+		<div class="absolute top-1/2 -right-20 h-80 w-80 rounded-full bg-pink-500/15 blur-[80px] animate-pulse" style="animation-delay:1s"></div>
+		<div class="absolute -bottom-40 left-1/3 h-72 w-72 rounded-full bg-blue-500/10 blur-[90px] animate-pulse" style="animation-delay:2s"></div>
+	</div>
 
 	<!-- deep background gradient -->
 	<div class="pointer-events-none absolute inset-0"
@@ -267,26 +370,27 @@
 
 					<!-- RIGHT: giant cover art -->
 					<div class="flex justify-center" in:fly={{ x: 30, duration: 600, delay: 200 }}>
-						<div class="group relative">
+						<!-- card with float animation -->
+						<div class="group relative" style="animation:float 6s ease-in-out infinite">
 							<!-- outer glow ring -->
-							<div class="absolute -inset-4 rounded-[2rem] opacity-40 blur-2xl transition-opacity duration-500 group-hover:opacity-70"
-								 style="background:linear-gradient(135deg,{drop.cover.from},{drop.cover.via},{drop.cover.to})"></div>
+							<div class="absolute -inset-4 rounded-[2rem] opacity-40 blur-2xl transition-all duration-500 group-hover:opacity-70 group-hover:scale-105"
+								 style="background:linear-gradient(135deg,{drop.cover.from},{drop.cover.via},{drop.cover.to});animation:pulse-glow 3s ease-in-out infinite"></div>
 
 							<!-- card -->
-							<div class="relative flex h-72 w-72 items-center justify-center overflow-hidden rounded-[2rem] sm:h-80 sm:w-80"
-								 style="background:linear-gradient(145deg,{drop.cover.from},{drop.cover.via},{drop.cover.to})">
+							<div class="relative flex h-72 w-72 items-center justify-center overflow-hidden rounded-[2rem] sm:h-80 sm:w-80 transition-transform duration-500 group-hover:scale-[1.02]"
+								 style="background:linear-gradient(145deg,{drop.cover.from},{drop.cover.via},{drop.cover.to});box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)">
 								<!-- inner noise -->
 								<div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22/></filter><rect width=%22100%22 height=%22100%22 filter=%22url(%23n)%22/></svg>')"></div>
-								<span class="relative z-10 text-[110px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-110">{drop.emoji}</span>
+								<span class="relative z-10 text-[110px] drop-shadow-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">{drop.emoji}</span>
 
 								<!-- play button -->
 								<button onclick={() => togglePlay(drop.id)}
-									class="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 backdrop-blur-xl transition-all hover:scale-110 hover:bg-black/60 border border-white/20">
+									class="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 backdrop-blur-xl transition-all hover:scale-110 hover:bg-black/60 border border-white/20 hover:border-white/40">
 									<span class="text-lg text-white">{playingId===drop.id?'⏸':'▶'}</span>
 								</button>
 
 								<!-- plays -->
-								<div class="absolute top-4 left-4 rounded-full bg-black/40 px-3 py-1 backdrop-blur-xl">
+								<div class="absolute top-4 left-4 rounded-full bg-black/40 px-3 py-1 backdrop-blur-xl border border-white/10">
 									<span class="text-[10px] font-black text-white/70">▶ {drop.plays.toLocaleString()}</span>
 								</div>
 
@@ -302,7 +406,7 @@
 							</div>
 
 							<!-- edition pill below card -->
-							<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-black/70 px-4 py-1.5 backdrop-blur-xl whitespace-nowrap">
+							<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-black/70 px-4 py-1.5 backdrop-blur-xl whitespace-nowrap shadow-xl">
 								<span class="text-[11px] font-black text-white">{drop.edition.sold}/{drop.edition.total}</span>
 								<span class="text-[11px] text-white/40"> editions minted</span>
 							</div>
@@ -314,19 +418,22 @@
 	{/each}
 
 	<!-- ══ COLLECTION STATS BAR ═════════════════════════════════ -->
-	<div class="border-y border-white/5 bg-black/30 backdrop-blur-xl" in:fly={{ y: 10, duration: 400, delay: 300 }}>
-		<div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
+	<div class="border-y border-white/5 bg-black/20 backdrop-blur-2xl" in:fly={{ y: 10, duration: 400, delay: 300 }}>
+		<div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-10">
 			{#each [
-				{ label: 'Floor Price', val: `${stats.floor} SOL`,           sub: '',          color: 'text-white'        },
-				{ label: '24h Volume',  val: `${stats.vol24h} SOL`,           sub: '+12.4%',    color: 'text-emerald-400'  },
-				{ label: 'Total Vol',   val: `${totalVol.toFixed(1)} SOL`,    sub: 'all-time',  color: 'text-white'        },
-				{ label: 'Items',       val: DROPS.reduce((s,d)=>s+d.edition.total,0).toLocaleString(), sub: 'total editions', color: 'text-white' },
-				{ label: 'Minted',      val: totalMinted.toLocaleString(),    sub: 'holders',   color: 'text-purple-300'   },
-				{ label: 'Owners',      val: stats.owners.toLocaleString(),   sub: 'unique',    color: 'text-white'        }
+				{ label: 'Floor Price', val: `${stats.floor} SOL`,           sub: '',          color: 'text-white',        icon: '📊' },
+				{ label: '24h Volume',  val: `${stats.vol24h} SOL`,           sub: '+12.4%',    color: 'text-emerald-400',  icon: '📈' },
+				{ label: 'Total Vol',   val: `${totalVol.toFixed(1)} SOL`,    sub: 'all-time',  color: 'text-white',        icon: '💎' },
+				{ label: 'Items',       val: DROPS.reduce((s,d)=>s+d.edition.total,0).toLocaleString(), sub: 'total editions', color: 'text-white', icon: '🎵' },
+				{ label: 'Minted',      val: totalMinted.toLocaleString(),    sub: 'holders',   color: 'text-purple-300',   icon: '👥' },
+				{ label: 'Owners',      val: stats.owners.toLocaleString(),   sub: 'unique',    color: 'text-white',        icon: '🔥' }
 			] as s}
-				<div class="text-center">
-					<p class="text-xs font-black {s.color}">{s.val} {#if s.sub}<span class="text-[10px] text-white/25">{s.sub}</span>{/if}</p>
-					<p class="text-[9px] uppercase tracking-widest text-white/25">{s.label}</p>
+				<div class="text-center group cursor-default">
+					<p class="text-[10px] uppercase tracking-widest text-white/30 mb-1">{s.label}</p>
+					<p class="text-sm font-black {s.color} transition-transform duration-200 group-hover:scale-110">
+						<span class="mr-1 text-xs">{s.icon}</span>{s.val}
+						{#if s.sub}<span class="text-[9px] text-white/25 font-normal ml-1">{s.sub}</span>{/if}
+					</p>
 				</div>
 			{/each}
 		</div>
@@ -339,26 +446,121 @@
 			<!-- LEFT -->
 			<div class="min-w-0 flex-1">
 
-				<!-- filter + sort bar -->
-				<div class="mb-6 flex flex-wrap items-center justify-between gap-3" in:fly={{ x: -20, duration: 400 }}>
-					<div class="flex flex-wrap gap-2">
+				<!-- Search & Filter Bar -->
+				<div class="mb-6 space-y-4" in:fly={{ y: -20, duration: 400 }}>
+					<!-- Search + Sort Row -->
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<!-- Search Input -->
+						<div class="relative flex-1 max-w-md">
+							<svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+							</svg>
+							<input
+								type="text"
+								placeholder="Search drops, artists, genres..."
+								bind:value={searchQuery}
+								class="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition-all focus:border-purple-500/50 focus:bg-white/8"
+							/>
+							{#if searchQuery}
+								<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+									<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+									</svg>
+								</button>
+							{/if}
+						</div>
+						
+						<!-- Sort Dropdown -->
+						<div class="flex items-center gap-2">
+							<select bind:value={sortBy} class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white/70 outline-none transition-all hover:border-white/20 focus:border-purple-500/50 cursor-pointer">
+								{#each SORT_OPTIONS as opt}
+									<option value={opt.key}>{opt.label}</option>
+								{/each}
+							</select>
+							
+							<!-- Mobile Filter Toggle -->
+							<button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white/70 transition-all hover:border-white/20 lg:hidden">
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+								</svg>
+								Filters {#if activeFilterCount > 0}<span class="ml-1 rounded-full bg-purple-500 px-1.5 py-0.5 text-[9px] text-white">{activeFilterCount}</span>{/if}
+							</button>
+						</div>
+					</div>
+					
+					<!-- Filter Pills -->
+					<div class="flex flex-wrap items-center gap-2">
+						<!-- Status Filters -->
 						{#each FILTERS as f (f.key)}
 							<button onclick={() => activeFilter = f.key}
-								class="rounded-full border px-3.5 py-1.5 text-xs font-black transition-all duration-150
+								class="rounded-full border px-3 py-1.5 text-xs font-black transition-all duration-150
 									   {activeFilter===f.key
 									     ? 'border-purple-400 bg-purple-400 text-black shadow-lg shadow-purple-400/25'
 									     : 'border-white/8 bg-white/3 text-white/35 hover:border-purple-400/40 hover:text-purple-300'}">
 								{f.label}
 							</button>
 						{/each}
+						
+						<div class="h-5 w-px bg-white/10 mx-1"></div>
+						
+						<!-- Genre Pills -->
+						{#each GENRES as genre}
+							<button onclick={() => toggleGenre(genre)}
+								class="rounded-full border px-2.5 py-1 text-[11px] font-bold transition-all duration-150
+									   {selectedGenres.includes(genre)
+									     ? 'border-emerald-400/50 bg-emerald-400/15 text-emerald-300'
+									     : 'border-white/8 bg-white/3 text-white/35 hover:border-white/20 hover:text-white/60'}">
+								{genre}
+							</button>
+						{/each}
+						
+						<div class="flex-1"></div>
+						
+						<!-- Results Count -->
+						<span class="text-xs text-white/30">{visibleDrops.length} drops</span>
+						
+						<!-- Clear Filters -->
+						{#if activeFilterCount > 0}
+							<button onclick={clearFilters} class="flex items-center gap-1 text-[11px] text-white/40 hover:text-white/70 transition-colors">
+								<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+								</svg>
+								Clear
+							</button>
+						{/if}
 					</div>
-					<span class="text-xs text-white/20">{visibleDrops.length} drops</span>
 				</div>
 
 				<!-- grid -->
-				<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-					{#each visibleDrops.filter(d => !d.featured) as drop, i (drop.id)}
-						<div class="group relative flex flex-col overflow-hidden rounded-2xl border border-white/6 bg-[#0e0e18] transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-[0_8px_40px_rgba(168,85,247,.15)]"
+				<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+					{#if isLoading}
+						<!-- Skeleton Loaders -->
+						{#each Array(6) as _, i}
+							<div class="flex flex-col overflow-hidden rounded-2xl border border-white/6 bg-[#0e0e18]">
+								<div class="aspect-square animate-pulse bg-white/5"></div>
+								<div class="p-4 space-y-3">
+									<div class="h-4 w-3/4 animate-pulse rounded bg-white/5"></div>
+									<div class="h-3 w-1/2 animate-pulse rounded bg-white/5"></div>
+									<div class="h-2 w-full animate-pulse rounded bg-white/5"></div>
+								</div>
+							</div>
+						{/each}
+					{:else if gridDrops.length === 0}
+						<!-- Empty State -->
+						<div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+							<div class="mb-4 text-6xl">🔍</div>
+							<h3 class="mb-2 text-lg font-bold text-white">No drops found</h3>
+							<p class="mb-6 max-w-sm text-sm text-white/40">
+								Try adjusting your filters or search query to find what you're looking for.
+							</p>
+							<button onclick={clearFilters} class="rounded-xl bg-purple-500 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-purple-400 hover:scale-105">
+								Clear all filters
+							</button>
+						</div>
+					{:else}
+						{#each gridDrops as drop, i (drop.id)}
+						<div class="group relative flex flex-col overflow-hidden rounded-2xl border border-white/6 bg-[#0e0e18]/80 transition-all duration-500 hover:-translate-y-2 hover:border-purple-500/30 hover:shadow-[0_20px_60px_rgba(168,85,247,.2)]"
+							 style="transform-style:preserve-3d"
 							 in:fly={{ y: 24, duration: 350, delay: i*55 }}>
 
 							<!-- COVER -->
@@ -487,7 +689,8 @@
 								</div>
 							</div>
 						</div>
-					{/each}
+						{/each}
+					{/if}
 				</div>
 			</div>
 
@@ -571,6 +774,76 @@
 		</div>
 	</div>
 </div>
+
+<!-- ══ MOBILE FILTER DRAWER ════════════════════════════════════ -->
+{#if showMobileFilters}
+	<button onclick={() => showMobileFilters = false}
+		class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm lg:hidden"
+		in:fade={{ duration: 200 }} aria-label="Close filters"></button>
+	
+	<div class="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t border-white/10 bg-[#0c0a1a] p-6 lg:hidden"
+		 in:fly={{ y: 100, duration: 300, easing: cubicOut }}>
+		<div class="mb-4 flex items-center justify-between">
+			<h3 class="text-lg font-bold text-white">Filters</h3>
+			<button onclick={() => showMobileFilters = false} class="rounded-full bg-white/5 p-2 text-white/50 transition hover:bg-white/10 hover:text-white">
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+		
+		<!-- Mobile Status Filters -->
+		<div class="mb-4">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Status</p>
+			<div class="flex flex-wrap gap-2">
+				{#each FILTERS as f}
+					<button onclick={() => activeFilter = f.key}
+						class="rounded-full border px-4 py-2 text-sm font-bold transition-all
+							   {activeFilter===f.key
+							     ? 'border-purple-400 bg-purple-400 text-black'
+							     : 'border-white/10 bg-white/5 text-white/60'}">
+						{f.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+		
+		<!-- Mobile Genre Filters -->
+		<div class="mb-4">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Genres</p>
+			<div class="flex flex-wrap gap-2">
+				{#each GENRES as genre}
+					<button onclick={() => toggleGenre(genre)}
+						class="rounded-full border px-3 py-1.5 text-xs font-bold transition-all
+							   {selectedGenres.includes(genre)
+							     ? 'border-emerald-400/50 bg-emerald-400/15 text-emerald-300'
+							     : 'border-white/10 bg-white/5 text-white/50'}">
+						{genre}
+					</button>
+				{/each}
+			</div>
+		</div>
+		
+		<!-- Mobile Sort -->
+		<div class="mb-6">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Sort By</p>
+			<select bind:value={sortBy} class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white outline-none">
+				{#each SORT_OPTIONS as opt}
+					<option value={opt.key}>{opt.label}</option>
+				{/each}
+			</select>
+		</div>
+		
+		<div class="flex gap-3">
+			<button onclick={clearFilters} class="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-bold text-white/60 transition hover:bg-white/10">
+				Clear All
+			</button>
+			<button onclick={() => showMobileFilters = false} class="flex-1 rounded-xl bg-purple-500 py-3 text-sm font-bold text-white transition hover:bg-purple-400">
+				Show {visibleDrops.length} Results
+			</button>
+		</div>
+	</div>
+{/if}
 
 <!-- ══ MINT MODAL ══════════════════════════════════════════════ -->
 {#if mintTarget}
@@ -666,5 +939,39 @@
 	@keyframes waveBar {
 		from { transform: scaleY(0.3); }
 		to   { transform: scaleY(1);   }
+	}
+	@keyframes float {
+		0%, 100% { transform: translateY(0px) rotate(0deg); }
+		50% { transform: translateY(-20px) rotate(2deg); }
+	}
+	@keyframes pulse-glow {
+		0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+		50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6); }
+	}
+	@keyframes gradient-shift {
+		0% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+		100% { background-position: 0% 50%; }
+	}
+	@keyframes marquee {
+		0% { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
+	}
+	:global(.animate-gradient) {
+		background-size: 200% 200%;
+		animation: gradient-shift 8s ease infinite;
+	}
+	:global(.glass) {
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+	:global(.card-3d) {
+		transform-style: preserve-3d;
+		perspective: 1000px;
+	}
+	:global(.card-3d:hover) {
+		transform: translateY(-8px) rotateX(5deg);
 	}
 </style>
