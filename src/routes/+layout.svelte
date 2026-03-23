@@ -26,6 +26,8 @@
 		{ label: 'Memes',     emoji: '🤣', href: '/memes',     category: 'Entertainment' },
 		{ label: 'News',      emoji: '📰', href: '/news',      category: 'Entertainment' },
 		{ label: 'Forbes',    emoji: '🔴', href: '/forbes',    category: 'Market' },
+		{ label: 'Binance',      emoji: '🟡', href: '/binance',      category: 'Market' },
+		{ label: 'Hyperliquid',  emoji: '🟢', href: '/hyperliquid',  category: 'Market' },
 	];
 
 	const MORE_GROUPS = [

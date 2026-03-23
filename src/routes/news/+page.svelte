@@ -51,7 +51,7 @@
 		const category = categories.find((item) => item.id === categoryId) ?? categories[0];
 
 		try {
-			const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(category.url)}`;
+			const endpoint = `/api/news?url=${encodeURIComponent(category.url)}`;
 			const response = await fetch(endpoint);
 			if (!response.ok) throw new Error(`News request failed with ${response.status}`);
 
