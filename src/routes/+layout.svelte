@@ -49,9 +49,11 @@
 			color: 'from-amber-500/20 to-orange-500/20',
 			icon: '📈',
 			items: [
-				{ label: 'Perps',   emoji: '�', href: '/perps'   },
+				{ label: 'Perps',   emoji: '📊', href: '/perps'   },
 				{ label: 'Predict', emoji: '🔮', href: '/predict' },
 				{ label: 'Alpha',   emoji: '📡', href: '/alpha'   },
+				{ label: 'Solana',  emoji: '◎',  href: '/solana'  },
+				{ label: 'Bitcoin', emoji: '₿',  href: '/bitcoin' },
 			]
 		},
 	];
