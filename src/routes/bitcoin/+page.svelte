@@ -12,12 +12,12 @@
 	const fmtBTC = (n) => n.toFixed(8);
 
 	// ── Market data ───────────────────────────────────────────────────────────────
-	let btcPrice    = $state(87_420);
+	let btcPrice    = $state(95_420);
 	let btcChange   = $state(2.14);
-	let marketCap   = $state(1_720_000_000_000);
+	let marketCap   = $state(1_880_000_000_000);
 	let dominance   = $state(54.2);
 	let dailyVol    = $state(48_300_000_000);
-	let ath         = $state(108_364);
+	let ath         = $state(109_114);
 	let athDate     = '2024-12-17';
 
 	// ── Network stats ─────────────────────────────────────────────────────────────
@@ -38,12 +38,12 @@
 
 	function makePriceHistory() {
 		const pts = [];
-		let p = 68000;
+		let p = 82000;
 		for (let i = 0; i < 120; i++) {
 			p += rand(-1200, 1400);
-			pts.push(Math.max(40000, p));
+			pts.push(Math.max(60000, p));
 		}
-		pts.push(87420);
+		pts.push(95420);
 		return pts;
 	}
 

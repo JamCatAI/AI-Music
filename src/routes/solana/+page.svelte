@@ -17,9 +17,9 @@
 	let epoch       = $state(742);
 	let epochPct    = $state(67.4);
 	let validators  = $state(1_847);
-	let solPrice    = $state(142.38);
-	let solChange   = $state(3.21);
-	let marketCap   = $state(65_800_000_000);
+	let solPrice    = $state(185.42);
+	let solChange   = $state(2.34);
+	let marketCap   = $state(85_200_000_000);
 	let tvl         = $state(8_420_000_000);
 	let dailyVol    = $state(3_100_000_000);
 	let activeWallets = $state(2_340_000);
@@ -30,13 +30,12 @@
 
 	function makePriceHistory() {
 		const pts = [];
-		let p = 128;
+		let p = 165;
 		for (let i = 0; i < 96; i++) {
-			p += rand(-2.5, 2.8);
-			pts.push(Math.max(80, p));
+			p += rand(-3, 3.2);
+			pts.push(Math.max(100, p));
 		}
-		// end near current
-		pts.push(142.38);
+		pts.push(185.42);
 		return pts;
 	}
 
