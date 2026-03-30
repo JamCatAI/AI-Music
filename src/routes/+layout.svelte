@@ -52,8 +52,11 @@
 				{ label: 'Perps',   emoji: '📊', href: '/perps'   },
 				{ label: 'Predict', emoji: '🔮', href: '/predict' },
 				{ label: 'Alpha',   emoji: '📡', href: '/alpha'   },
-				{ label: 'Solana',  emoji: '◎',  href: '/solana'  },
-				{ label: 'Bitcoin', emoji: '₿',  href: '/bitcoin' },
+				{ label: 'Solana',   emoji: '◎',  href: '/solana'   },
+				{ label: 'Bitcoin',  emoji: '₿',  href: '/bitcoin'  },
+				{ label: 'Ethereum', emoji: 'Ξ',  href: '/ethereum' },
+				{ label: 'Avalanche', emoji: '▲',  href: '/avax'    },
+				{ label: 'Cardano',   emoji: '₳',  href: '/cardano' },
 			]
 		},
 	];
