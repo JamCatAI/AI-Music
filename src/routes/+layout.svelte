@@ -19,15 +19,20 @@
 	];
 
 	const SECONDARY = [
-		{ label: 'Staking',   emoji: '💎', href: '/staking',   category: 'DeFi' },
-		{ label: 'DEX',       emoji: '📊', href: '/dex',       category: 'DeFi' },
-		{ label: 'AI',        emoji: '🧠', href: '/ai',        category: 'Tech' },
-		{ label: 'Airdrop',   emoji: '🪂', href: '/airdrop',   category: 'Platform' },
-		{ label: 'Memes',     emoji: '🤣', href: '/memes',     category: 'Entertainment' },
-		{ label: 'News',      emoji: '📰', href: '/news',      category: 'Entertainment' },
-		{ label: 'Forbes',    emoji: '🔴', href: '/forbes',    category: 'Market' },
-		{ label: 'Binance',      emoji: '🟡', href: '/binance',      category: 'Market' },
-		{ label: 'Hyperliquid',  emoji: '🟢', href: '/hyperliquid',  category: 'Market' },
+		{ label: 'Staking',    emoji: '💎', href: '/staking',    category: 'DeFi' },
+		{ label: 'DEX',        emoji: '📊', href: '/dex',        category: 'DeFi' },
+		{ label: 'AI',         emoji: '🧠', href: '/ai',         category: 'Tech' },
+		{ label: 'Airdrop',    emoji: '🪂', href: '/airdrop',    category: 'Platform' },
+		{ label: 'Memes',      emoji: '🤣', href: '/memes',      category: 'Entertainment' },
+		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Entertainment' },
+		{ label: 'Forbes',     emoji: '🔴', href: '/forbes',     category: 'Market' },
+		{ label: 'Binance',    emoji: '🟡', href: '/binance',    category: 'Market' },
+		{ label: 'Hyperliquid',emoji: '🟢', href: '/hyperliquid',category: 'Market' },
+		{ label: 'Rewards',    emoji: '🎁', href: '/rewards',    category: 'DeFi' },
+		{ label: 'Analytics',  emoji: '📈', href: '/analytics', category: 'Market' },
+		{ label: 'Bridge',     emoji: '🌉', href: '/bridge',     category: 'DeFi' },
+		{ label: 'Games',      emoji: '🎲', href: '/games',      category: 'Entertainment' },
+		{ label: 'Wallet',     emoji: '👛', href: '/wallet',     category: 'Account' },
 	];
 
 	const MORE_GROUPS = [
