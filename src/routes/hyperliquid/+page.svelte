@@ -329,9 +329,9 @@ onMount(() => {
 <svelte:head><title>Hyperliquid | JamCat</title></svelte:head>
 
 <!-- Ticker -->
-<div class="overflow-hidden border-b border-white/5 bg-[#00E5BE]/10 py-2 backdrop-blur-xl">
-  <div class="flex whitespace-nowrap" style="animation:marquee 35s linear infinite">
-    {#each [TICKER_TEXT, TICKER_TEXT, TICKER_TEXT] as t}
+<div class="overflow-hidden border-b border-white/5 bg-gradient-to-r from-[#00E5BE]/10 via-[#00E5BE]/5 to-transparent py-2.5 backdrop-blur-xl">
+  <div class="flex whitespace-nowrap" style="animation:marquee 30s linear infinite">
+    {#each [TICKER_TEXT, TICKER_TEXT] as t}
       <span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em]" style="color:#00E5BE">{t}</span>
     {/each}
   </div>
@@ -354,54 +354,59 @@ onMount(() => {
       style="background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:80px 80px"></div>
   </div>
 
-  <div class="relative mx-auto max-w-7xl px-5 py-10 sm:px-8">
+  <div class="relative mx-auto max-w-7xl px-5 py-12 sm:px-8">
 
     <!-- Enhanced Header -->
-    <div class="mb-10 text-center">
-      <div class="mb-5 inline-flex items-center gap-4">
-        <div class="relative">
-          <div class="flex h-16 w-16 items-center justify-center rounded-2xl shadow-2xl"
-            style="background:linear-gradient(135deg,#00E5BE,#00b89a);box-shadow:0 8px 32px #00E5BE40,0 0 60px #00E5BE20">
+    <div class="mb-12 text-center">
+      <div class="mb-6 inline-flex items-center gap-5">
+        <div class="relative group">
+          <div class="flex h-20 w-20 items-center justify-center rounded-3xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            style="background:linear-gradient(135deg,#00E5BE,#00b89a);box-shadow:0 8px 40px #00E5BE50,0 0 80px #00E5BE30,0 0 120px #00E5BE15">
             <!-- HL logo -->
-            <svg class="h-9 w-9" viewBox="0 0 32 32" fill="none">
+            <svg class="h-11 w-11" viewBox="0 0 32 32" fill="none">
               <path d="M6 6h4v8h12V6h4v20h-4v-8H10v8H6V6z" fill="white"/>
             </svg>
           </div>
-          <div class="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-emerald-400 {pulse ? 'scale-150' : ''} transition-transform">
-            <div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/40"></div>
+          <div class="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#04080f] {pulse ? 'scale-125' : ''} transition-transform duration-300">
+            <div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/50"></div>
           </div>
+          <!-- Glow ring -->
+          <div class="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#00E5BE] to-emerald-400 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-40"></div>
         </div>
         <div class="text-left">
-          <h1 class="text-4xl font-black tracking-tighter text-white sm:text-5xl lg:text-6xl"
-            style="text-shadow:0 0 80px rgba(0,229,190,0.3)">Hyperliquid</h1>
-          <p class="text-[11px] uppercase tracking-[0.3em]" style="color:#00E5BE99">Perpetuals · Live · On-Chain</p>
+          <h1 class="text-5xl font-black tracking-tighter text-white sm:text-6xl lg:text-7xl"
+            style="text-shadow:0 0 60px rgba(0,229,190,0.4),0 0 120px rgba(0,229,190,0.2)">Hyperliquid</h1>
+          <p class="text-[12px] uppercase tracking-[0.4em] mt-2" style="color:#00E5BE99">Perpetuals · Live · On-Chain</p>
         </div>
       </div>
 
       <!-- Enhanced Stats bar -->
-      <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-6 py-4 backdrop-blur-md"
-        style="box-shadow:0 4px 24px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05)">
-        <div class="flex items-center gap-2">
-          <div class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span class="text-[10px] font-bold text-white/40">LIVE</span>
+      <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-8 py-5 backdrop-blur-xl"
+        style="box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.06),0 0 40px rgba(0,229,190,0.05)">
+        <div class="flex items-center gap-2.5">
+          <div class="relative">
+            <div class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <div class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40"></div>
+          </div>
+          <span class="text-[11px] font-bold text-white/50">LIVE</span>
         </div>
-        <div class="h-4 w-px bg-white/10"></div>
-        <span class="text-[10px] font-bold text-white/40">
-          <span class="font-black text-white/80">{markets.length}</span> perp markets
+        <div class="h-5 w-px bg-white/10"></div>
+        <span class="text-[11px] font-bold text-white/50">
+          <span class="font-black text-white">{markets.length}</span> markets
         </span>
-        <div class="h-4 w-px bg-white/10"></div>
-        <span class="text-[10px] font-bold text-white/40">
-          24h vol <span class="font-black text-white/80">{fmtVol(totalVolume)}</span>
+        <div class="h-5 w-px bg-white/10"></div>
+        <span class="text-[11px] font-bold text-white/50">
+          Vol <span class="font-black text-white">{fmtVol(totalVolume)}</span>
         </span>
-        <div class="h-4 w-px bg-white/10"></div>
-        <span class="text-[10px] font-bold text-white/40">
-          OI <span class="font-black text-white/80">{fmtVol(totalOI)}</span>
+        <div class="h-5 w-px bg-white/10"></div>
+        <span class="text-[11px] font-bold text-white/50">
+          OI <span class="font-black text-white">{fmtVol(totalOI)}</span>
         </span>
-        <div class="h-4 w-px bg-white/10"></div>
-        <span class="text-[10px] text-white/30 flex items-center gap-1.5">
+        <div class="h-5 w-px bg-white/10"></div>
+        <span class="text-[11px] text-white/40 flex items-center gap-2">
           {#if lastUpdated}
             {#if Math.floor((Date.now() - lastUpdated.getTime()) / 1000) < 10}
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
             {/if}
             {getTimeAgo(lastUpdated)}
           {:else}
@@ -480,76 +485,83 @@ onMount(() => {
       </div>
     {/if}
 
-    <!-- Enhanced Featured top markets -->
+        <!-- Enhanced Featured top markets -->
     {#if topMarkets.length && !searchQuery && selectedCategory === 'all'}
-      <div class="mb-10">
-        <div class="mb-4 flex items-center justify-between">
-          <p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/30 flex items-center gap-2">
-            <span class="h-1.5 w-1.5 rounded-full bg-[#00E5BE]"></span>
+      <div class="mb-12">
+        <div class="mb-5 flex items-center justify-between">
+          <p class="text-[11px] font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-[#00E5BE] shadow-[0_0_10px_#00E5BE]"></span>
             Top Markets by Volume
           </p>
-          <span class="text-[9px] text-white/20">click for details · prices auto-update</span>
+          <span class="text-[10px] text-white/30">Click cards for detailed view</span>
         </div>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {#each topMarkets.slice(0, 12) as m, i (m.name)}
             {@const color = coinColor(m.name)}
             {@const isPositive = m.change24h >= 0}
             {@const spark = sparkSvg(m.spark, isPositive)}
             {@const fundingVal = parseFloat(m.funding)}
             <div
-              class="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 cursor-pointer backdrop-blur-md transition-all duration-300 hover:border-[#00E5BE]/30 hover:shadow-[0_8px_32px_rgba(0,229,190,0.15)] hover:-translate-y-1"
-              style="animation:slideUp 0.5s cubic-bezier(.22,1,.36,1) {i*40}ms both"
+              class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 cursor-pointer backdrop-blur-md transition-all duration-500 hover:border-[#00E5BE]/40 hover:shadow-[0_12px_40px_rgba(0,229,190,0.2)] hover:-translate-y-2"
+              style="animation:slideUp 0.6s cubic-bezier(.22,1,.36,1) {i*50}ms both"
               role="button" tabindex="0"
               onclick={() => openMarketDetail(m)}
               onkeydown={(e) => e.key==='Enter' && openMarketDetail(m)}>
 
-              <!-- Glow effect -->
-              <div class="absolute -top-20 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-50"
+              <!-- Top gradient glow -->
+              <div class="absolute -top-24 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full opacity-0 blur-3xl transition-all duration-700 group-hover:opacity-60 group-hover:scale-150"
                 style="background:{color}"></div>
 
+              <!-- Animated border glow -->
+              <div class="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style="background:linear-gradient(135deg,{color}20,transparent 50%);"></div>
+
               <!-- Shimmer effect -->
-              <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/5 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
+              <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 transition-transform duration-1000 group-hover:translate-x-full"></div>
 
               <div class="relative">
-                <div class="mb-3 flex items-start justify-between">
-                  <div class="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-black text-white shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl"
-                    style="background:linear-gradient(135deg,{color},{color}aa);box-shadow:0 4px 20px {color}50">
+                <div class="mb-4 flex items-start justify-between">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-xl text-sm font-black text-white shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl"
+                    style="background:linear-gradient(135deg,{color},{color}88);box-shadow:0 4px 24px {color}60">
                     {m.name.slice(0,1)}
                   </div>
-                  <div class="flex flex-col items-end gap-1">
-                    <div class="flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[9px] font-bold {isPositive?'bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]':'bg-red-500/20 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'}">
-                      <span>{isPositive?'▲':'▼'}</span>
+                  <div class="flex flex-col items-end gap-1.5">
+                    <div class="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm transition-colors {isPositive?'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20':'bg-red-500/15 text-red-400 border border-red-500/20'}">
+                      <span class="text-[8px]">{isPositive?'▲':'▼'}</span>
                       <span>{Math.abs(m.change24h).toFixed(2)}%</span>
                     </div>
-                    <span class="text-[8px] font-bold {fundingVal >= 0 ? 'text-emerald-400/70' : 'text-red-400/70'}">{fmtFunding(m.funding)}/h</span>
+                    <span class="text-[9px] font-semibold {fundingVal >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}">{fmtFunding(m.funding)}/h</span>
                   </div>
                 </div>
 
-                <p class="text-[10px] font-bold uppercase tracking-wider text-white/40">{m.name}-PERP</p>
-                <p class="relative text-xl font-black tracking-tight text-white transition-colors group-hover:text-[#00E5BE]"
+                <p class="text-[11px] font-bold uppercase tracking-wider text-white/50">{m.name}-PERP</p>
+                <p class="relative text-2xl font-black tracking-tight text-white transition-all duration-300 group-hover:text-[#00E5BE] group-hover:scale-105 origin-left"
                   class:text-emerald-400={flashStates[m.name]==='up'}
                   class:text-red-400={flashStates[m.name]==='down'}>
                   ${fmt(m.markPx)}
                 </p>
 
-                <!-- Enhanced sparkline -->
-                <svg viewBox="0 0 100 32" class="mt-2 h-7 w-full opacity-60 transition-opacity group-hover:opacity-100" preserveAspectRatio="none">
+                <!-- Enhanced sparkline with glow -->
+                <svg viewBox="0 0 100 32" class="mt-3 h-8 w-full opacity-50 transition-opacity duration-300 group-hover:opacity-100" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="hl-g-{m.name}" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color={isPositive?'#10b981':'#ef4444'} stop-opacity="0.5"/>
+                      <stop offset="0%" stop-color={isPositive?'#10b981':'#ef4444'} stop-opacity="0.6"/>
                       <stop offset="100%" stop-color={isPositive?'#10b981':'#ef4444'} stop-opacity="0"/>
                     </linearGradient>
                   </defs>
                   <path d={spark.area} fill="url(#hl-g-{m.name})"/>
-                  <path d={spark.line} fill="none" stroke={isPositive?'#10b981':'#ef4444'} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    style="filter: drop-shadow(0 0 2px {isPositive?'#10b981':'#ef4444'});"/>
+                  <path d={spark.line} fill="none" stroke={isPositive?'#10b981':'#ef4444'} stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                    style="filter: drop-shadow(0 0 3px {isPositive?'#10b981':'#ef4444'});"/>
                 </svg>
 
-                <div class="mt-2 flex items-center justify-between">
-                  <p class="text-[9px] text-white/30 font-medium">Vol {fmtVol(m.volume24h)}</p>
-                  <p class="text-[9px] text-white/30 font-medium">{m.maxLeverage}x</p>
+                <div class="mt-3 flex items-center justify-between">
+                  <p class="text-[10px] text-white/40 font-medium">Vol {fmtVol(m.volume24h)}</p>
+                  <p class="text-[10px] text-white/40 font-medium">{m.maxLeverage}x</p>
                 </div>
               </div>
+
+              <!-- Bottom progress bar -->
+              <div class="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-[#00E5BE] to-emerald-400 transition-all duration-500 group-hover:w-full"></div>
             </div>
           {/each}
         </div>
