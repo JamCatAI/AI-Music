@@ -135,13 +135,39 @@
 
 	let recentBlocks = $state([]);
 
+	// Fetch real BTC price from CoinGecko
+	async function fetchBtcData() {
+		try {
+			const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&sparkline=true');
+			if (res.ok) {
+				const data = await res.json();
+				if (data && data[0]) {
+					btcPrice = data[0].current_price;
+					btcChange = data[0].price_change_percentage_24h || 0;
+					marketCap = data[0].market_cap || marketCap;
+					dailyVol = data[0].total_volume || dailyVol;
+					ath = data[0].ath || ath;
+					if (data[0].sparkline_in_7d?.price?.length > 0) {
+						priceHistory = data[0].sparkline_in_7d.price.slice(-120);
+					}
+				}
+			}
+		} catch (e) {
+			console.log('CoinGecko fetch failed:', e.message);
+		}
+	}
+
 	onMount(() => {
 		priceHistory = makePriceHistory();
 		recentBlocks = Array.from({ length: 8 }, (_, i) => makeBlock(blockHeight - i));
+		
+		// Fetch real BTC price
+		fetchBtcData();
+		const priceRefresh = setInterval(fetchBtcData, 60000);
 
 		const tickPrice = setInterval(() => {
-			btcPrice = Math.round(btcPrice * (1 + rand(-0.0006, 0.0007)));
-			btcChange = parseFloat((btcChange + rand(-0.03, 0.03)).toFixed(2));
+			// Only small variations since we fetch real price from API
+			btcPrice = Math.round(btcPrice * (1 + rand(-0.0001, 0.0001)));
 			dailyVol += rand(-1e8, 1.2e8);
 			hashrate = parseFloat((hashrate + rand(-3, 3)).toFixed(1));
 			mempoolTx += randInt(-200, 300);
@@ -152,13 +178,14 @@
 			blockHeight += 1;
 			recentBlocks = [makeBlock(blockHeight), ...recentBlocks.slice(0, 7)];
 			nextHalving -= 1;
-		}, 8000); // ~10min real, 8s demo
+		}, 8000);
 
 		const tickChart = setInterval(() => {
 			priceHistory = [...priceHistory.slice(1), btcPrice + rand(-200, 200)];
 		}, 2500);
 
 		return () => {
+			clearInterval(priceRefresh);
 			clearInterval(tickPrice);
 			clearInterval(tickBlock);
 			clearInterval(tickChart);

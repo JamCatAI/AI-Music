@@ -147,13 +147,39 @@
 
 	let recentBlocks = $state([]);
 
+	// Fetch real ETH price from CoinGecko
+	async function fetchEthData() {
+		try {
+			const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum&sparkline=true');
+			if (res.ok) {
+				const data = await res.json();
+				if (data && data[0]) {
+					ethPrice = data[0].current_price;
+					ethChange = data[0].price_change_percentage_24h || 0;
+					marketCap = data[0].market_cap || marketCap;
+					dailyVol = data[0].total_volume || dailyVol;
+					ath = data[0].ath || ath;
+					if (data[0].sparkline_in_7d?.price?.length > 0) {
+						priceHistory = data[0].sparkline_in_7d.price.slice(-120);
+					}
+				}
+			}
+		} catch (e) {
+			console.log('CoinGecko fetch failed:', e.message);
+		}
+	}
+
 	onMount(() => {
 		priceHistory = makePriceHistory();
 		recentBlocks = Array.from({ length: 8 }, (_, i) => makeBlock(blockNumber - i));
+		
+		// Fetch real ETH price
+		fetchEthData();
+		const priceRefresh = setInterval(fetchEthData, 60000);
 
 		const tickPrice = setInterval(() => {
-			ethPrice = Math.round(ethPrice * (1 + rand(-0.0005, 0.0006)));
-			ethChange = parseFloat((ethChange + rand(-0.02, 0.02)).toFixed(2));
+			// Only small variations since we fetch real price from API
+			ethPrice = Math.round(ethPrice * (1 + rand(-0.0001, 0.0001)));
 			gasPrice = parseFloat(Math.max(3, gasPrice + rand(-1.2, 1.4)).toFixed(1));
 			burnedToday = parseFloat((burnedToday + rand(-0.5, 0.6)).toFixed(1));
 			issuanceNet = parseFloat((issuanceNet + rand(-0.2, 0.2)).toFixed(1));
@@ -162,13 +188,14 @@
 		const tickBlock = setInterval(() => {
 			blockNumber += 1;
 			recentBlocks = [makeBlock(blockNumber), ...recentBlocks.slice(0, 7)];
-		}, 4000); // 12s real → 4s demo
+		}, 4000);
 
 		const tickChart = setInterval(() => {
 			priceHistory = [...priceHistory.slice(1), ethPrice + rand(-15, 15)];
 		}, 2500);
 
 		return () => {
+			clearInterval(priceRefresh);
 			clearInterval(tickPrice);
 			clearInterval(tickBlock);
 			clearInterval(tickChart);
