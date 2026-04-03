@@ -203,9 +203,9 @@ return () => clearInterval(iv);
 <svelte:window onkeydown={handleKeydown} />
 <svelte:head><title>Binance | JamCat</title></svelte:head>
 
-<div class="overflow-hidden border-b border-white/5 bg-[#F0B90B]/10 py-2 backdrop-blur-xl">
-<div class="flex whitespace-nowrap" style="animation:marquee 35s linear infinite">
-{#each [TICKER_TEXT, TICKER_TEXT, TICKER_TEXT] as t}
+<div class="overflow-hidden border-b border-white/5 bg-gradient-to-r from-[#F0B90B]/10 via-[#F0B90B]/5 to-transparent py-2.5 backdrop-blur-xl">
+<div class="flex whitespace-nowrap" style="animation:marquee 30s linear infinite">
+{#each [TICKER_TEXT, TICKER_TEXT] as t}
 <span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em]" style="color:#F0B90B">{t}</span>
 {/each}
 </div>
@@ -228,45 +228,44 @@ return () => clearInterval(iv);
 <div class="relative mx-auto max-w-7xl px-5 py-10 sm:px-8">
 
 <!-- Header -->
-<div class="mb-10 text-center">
-<div class="mb-5 inline-flex items-center gap-4">
-<div class="relative">
-<div class="flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl shadow-[#F0B90B]/30"
- style="background:linear-gradient(135deg,#F0B90B,#d4a017)">
-<!-- Binance logo diamond -->
-<svg class="h-8 w-8" viewBox="0 0 24 24" fill="white">
+<div class="mb-12 text-center">
+<div class="mb-6 inline-flex items-center gap-5">
+<div class="relative group">
+<div class="flex h-20 w-20 items-center justify-center rounded-3xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
+style="background:linear-gradient(135deg,#F0B90B,#d4a017);box-shadow:0 8px 40px rgba(240,185,11,0.4),0 0 80px rgba(240,185,11,0.2),0 0 120px rgba(240,185,11,0.1)">
+<!-- Binance logo -->
+<svg class="h-11 w-11" viewBox="0 0 24 24" fill="white">
 <path d="M12 1.5L7.5 6l1.77 1.77L12 5.04l2.73 2.73L16.5 6 12 1.5zm4.5 4.5l-1.77 1.77L12 10.54 9.27 7.77 7.5 9.54 12 14.04l4.5-4.5-1.5-3.54zM1.5 12l1.77 1.77L6 11.04v1.92l4.5 4.5 1.5-1.5L7.5 11.5v-2.04L1.5 12zm19.23-1.77L19.04 9.46 18 11.04v-2.04l-4.5 4.5 1.5 1.5 4.5-4.5V11.5l-1.5 1.5 1.77 1.77L22.5 12l-1.77-1.77zM12 13.96l-2.73 2.73L7.5 18l4.5 4.5 4.5-4.5-1.77-1.77L12 18.96l-2.73-2.73-1.5 1.5L12 21.54l4.23-4.23-1.5-1.5L12 13.96z"/>
 </svg>
 </div>
-<div class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-emerald-400 {pulse ? 'scale-150' : ''} transition-transform">
-<div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/40"></div>
+<div class="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#060810] {pulse ? 'scale-125' : ''} transition-transform duration-300">
+<div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/50"></div>
 </div>
+<!-- Glow ring -->
+<div class="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#F0B90B] to-amber-400 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-40"></div>
 </div>
 <div class="text-left">
-<h1 class="text-4xl font-black tracking-tighter text-white sm:text-5xl lg:text-6xl" style="text-shadow:0 0 80px rgba(240,185,11,0.3)">Binance</h1>
-<p class="text-[11px] uppercase tracking-[0.3em]" style="color:#F0B90B99">Spot Markets · Live</p>
+<h1 class="text-5xl font-black tracking-tighter text-white sm:text-6xl lg:text-7xl" style="text-shadow:0 0 60px rgba(240,185,11,0.4),0 0 120px rgba(240,185,11,0.2)">Binance</h1>
+<p class="text-[12px] uppercase tracking-[0.4em] mt-2" style="color:#F0B90B99">Spot Markets · Live</p>
 </div>
 </div>
 
-<div class="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-white/[0.04] bg-white/[0.02] px-6 py-3 backdrop-blur-sm">
-<div class="flex items-center gap-2">
-<div class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-<span class="text-[10px] font-bold text-white/30">LIVE</span>
+<div class="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-8 py-5 backdrop-blur-xl"
+style="box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.06),0 0 40px rgba(240,185,11,0.05)">
+<div class="flex items-center gap-2.5">
+<div class="relative">
+<div class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+<div class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40"></div>
 </div>
-<div class="h-3 w-px bg-white/10"></div>
-<span class="text-[10px] font-bold text-white/40">
-<span class="font-black text-white/70">{tickers.length}</span> USDT pairs
+<span class="text-[11px] font-bold text-white/50">LIVE</span>
+</div>
+<div class="h-5 w-px bg-white/10"></div>
+<span class="text-[11px] font-bold text-white/50">
+<span class="font-black text-white">{tickers.length}</span> pairs
 </span>
-<div class="h-3 w-px bg-white/10"></div>
-<span class="text-[10px] text-white/20 flex items-center gap-1">
-{#if lastUpdated}
-{#if Math.floor((Date.now() - lastUpdated.getTime()) / 1000) < 60}
-<span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-{/if}
-{getTimeAgo(lastUpdated)}
-{:else}
-loading…
-{/if}
+<div class="h-5 w-px bg-white/10"></div>
+<span class="text-[11px] font-bold text-white/50">
+Updated <span class="text-white">{getTimeAgo(lastUpdated)}</span>
 </span>
 </div>
 </div>
@@ -348,48 +347,56 @@ Try Again
 
 <!-- Featured Cards -->
 {#if featured.length && !searchQuery}
-<div class="mb-8">
-<div class="mb-3 flex items-center justify-between">
-<p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/20">Featured Pairs</p>
-<span class="text-[9px] text-white/20">24h change · click to copy</span>
+<div class="mb-12">
+<div class="mb-5 flex items-center justify-between">
+<p class="text-[11px] font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-[#F0B90B] shadow-[0_0_10px_#F0B90B]"></span>
+Featured Pairs
+</p>
+<span class="text-[10px] text-white/30">Click to copy price</span>
 </div>
-<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
 {#each featured as coin, i (coin.sym)}
 {@const t = coin.t}
 {@const change = parseFloat(t.priceChangePercent)}
 {@const isPositive = change >= 0}
 {@const spark = sparkSvg(coin.spark, coin.color)}
 <div
-class="group relative overflow-hidden rounded-xl border border-white/[0.05] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-4 text-left backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1 cursor-pointer"
-style="animation:slideUp 0.5s cubic-bezier(.22,1,.36,1) {i * 40}ms both"
-onmouseenter={() => hoveredCard = coin.sym}
-onmouseleave={() => hoveredCard = null}
+class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 text-left backdrop-blur-md transition-all duration-500 hover:border-[#F0B90B]/40 hover:shadow-[0_12px_40px_rgba(240,185,11,0.2)] hover:-translate-y-2 cursor-pointer"
+style="animation:slideUp 0.6s cubic-bezier(.22,1,.36,1) {i * 50}ms both"
 onclick={() => copyToClipboard(t.lastPrice, coin.sym)}
 role="button" tabindex="0"
 onkeydown={(e) => e.key === 'Enter' && copyToClipboard(t.lastPrice, coin.sym)}>
 
-<div class="absolute -top-20 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40"
- style="background:{coin.color}"></div>
+<!-- Top gradient glow -->
+<div class="absolute -top-24 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full opacity-0 blur-3xl transition-all duration-700 group-hover:opacity-60 group-hover:scale-150"
+style="background:{coin.color}"></div>
+
+<!-- Animated border glow -->
+<div class="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+style="background:linear-gradient(135deg,{coin.color}20,transparent 50%);"></div>
+
+<!-- Shimmer effect -->
+<div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 transition-transform duration-1000 group-hover:translate-x-full"></div>
 
 <div class="relative">
-<div class="mb-3 flex items-start justify-between">
-<div class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-black text-white shadow-lg transition-transform duration-300 group-hover:scale-110"
- style="background:linear-gradient(135deg,{coin.color},{coin.color}aa);box-shadow:0 4px 16px {coin.color}40">
+<div class="mb-4 flex items-start justify-between">
+<div class="flex h-12 w-12 items-center justify-center rounded-xl text-sm font-black text-white shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl"
+style="background:linear-gradient(135deg,{coin.color},{coin.color}88);box-shadow:0 4px 24px {coin.color}60">
 {baseSymbol(coin.sym).slice(0,1)}
 </div>
-<div class="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold {isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}">
-<span>{isPositive ? '↑' : '↓'}</span>
+<div class="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm transition-colors {isPositive?'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20':'bg-red-500/15 text-red-400 border border-red-500/20'}">
+<span class="text-[8px]">{isPositive?'▲':'▼'}</span>
 <span>{Math.abs(change).toFixed(2)}%</span>
 </div>
 </div>
 
-<p class="text-[10px] font-bold uppercase tracking-wider text-white/30">{baseSymbol(coin.sym)}</p>
+<p class="text-[11px] font-bold uppercase tracking-wider text-white/50">{baseSymbol(coin.sym)}</p>
 <button
 onclick={(e) => { e.stopPropagation(); copyToClipboard(t.lastPrice, coin.sym); }}
-class="relative text-xl font-black tracking-tight transition-all cursor-pointer hover:scale-105 active:scale-95"
-class:text-emerald-400={flashStates[coin.sym] === 'up'}
-class:text-red-400={flashStates[coin.sym] === 'down'}
-class:text-white={!flashStates[coin.sym]}
+class="relative text-2xl font-black tracking-tight transition-all duration-300 cursor-pointer group-hover:text-[#F0B90B] group-hover:scale-105 origin-left"
+class:text-emerald-400={flashStates[coin.sym]==='up'}
+class:text-red-400={flashStates[coin.sym]==='down'}
 >
 ${fmt(t.lastPrice)}
 {#if flashStates[coin.sym + '_copied']}
@@ -397,19 +404,24 @@ ${fmt(t.lastPrice)}
 {/if}
 </button>
 
-<svg viewBox="0 0 80 32" class="mt-2 h-7 w-full opacity-50 transition-opacity group-hover:opacity-80" preserveAspectRatio="none">
+<!-- Enhanced sparkline with glow -->
+<svg viewBox="0 0 80 32" class="mt-3 h-8 w-full opacity-50 transition-opacity duration-300 group-hover:opacity-100" preserveAspectRatio="none">
 <defs>
 <linearGradient id="g-{coin.sym}" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color={isPositive ? '#10b981' : '#ef4444'} stop-opacity="0.4"/>
-<stop offset="100%" stop-color={isPositive ? '#10b981' : '#ef4444'} stop-opacity="0"/>
+<stop offset="0%" stop-color={isPositive?'#10b981':'#ef4444'} stop-opacity="0.6"/>
+<stop offset="100%" stop-color={isPositive?'#10b981':'#ef4444'} stop-opacity="0"/>
 </linearGradient>
 </defs>
 <path d={spark.area} fill="url(#g-{coin.sym})"/>
-<path d={spark.line} fill="none" stroke={isPositive ? '#10b981' : '#ef4444'} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d={spark.line} fill="none" stroke={isPositive?'#10b981':'#ef4444'} stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+style="filter: drop-shadow(0 0 3px {isPositive?'#10b981':'#ef4444'});"/>
 </svg>
 
-<p class="mt-1 text-[9px] text-white/20">Vol {fmtVol(t.quoteVolume)}</p>
+<p class="mt-3 text-[10px] text-white/40 font-medium">Vol {fmtVol(t.quoteVolume)}</p>
 </div>
+
+<!-- Bottom progress bar -->
+<div class="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-[#F0B90B] to-amber-400 transition-all duration-500 group-hover:w-full"></div>
 </div>
 {/each}
 </div>
