@@ -201,10 +201,10 @@
 <svelte:head><title>Staking | JamCat</title></svelte:head>
 
 <!-- TICKER -->
-<div class="overflow-hidden border-b border-white/5 bg-cyan-500/[0.06] py-2 backdrop-blur-xl">
-	<div class="flex whitespace-nowrap" style="animation:marquee 40s linear infinite">
-		{#each [TICKER, TICKER, TICKER] as t}
-			<span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400/80">{t}</span>
+<div class="overflow-hidden border-b border-white/5 bg-gradient-to-r from-cyan-500/10 via-purple-500/5 to-transparent py-2.5 backdrop-blur-xl">
+	<div class="flex whitespace-nowrap" style="animation:marquee 35s linear infinite">
+		{#each [TICKER, TICKER] as t}
+			<span class="mr-0 text-[10px] font-black uppercase tracking-[0.25em] text-cyan-400/90">{t}</span>
 		{/each}
 	</div>
 </div>
@@ -213,48 +213,61 @@
 
 	<!-- ambient bg -->
 	<div class="pointer-events-none fixed inset-0">
-		<div class="absolute -left-20 -top-32 h-[600px] w-[600px] rounded-full opacity-[0.08] blur-[140px]"
+		<div class="absolute -left-20 -top-32 h-[600px] w-[600px] rounded-full opacity-[0.1] blur-[150px]"
 			 style="background:radial-gradient(circle,#a855f7,transparent 70%)"></div>
-		<div class="absolute -bottom-40 -right-20 h-[500px] w-[500px] rounded-full opacity-[0.06] blur-[120px]"
+		<div class="absolute -bottom-40 -right-20 h-[500px] w-[500px] rounded-full opacity-[0.08] blur-[130px]"
 			 style="background:radial-gradient(circle,#06b6d4,transparent 70%)"></div>
-		<div class="absolute inset-0 opacity-[0.03]"
-			 style="background-image:linear-gradient(rgba(168,85,247,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.2) 1px,transparent 1px);background-size:80px 80px"></div>
+		<div class="absolute left-1/3 top-1/3 h-[400px] w-[400px] rounded-full opacity-[0.05] blur-[100px]"
+			 style="background:radial-gradient(circle,#ec4899,transparent 70%)"></div>
+		<div class="absolute inset-0 opacity-[0.035]"
+			 style="background-image:linear-gradient(rgba(168,85,247,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.3) 1px,transparent 1px);background-size:80px 80px"></div>
 	</div>
 
-	<div class="relative mx-auto max-w-7xl px-5 py-8 sm:px-8">
+	<div class="relative mx-auto max-w-7xl px-5 py-10 sm:px-8">
 
-		<!-- ═══ HEADER + CALCULATOR (combined) ═══ -->
-		<div class="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur-sm">
+		<!-- ═══ HEADER + CALCULATOR ═══ -->
+		<div class="group relative mb-8 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm transition-all duration-500 hover:border-cyan-500/30">
+			<!-- shimmer effect -->
+			<div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 transition-transform duration-1000 group-hover:translate-x-full"></div>
+			
 			<div class="flex flex-wrap items-start gap-8">
 				<!-- left: title + stats -->
 				<div class="min-w-0 flex-1">
-					<div class="mb-3 flex items-center gap-3">
-						<span class="text-2xl">💎</span>
-						<h1 class="bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">Staking</h1>
-						<span class="rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-cyan-300">LIVE</span>
+					<div class="mb-4 flex items-center gap-3">
+						<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-purple-400 to-pink-400 shadow-lg shadow-purple-500/30">
+							<span class="text-2xl">💎</span>
+						</div>
+						<div>
+							<h1 class="bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-4xl font-black tracking-tight text-transparent sm:text-5xl">Staking</h1>
+							<div class="mt-1 flex items-center gap-2">
+								<span class="rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/20 px-2 py-0.5 text-[10px] font-bold text-cyan-300">LIVE</span>
+								<span class="text-[10px] text-white/30">DeFiLlama Data</span>
+							</div>
+						</div>
 					</div>
 					<!-- quick stats -->
-					<div class="flex flex-wrap gap-x-5 gap-y-1">
-						<div>
-							<p class="text-[9px] uppercase tracking-wider text-white/12">Pools</p>
-							<p class="text-sm font-black text-white/60">{stats.count}</p>
-						</div>
-						<div>
-							<p class="text-[9px] uppercase tracking-wider text-white/12">Avg APY</p>
-							<p class="text-sm font-black text-cyan-400">{stats.avgApy.toFixed(1)}%</p>
-						</div>
-						<div>
-							<p class="text-[9px] uppercase tracking-wider text-white/12">Total TVL</p>
-							<p class="text-sm font-black text-white/60">{fmtTvl(stats.totalTvl)}</p>
-						</div>
-						<div>
-							<p class="text-[9px] uppercase tracking-wider text-white/12">Max APY</p>
-							<p class="text-sm font-black" style="color:{apyColor(stats.maxApy)}">{stats.maxApy.toFixed(1)}%</p>
-						</div>
+					<div class="flex flex-wrap gap-4">
+						{#each [
+							{ label: 'Pools', value: stats.count, color: 'text-white/60' },
+							{ label: 'Avg APY', value: stats.avgApy.toFixed(1) + '%', color: 'text-cyan-400' },
+							{ label: 'Total TVL', value: fmtTvl(stats.totalTvl), color: 'text-white/60' },
+							{ label: 'Max APY', value: stats.maxApy.toFixed(1) + '%', color: apyColor(stats.maxApy) }
+						] as stat}
+							<div class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
+								<p class="text-[9px] font-bold uppercase tracking-wider text-white/20">{stat.label}</p>
+								<p class="text-lg font-black {stat.color}">{stat.value}</p>
+							</div>
+						{/each}
 						{#if lastUpdated}
-							<div>
-								<p class="text-[9px] uppercase tracking-wider text-white/12">Updated</p>
-								<p class="text-sm font-black text-white/30">{lastUpdated.toLocaleTimeString()}</p>
+							<div class="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
+								<div class="relative">
+									<div class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.6)]"></div>
+									<div class="absolute inset-0 h-2 w-2 rounded-full bg-cyan-400 animate-ping opacity-40"></div>
+								</div>
+								<div>
+									<p class="text-[9px] font-bold uppercase tracking-wider text-white/20">Updated</p>
+									<p class="text-sm font-bold text-white/40">{lastUpdated.toLocaleTimeString()}</p>
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -262,48 +275,51 @@
 
 				<!-- right: calculator -->
 				<div class="w-full max-w-md">
-					<p class="mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-white/15">Earnings Estimator</p>
+					<p class="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-white/30">
+						<span class="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.6)]"></span>
+						Earnings Estimator
+					</p>
 					<div class="flex flex-wrap gap-3">
 						<div>
-							<label class="mb-0.5 block text-[8px] uppercase tracking-wider text-white/10">Amount</label>
+							<label class="mb-1 block text-[9px] font-bold uppercase tracking-wider text-white/20">Amount</label>
 							<div class="flex items-center gap-0">
-								<span class="rounded-l-lg border border-r-0 border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-[10px] font-bold text-white/20">$</span>
+								<span class="rounded-l-xl border border-r-0 border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[11px] font-bold text-white/30">$</span>
 								<input type="number" bind:value={stakeAmount}
-									class="w-24 rounded-r-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-xs font-black text-white outline-none focus:border-cyan-500/25 transition" />
+									class="w-28 rounded-r-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm font-black text-white outline-none focus:border-cyan-500/30 focus:bg-white/[0.06] transition-all" />
 							</div>
 						</div>
 						<div>
-							<label class="mb-0.5 block text-[8px] uppercase tracking-wider text-white/10">Period</label>
-							<div class="flex gap-0.5">
+							<label class="mb-1 block text-[9px] font-bold uppercase tracking-wider text-white/20">Period</label>
+							<div class="flex gap-1">
 								{#each [{d:30,l:'30d'},{d:90,l:'90d'},{d:365,l:'1y'},{d:730,l:'2y'}] as opt}
 									<button onclick={() => stakeDuration = opt.d}
-										class="rounded-md border px-2 py-1.5 text-[9px] font-bold transition
-											{stakeDuration === opt.d ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400' : 'border-white/[0.04] text-white/15 hover:text-white/30'}">
+										class="rounded-lg border px-3 py-2 text-[10px] font-bold transition-all
+											{stakeDuration === opt.d ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-400' : 'border-white/[0.06] text-white/20 hover:text-white/40 hover:bg-white/[0.04]'}">
 										{opt.l}
 									</button>
-								{/each}
+									{/each}
 							</div>
 						</div>
 						<div>
-							<label class="mb-0.5 block text-[8px] uppercase tracking-wider text-white/10">Compound</label>
-							<div class="flex gap-0.5">
+							<label class="mb-1 block text-[9px] font-bold uppercase tracking-wider text-white/20">Compound</label>
+							<div class="flex gap-1">
 								{#each [{v:1,l:'None'},{v:365,l:'Daily'},{v:52,l:'Weekly'}] as opt}
 									<button onclick={() => compoundFreq = opt.v}
-										class="rounded-md border px-2 py-1.5 text-[9px] font-bold transition
-											{compoundFreq === opt.v ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400' : 'border-white/[0.04] text-white/15 hover:text-white/30'}">
+										class="rounded-lg border px-3 py-2 text-[10px] font-bold transition-all
+											{compoundFreq === opt.v ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-400' : 'border-white/[0.06] text-white/20 hover:text-white/40 hover:bg-white/[0.04]'}">
 										{opt.l}
 									</button>
-								{/each}
+									{/each}
 							</div>
 						</div>
 					</div>
 					<!-- earnings preview -->
-					<div class="mt-3 flex gap-3">
+					<div class="mt-4 flex gap-3">
 						{#each [{apy:5,label:'5% Safe'},{apy:10,label:'10% Mid'},{apy:20,label:'20% Agg'}] as calc}
 							{@const earn = calcEarnings(calc.apy, stakeAmount, stakeDuration, compoundFreq)}
-							<div class="flex-1 rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2 text-center">
-								<p class="text-[8px] uppercase tracking-wider text-white/12">{calc.label}</p>
-								<p class="text-sm font-black text-cyan-400">+${earn.toFixed(0)}</p>
+							<div class="flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-center transition-all hover:border-cyan-500/20 hover:bg-white/[0.05]">
+								<p class="text-[9px] font-bold uppercase tracking-wider text-white/20">{calc.label}</p>
+								<p class="mt-1 text-lg font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]">+${earn.toFixed(0)}</p>
 							</div>
 						{/each}
 					</div>
@@ -454,35 +470,44 @@
 			</div>
 		{/if}
 
-		<!-- ═══ TOP ROWS (only on default filters) ═══ -->
+		<!-- ═══ TOP ROWS ═══ -->
 		{#if !searchQuery && selectedChain === 'all' && selectedCategory === 'all'}
-			<div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+			<div class="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
 				<!-- Top APY -->
 				{#if topByApy.length}
-					<div class="rounded-xl border border-white/[0.06] bg-white/[0.025] p-4">
-						<div class="mb-3 flex items-center gap-2">
-							<span class="text-[10px]">🔥</span>
-							<p class="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">Top Yields</p>
-							<span class="text-[8px] text-white/8">$1M+ TVL</span>
+					<div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-sm transition-all duration-500 hover:border-amber-500/20">
+						<div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 hover:opacity-100 pointer-events-none"></div>
+						<div class="mb-4 flex items-center gap-2">
+							<span class="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-red-500 text-sm shadow-lg shadow-orange-500/20">🔥</span>
+							<p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">Top Yields</p>
+							<span class="rounded-full bg-white/[0.06] px-2 py-0.5 text-[8px] font-bold text-white/20">$1M+ TVL</span>
+							<div class="flex-1"></div>
+							<button onclick={() => setSort('apy')}
+								class="rounded-lg border border-white/[0.06] bg-white/[0.04] px-2 py-1 text-[9px] font-bold text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all">
+								View All →
+							</button>
 						</div>
 						<div class="space-y-2">
 							{#each topByApy as pool, i (pool.pool + 'apy' + i)}
 								{@const color = protocolColor(pool.project)}
 								{@const earn = calcEarnings(pool.apy, stakeAmount, stakeDuration, compoundFreq)}
-								<div class="flex items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-white/[0.03]"
-									 style="animation:slideRight 0.3s ease {i*50}ms both">
-									<span class="w-4 text-[9px] font-black text-white/10">{i + 1}</span>
-									<div class="flex h-7 w-7 items-center justify-center rounded-lg text-[8px] font-black"
-										 style="background:{color}12;color:{color}">
+								<div class="group flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3 transition-all duration-300 hover:border-amber-500/30 hover:bg-white/[0.04]"
+									 style="animation:slideRight 0.35s ease {i*60}ms both">
+									<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-black shadow-lg transition-transform duration-300 group-hover:scale-110"
+										 style="background:{color}20;color:{color};box-shadow:0 2px 8px {color}40">
+										{i + 1}
+									</div>
+									<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[10px] font-black transition-transform duration-300 group-hover:scale-110"
+										 style="background:{color}18;color:{color};box-shadow:0 4px 12px {color}30">
 										{pool.project?.slice(0, 2).toUpperCase()}
 									</div>
 									<div class="min-w-0 flex-1">
-										<p class="truncate text-[10px] font-bold capitalize text-white/40">{pool.project}</p>
-										<p class="truncate text-[8px] text-white/12">{pool.symbol?.slice(0, 18)}</p>
+										<p class="truncate text-[12px] font-bold capitalize text-white/60 group-hover:text-white/80 transition-colors">{pool.project}</p>
+										<p class="truncate text-[9px] text-white/25">{pool.symbol?.slice(0, 18)} · {pool.chain}</p>
 									</div>
 									<div class="text-right">
-										<p class="text-sm font-black" style="color:{apyColor(pool.apy)}">{pool.apy.toFixed(1)}%</p>
-										<p class="text-[8px] text-cyan-400/50">+${earn.toFixed(0)}</p>
+										<p class="text-lg font-black" style="color:{apyColor(pool.apy)}; text-shadow:0 0 20px {apyColor(pool.apy)}40">{pool.apy.toFixed(1)}%</p>
+										<p class="text-[9px] font-bold text-cyan-400/60">+${earn.toFixed(0)}</p>
 									</div>
 								</div>
 							{/each}
@@ -492,30 +517,43 @@
 
 				<!-- Top TVL -->
 				{#if topByTvl.length}
-					<div class="rounded-xl border border-white/[0.06] bg-white/[0.025] p-4">
-						<div class="mb-3 flex items-center gap-2">
-							<span class="text-[10px]">🏛️</span>
-							<p class="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">Largest Pools</p>
-							<span class="text-[8px] text-white/8">by TVL</span>
+					<div class="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-sm transition-all duration-500 hover:border-purple-500/20">
+						<div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 hover:opacity-100 pointer-events-none"></div>
+						<div class="mb-4 flex items-center gap-2">
+							<span class="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-purple-400 to-indigo-500 text-sm shadow-lg shadow-purple-500/20">🏛️</span>
+							<p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">Largest Pools</p>
+							<span class="rounded-full bg-white/[0.06] px-2 py-0.5 text-[8px] font-bold text-white/20">by TVL</span>
+							<div class="flex-1"></div>
+							<button onclick={() => setSort('tvlUsd')}
+								class="rounded-lg border border-white/[0.06] bg-white/[0.04] px-2 py-1 text-[9px] font-bold text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all">
+								View All →
+							</button>
 						</div>
 						<div class="space-y-2">
 							{#each topByTvl as pool, i (pool.pool + 'tvl' + i)}
 								{@const color = protocolColor(pool.project)}
-								{@const risk = riskLevel(pool)}
-								<div class="flex items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-white/[0.03]"
-									 style="animation:slideRight 0.3s ease {i*50}ms both">
-									<span class="w-4 text-[9px] font-black text-white/10">{i + 1}</span>
-									<div class="flex h-7 w-7 items-center justify-center rounded-lg text-[8px] font-black"
-										 style="background:{color}12;color:{color}">
+								<div class="group flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3 transition-all duration-300 hover:border-purple-500/30 hover:bg-white/[0.04]"
+									 style="animation:slideRight 0.35s ease {i*60}ms both">
+									<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-black shadow-lg transition-transform duration-300 group-hover:scale-110"
+										 style="background:{color}20;color:{color};box-shadow:0 2px 8px {color}40">
+										{i + 1}
+									</div>
+									<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[10px] font-black transition-transform duration-300 group-hover:scale-110"
+										 style="background:{color}18;color:{color};box-shadow:0 4px 12px {color}30">
 										{pool.project?.slice(0, 2).toUpperCase()}
 									</div>
 									<div class="min-w-0 flex-1">
-										<p class="truncate text-[10px] font-bold capitalize text-white/40">{pool.project}</p>
-										<p class="truncate text-[8px] text-white/12">{pool.symbol?.slice(0, 18)}</p>
+										<p class="truncate text-[12px] font-bold capitalize text-white/60 group-hover:text-white/80 transition-colors">{pool.project}</p>
+										<p class="truncate text-[9px] text-white/25">{pool.symbol?.slice(0, 18)} · {pool.chain}</p>
 									</div>
-									<p class="text-right text-xs font-black text-white/50">{fmtTvl(pool.tvlUsd)}</p>
-									<span class="rounded px-1 py-0.5 text-[8px] font-bold"
-										  style="background:{apyColor(pool.apy)}12;color:{apyColor(pool.apy)}">{pool.apy.toFixed(1)}%</span>
+									<div class="text-right">
+										<p class="text-sm font-black text-white/70">{fmtTvl(pool.tvlUsd)}</p>
+										<span class="inline-flex items-center gap-1 rounded-lg bg-white/[0.06] px-2 py-0.5 text-[9px] font-bold"
+											  style="color:{apyColor(pool.apy)}">
+											<svg class="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M12 7h-2v-2h2v2zm0 4h-2v6h2v-6zm-1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+											{pool.apy.toFixed(1)}%
+										</span>
+									</div>
 								</div>
 							{/each}
 						</div>
@@ -526,9 +564,9 @@
 
 		<!-- ═══ LOADING ═══ -->
 		{#if loading && !pools.length}
-			<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-				{#each Array(8) as _, i}
-					<div class="h-24 animate-pulse rounded-xl bg-white/[0.02]" style="animation-delay:{i*40}ms"></div>
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				{#each Array.from({length: 8}), i}
+					<div class="h-28 animate-pulse rounded-2xl bg-white/[0.03] border border-white/[0.06]" style="animation-delay:{i*50}ms"></div>
 				{/each}
 			</div>
 		{/if}
@@ -536,8 +574,8 @@
 		<!-- ═══ POOLS ═══ -->
 		{#if filtered.length}
 			{#if view === 'grid'}
-				<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each filtered.slice(0, 48) as pool, i (pool.pool + i)}
+				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					{#each filtered.slice(0, 48) as pool, i (pool.pool)}
 						{@const color = protocolColor(pool.project)}
 						{@const risk = riskLevel(pool)}
 						{@const earn = calcEarnings(pool.apy, stakeAmount, stakeDuration, compoundFreq)}
@@ -547,42 +585,46 @@
 						<div
 							role="button"
 							tabindex="0"
-							class="group relative overflow-hidden rounded-xl border px-4 py-3 text-left transition-all cursor-pointer
-								{isCompared ? 'border-cyan-500/25 bg-cyan-500/[0.05]' : 'border-white/[0.05] bg-white/[0.015] hover:border-white/[0.1] hover:bg-white/[0.03]'}"
-							style="animation:fadeIn 0.2s ease {Math.min(i*10,300)}ms both"
+							class="group relative overflow-hidden rounded-2xl border px-5 py-4 text-left transition-all duration-300 cursor-pointer
+								{isCompared ? 'border-cyan-500/30 bg-cyan-500/[0.06] shadow-[0_0_20px_rgba(6,182,212,0.15)]' : 'border-white/[0.06] bg-white/[0.03] hover:border-cyan-500/20 hover:bg-white/[0.05] hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)]'}"
+							style="animation:fadeIn 0.3s ease {Math.min(i*8,300)}ms both"
 							onclick={() => { if (compareMode) toggleCompare(pool); else expandedPool = expandedPool === pool.pool ? null : pool.pool; }}
-							onkeydown={(e) => { if (e.key === 'Enter') { if (compareMode) toggleCompare(pool); else expandedPool = expandedPool === pool.pool ? null : pool.pool; } }}>
+							onkeydown={(e) => { if (e.key === 'Enter') { if (compareMode) toggleCompare(pool); else expandedPool = expandedPool === pool.pool ? null : pool.pool; } }}
+							aria-label="{pool.project} pool card">
+
+							<!-- hover glow -->
+							<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
 
 							<!-- expanded detail -->
 							{#if expandedPool === pool.pool}
-								<div class="mb-3 space-y-2 border-b border-white/[0.04] pb-3" style="animation:expand 0.2s ease">
-									<div class="flex justify-between text-[9px]">
-										<span class="text-white/12">Category</span>
-										<span class="text-white/30">{pool.category ?? '—'}</span>
+								<div class="relative mb-4 space-y-2 border-b border-white/[0.06] pb-4" style="animation:expand 0.25s ease">
+									<div class="flex justify-between text-[10px]">
+										<span class="text-white/20">Category</span>
+										<span class="text-white/50">{pool.category ?? '—'}</span>
 									</div>
-									<div class="flex justify-between text-[9px]">
-										<span class="text-white/12">Base APY</span>
-										<span class="text-white/30">{(pool.apyBase ?? 0).toFixed(2)}%</span>
+									<div class="flex justify-between text-[10px]">
+										<span class="text-white/20">Base APY</span>
+										<span class="text-white/50">{(pool.apyBase ?? 0).toFixed(2)}%</span>
 									</div>
-									<div class="flex justify-between text-[9px]">
-										<span class="text-white/12">Reward APY</span>
-										<span class="text-white/30">{(pool.apyReward ?? 0).toFixed(2)}%</span>
+									<div class="flex justify-between text-[10px]">
+										<span class="text-white/20">Reward APY</span>
+										<span class="text-white/50">{(pool.apyReward ?? 0).toFixed(2)}%</span>
 									</div>
 									{#if pool.il7d != null}
-										<div class="flex justify-between text-[9px]">
-											<span class="text-white/12">IL 7d</span>
-											<span class="text-red-400/50">{pool.il7d.toFixed(2)}%</span>
+										<div class="flex justify-between text-[10px]">
+											<span class="text-white/20">IL 7d</span>
+											<span class="text-red-400/70">{pool.il7d.toFixed(2)}%</span>
 										</div>
 									{/if}
 									{#if pool.apyBase7d != null}
-										<div class="flex justify-between text-[9px]">
-											<span class="text-white/12">7d Avg APY</span>
-											<span class="text-white/30">{pool.apyBase7d.toFixed(2)}%</span>
+										<div class="flex justify-between text-[10px]">
+											<span class="text-white/20">7d Avg APY</span>
+											<span class="text-white/50">{pool.apyBase7d.toFixed(2)}%</span>
 										</div>
 									{/if}
 									{#if pool.url}
 										<a href={pool.url} target="_blank" rel="noopener"
-											class="mt-1 block rounded-lg border border-cyan-500/15 bg-cyan-500/5 py-1.5 text-center text-[9px] font-bold text-cyan-400 hover:bg-cyan-500/10 transition">
+											class="mt-2 block rounded-xl border border-cyan-500/20 bg-cyan-500/10 py-2 text-center text-[10px] font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all">
 											Visit Protocol ↗
 										</a>
 									{/if}
@@ -590,42 +632,42 @@
 							{/if}
 
 							<!-- top row -->
-							<div class="flex items-start gap-2.5">
-								<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black transition-transform group-hover:scale-105"
-									 style="background:{color}10;color:{color}">
+							<div class="relative flex items-start gap-3">
+								<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[11px] font-black shadow-lg transition-all duration-300 group-hover:scale-110"
+									 style="background:{color}20;color:{color};box-shadow:0 4px 20px {color}30">
 									{pool.project?.slice(0, 2)?.toUpperCase() ?? '??'}
 								</div>
 								<div class="min-w-0 flex-1">
 									<div class="flex items-center gap-1.5">
-										<p class="truncate text-[10px] font-bold capitalize text-white/50">{pool.project}</p>
-										<span class="shrink-0 rounded px-1 py-0.5 text-[7px] font-bold"
-											  style="background:{risk.color}10;color:{risk.color}">{risk.label}</span>
+										<p class="truncate text-[12px] font-bold capitalize text-white/60 group-hover:text-white/80 transition-colors">{pool.project}</p>
+										<span class="shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold"
+											  style="background:{risk.color}15;color:{risk.color}">{risk.label}</span>
 									</div>
-									<p class="truncate text-[8px] text-white/12">{pool.symbol} · {pool.chain}</p>
+									<p class="truncate text-[10px] text-white/25">{pool.symbol} · {pool.chain}</p>
 								</div>
 								<!-- fav btn -->
 								<button onclick={(e) => { e.stopPropagation(); toggleFav(pool.pool); }}
-									class="shrink-0 text-[11px] transition {isFav ? 'text-amber-400' : 'text-white/8 hover:text-white/20'}">
+									class="shrink-0 rounded-lg p-1 text-[13px] transition-all duration-200 hover:bg-white/[0.06] {isFav ? 'text-amber-400' : 'text-white/10 hover:text-amber-400/50'}">
 									{isFav ? '★' : '☆'}
 								</button>
 							</div>
 
 							<!-- bottom row -->
-							<div class="mt-2 flex items-end justify-between">
+							<div class="relative mt-3 flex items-end justify-between">
 								<div>
-									<p class="text-[8px] uppercase tracking-wider text-white/8">APY</p>
-									<p class="text-lg font-black leading-tight" style="color:{apyColor(pool.apy)}">{pool.apy.toFixed(2)}%</p>
+									<p class="text-[9px] font-bold uppercase tracking-wider text-white/15">APY</p>
+									<p class="text-xl font-black leading-tight" style="color:{apyColor(pool.apy)}; text-shadow:0 0 20px {apyColor(pool.apy)}50">{pool.apy.toFixed(2)}%</p>
 								</div>
 								<div class="text-right">
-									<p class="text-[8px] uppercase tracking-wider text-white/8">TVL</p>
-									<p class="text-xs font-bold text-white/30">{fmtTvl(pool.tvlUsd)}</p>
+									<p class="text-[9px] font-bold uppercase tracking-wider text-white/15">TVL</p>
+									<p class="text-sm font-bold text-white/40">{fmtTvl(pool.tvlUsd)}</p>
 								</div>
 								<div class="text-right">
-									<p class="text-[8px] uppercase tracking-wider text-white/8">{stakeDuration}d</p>
-									<p class="text-xs font-bold text-cyan-400/60">+${earn.toFixed(0)}</p>
+									<p class="text-[9px] font-bold uppercase tracking-wider text-white/15">{stakeDuration}d Earn</p>
+									<p class="text-sm font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]">+${earn.toFixed(0)}</p>
 								</div>
-								<svg viewBox="0 0 60 16" class="h-4 w-12 opacity-25 group-hover:opacity-50 transition-opacity" preserveAspectRatio="none">
-									<path d={sparkLine(spark)} fill="none" stroke={color} stroke-width="1.5" stroke-linecap="round"/>
+								<svg viewBox="0 0 60 16" class="h-5 w-14 opacity-30 group-hover:opacity-70 transition-opacity duration-300" preserveAspectRatio="none">
+									<path d={sparkLine(spark)} fill="none" stroke={color} stroke-width="2" stroke-linecap="round"/>
 								</svg>
 							</div>
 						</div>
