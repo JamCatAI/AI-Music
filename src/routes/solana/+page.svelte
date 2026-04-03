@@ -17,12 +17,37 @@
 	let epoch       = $state(742);
 	let epochPct    = $state(67.4);
 	let validators  = $state(1_847);
+	
+	// Live price data from CoinGecko
 	let solPrice    = $state(185.42);
 	let solChange   = $state(2.34);
 	let marketCap   = $state(85_200_000_000);
-	let tvl         = $state(8_420_000_000);
 	let dailyVol    = $state(3_100_000_000);
+	let tvl         = $state(8_420_000_000);
 	let activeWallets = $state(2_340_000);
+
+	// Fetch real SOL price from CoinGecko
+	async function fetchSolData() {
+		try {
+			const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=solana&sparkline=true');
+			if (res.ok) {
+				const data = await res.json();
+				if (data && data[0]) {
+					solPrice = data[0].current_price;
+					solChange = data[0].price_change_percentage_24h || 0;
+					marketCap = data[0].market_cap || marketCap;
+					dailyVol = data[0].total_volume || dailyVol;
+					// Update price history with real sparkline data if available
+					if (data[0].sparkline_in_7d?.price?.length > 0) {
+						const sparkPrices = data[0].sparkline_in_7d.price;
+						priceHistory = sparkPrices.slice(-96); // Last 96 points (roughly 1 day)
+					}
+				}
+			}
+		} catch (e) {
+			console.log('CoinGecko fetch failed, using fallback:', e.message);
+		}
+	}
 
 	// ── Price chart ───────────────────────────────────────────────────────────────
 	const CHART_W = 600, CHART_H = 120;
@@ -35,7 +60,7 @@
 			p += rand(-3, 3.2);
 			pts.push(Math.max(100, p));
 		}
-		pts.push(185.42);
+		pts.push(solPrice);
 		return pts;
 	}
 
@@ -133,13 +158,19 @@
 	onMount(() => {
 		priceHistory = makePriceHistory();
 		txFeed = Array.from({ length: 18 }, makeTx);
+		
+		// Fetch real SOL price from CoinGecko
+		fetchSolData();
+		
+		// Refresh price every 60 seconds
+		const priceRefresh = setInterval(fetchSolData, 60000);
 
 		const tickNet = setInterval(() => {
 			tps = randInt(3200, 6800);
 			slot += randInt(1, 3);
 			epochPct = Math.min(100, epochPct + 0.01);
-			solPrice = parseFloat((solPrice * (1 + rand(-0.0008, 0.0010))).toFixed(2));
-			solChange = parseFloat((solChange + rand(-0.05, 0.05)).toFixed(2));
+			// Only small random variations since we fetch real price from API
+			solPrice = parseFloat((solPrice * (1 + rand(-0.0001, 0.0001))).toFixed(2));
 			activeWallets = randInt(2_200_000, 2_500_000);
 		}, 1200);
 
@@ -152,6 +183,7 @@
 		}, 3000);
 
 		return () => {
+			clearInterval(priceRefresh);
 			clearInterval(tickNet);
 			clearInterval(tickTx);
 			clearInterval(tickChart);
