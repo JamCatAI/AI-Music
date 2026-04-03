@@ -9,65 +9,61 @@
 
 	// ── Navigation Data ──
 	const PRIMARY = [
-		{ label: 'NFT',       emoji: '🎵', href: '/drops',     category: 'Platform' },
 		{ label: 'Jam.fun',   emoji: '🚀', href: '/jam',       category: 'Platform' },
-		{ label: 'Play',      emoji: '🎮', href: '/play',      category: 'Entertainment' },
-		{ label: 'Swap',      emoji: '🔄', href: '/swap',      category: 'Trading' },
+		{ label: 'Swap',      emoji: '🔄', href: '/swap',      category: 'DeFi' },
+		{ label: 'Portfolio', emoji: '💼', href: '/portfolio', category: 'Account' },
 		{ label: 'CoinGecko', emoji: '🦎', href: '/coingecko', category: 'Market' },
 		{ label: 'Coinbase',  emoji: '🔵', href: '/coinbase',  category: 'Market' },
-		{ label: 'Portfolio', emoji: '💼', href: '/portfolio', category: 'Account' },
+		{ label: 'Binance',   emoji: '🟡', href: '/binance',   category: 'Market', highlight: true, badge: 'TOP' },
+		{ label: 'Hyperliquid', emoji: '🟢', href: '/hyperliquid', category: 'Market', highlight: true, badge: 'HOT' },
 	];
 
 	const SECONDARY = [
 		{ label: 'Staking',    emoji: '💎', href: '/staking',    category: 'DeFi' },
 		{ label: 'DEX',        emoji: '📊', href: '/dex',        category: 'DeFi' },
+		{ label: 'Perps',      emoji: '📈', href: '/perps',      category: 'DeFi' },
+		{ label: 'Predict',    emoji: '🔮', href: '/predict',    category: 'DeFi' },
 		{ label: 'AI',         emoji: '🧠', href: '/ai',         category: 'Tech' },
+		{ label: 'LLM',        emoji: '💬', href: '/llm',        category: 'Tech' },
+		{ label: 'x402',       emoji: '🤖', href: '/x402',       category: 'Tech', highlight: true, badge: 'NEW' },
+		{ label: 'OpenClaw',   emoji: '⚡', href: '/openclaw',   category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'Airdrop',    emoji: '🪂', href: '/airdrop',    category: 'Platform' },
-		{ label: 'Memes',      emoji: '🤣', href: '/memes',      category: 'Entertainment' },
-		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Entertainment' },
-		{ label: 'Forbes',     emoji: '🔴', href: '/forbes',     category: 'Market' },
-		{ label: 'Binance',    emoji: '🟡', href: '/binance',    category: 'Market' },
-		{ label: 'Hyperliquid',emoji: '🟢', href: '/hyperliquid',category: 'Market' },
-		{ label: 'Rewards',    emoji: '🎁', href: '/rewards',    category: 'DeFi' },
-		{ label: 'Analytics',  emoji: '📈', href: '/analytics', category: 'Market' },
-		{ label: 'Bridge',     emoji: '🌉', href: '/bridge',     category: 'DeFi' },
-		{ label: 'Games',      emoji: '🎲', href: '/games',      category: 'Entertainment' },
-		{ label: 'Wallet',     emoji: '👛', href: '/wallet',     category: 'Account' },
+		{ label: 'Memes',      emoji: '🤣', href: '/memes',      category: 'Fun' },
+		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Fun' },
+		{ label: 'Play',       emoji: '🎮', href: '/play',       category: 'Fun' },
+		{ label: 'Games',      emoji: '🎲', href: '/games',      category: 'Fun' },
+		{ label: 'NFT',        emoji: '🎵', href: '/drops',      category: 'Platform' },
 	];
 
 	const MORE_GROUPS = [
 		{
-			label: 'Tech',
-			color: 'from-emerald-500/20 to-cyan-500/20',
-			icon: '🧬',
+			label: 'Chains',
+			color: 'from-violet-500/20 to-purple-500/20',
+			icon: '⛓️',
 			items: [
-				{ label: 'LLM',       emoji: '💬', href: '/llm'       },
-				{ label: 'GPU',       emoji: '🖥️', href: '/gpu'       },
-				{ label: 'Subagents', emoji: '🧬', href: '/subagents' },
-				{ label: 'NVIDIA',    emoji: '�', href: '/nvidia'    },
-				{ label: 'x402',      emoji: '🤖', href: '/x402'      },
-				{ label: 'OpenClaw',  emoji: '�', href: '/openclaw'  },
+				{ label: 'Solana',    emoji: '◎',  href: '/solana' },
+				{ label: 'Bitcoin',   emoji: '₿',  href: '/bitcoin' },
+				{ label: 'Ethereum',  emoji: 'Ξ',  href: '/ethereum' },
+				{ label: 'Avalanche', emoji: '▲',  href: '/avax' },
+				{ label: 'Cardano',   emoji: '₳',  href: '/cardano' },
 			]
 		},
 		{
-			label: 'Trading',
-			color: 'from-amber-500/20 to-orange-500/20',
-			icon: '📈',
+			label: 'More',
+			color: 'from-emerald-500/20 to-cyan-500/20',
+			icon: '✨',
 			items: [
-				{ label: 'Perps',   emoji: '📊', href: '/perps'   },
-				{ label: 'Predict', emoji: '🔮', href: '/predict' },
-				{ label: 'Alpha',   emoji: '📡', href: '/alpha'   },
-				{ label: 'Solana',   emoji: '◎',  href: '/solana'   },
-				{ label: 'Bitcoin',  emoji: '₿',  href: '/bitcoin'  },
-				{ label: 'Ethereum', emoji: 'Ξ',  href: '/ethereum' },
-				{ label: 'Avalanche', emoji: '▲',  href: '/avax'    },
-				{ label: 'Cardano',   emoji: '₳',  href: '/cardano' },
+				{ label: 'Rewards',   emoji: '🎁', href: '/rewards' },
+				{ label: 'Bridge',    emoji: '🌉', href: '/bridge' },
+				{ label: 'Analytics', emoji: '📈', href: '/analytics' },
+				{ label: 'Forbes',    emoji: '🔴', href: '/forbes' },
+				{ label: 'GPU',       emoji: '🖥️', href: '/gpu' },
+				{ label: 'Subagents', emoji: '🧬', href: '/subagents', highlight: true, badge: 'NEW' },
 			]
 		},
 	];
 
 	const MORE_ITEMS = MORE_GROUPS.flatMap(g => g.items);
-
 	const ALL_NAV_ITEMS = [...PRIMARY, ...SECONDARY, ...MORE_ITEMS];
 
 	// ── State ──
@@ -88,8 +84,7 @@
 		searchQuery.trim() === ''
 			? ALL_NAV_ITEMS
 			: ALL_NAV_ITEMS.filter(item =>
-				item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				item.category.toLowerCase().includes(searchQuery.toLowerCase())
+				item.label.toLowerCase().includes(searchQuery.toLowerCase())
 			)
 	);
 
@@ -99,21 +94,16 @@
 	}
 
 	function handleKeydown(e) {
-		// Cmd/Ctrl + K to open search
 		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
 			e.preventDefault();
 			searchOpen = true;
 			tick().then(() => searchInputEl?.focus());
 		}
-
-		// Escape to close modals
 		if (e.key === 'Escape') {
 			searchOpen = false;
 			mobileMenuOpen = false;
 			moreOpen = false;
 		}
-
-		// Search navigation
 		if (searchOpen) {
 			if (e.key === 'ArrowDown') {
 				e.preventDefault();
@@ -139,10 +129,6 @@
 			secondaryVisible = true;
 		}
 		lastScrollY = currentScrollY;
-	}
-
-	function selectItem(index) {
-		selectedIndex = index;
 	}
 
 	onMount(() => {
@@ -178,11 +164,14 @@
 					<a href={tab.href}
 						class="group relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-[12px] font-semibold transition-all duration-200
 							{active
-							? 'bg-white/[0.08] text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-							: 'text-white/50 hover:bg-white/[0.04] hover:text-white/90'}">
+							? tab.highlight ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/[0.08] text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+							: tab.highlight ? 'text-amber-400 hover:bg-amber-500/15 hover:text-amber-300' : 'text-white/50 hover:bg-white/[0.04] hover:text-white/90'}">
 						<span class="text-[13px] leading-none transition-transform duration-200 group-hover:scale-110">{tab.emoji}</span>
 						<span>{tab.label}</span>
-						{#if active}
+						{#if tab.badge}
+							<span class="ml-1 flex h-4 items-center justify-center rounded bg-amber-500/20 px-1.5 text-[8px] font-black text-amber-400">{tab.badge}</span>
+						{/if}
+						{#if active && !tab.highlight}
 							<span class="absolute inset-x-3 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-transparent via-white/60 to-transparent"></span>
 						{/if}
 					</a>
@@ -212,14 +201,14 @@
 					<!-- More Dropdown -->
 					{#if moreOpen}
 						<div
-							class="absolute right-0 top-[calc(100%+12px)] w-80 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12]/98 shadow-2xl shadow-black/80 backdrop-blur-xl"
+							class="absolute right-0 top-[calc(100%+12px)] w-72 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12]/98 shadow-2xl shadow-black/80 backdrop-blur-xl"
 							data-more
 							in:fly={{ y: -8, duration: 200, easing: cubicOut }}
 							out:fade={{ duration: 100 }}>
 
 							<div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-							<div class="p-1">
+							<div class="p-2">
 								<!-- Header -->
 								<div class="mb-2 flex items-center justify-between px-3 py-2">
 									<span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-white/40">
@@ -311,14 +300,16 @@
 			<div class="flex items-center gap-2 md:hidden">
 				<button
 					onclick={() => { searchOpen = true; tick().then(() => searchInputEl?.focus()); }}
-					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]">
+					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]"
+					aria-label="Search">
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
 					</svg>
 				</button>
 				<button
 					onclick={() => mobileMenuOpen = !mobileMenuOpen}
-					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]">
+					class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.02] text-white/50 transition-colors hover:bg-white/[0.04]"
+					aria-label="Menu">
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						{#if mobileMenuOpen}
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -338,10 +329,13 @@
 					<a href={tab.href}
 						class="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200
 							{active
-							? 'bg-white/[0.06] text-white'
-							: 'text-white/40 hover:bg-white/[0.03] hover:text-white/80'}">
+							? tab.highlight ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30' : 'bg-white/[0.06] text-white'
+							: tab.highlight ? 'text-pink-400 hover:bg-pink-500/15 hover:text-pink-300' : 'text-white/40 hover:bg-white/[0.03] hover:text-white/80'}">
 						<span class="text-[12px] transition-transform duration-200 group-hover:scale-110">{tab.emoji}</span>
 						<span>{tab.label}</span>
+						{#if tab.badge}
+							<span class="ml-1 flex h-3.5 items-center justify-center rounded bg-pink-500/20 px-1 text-[7px] font-black text-pink-400">{tab.badge}</span>
+						{/if}
 					</a>
 				{/each}
 			</div>
@@ -391,7 +385,7 @@
 							<a
 								href={item.href}
 								onclick={() => searchOpen = false}
-								onmouseenter={() => selectItem(i)}
+								onmouseenter={() => selectedIndex = i}
 								class="group mx-2 flex items-center justify-between rounded-xl px-3 py-3 text-[13px] transition-all duration-150
 									{selectedIndex === i ? 'bg-white/[0.08] text-white' : 'text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
 								<div class="flex items-center gap-3">
@@ -400,7 +394,6 @@
 									</span>
 									<div class="flex flex-col">
 										<span class="font-medium">{item.label}</span>
-										<span class="text-[10px] text-white/30">{item.category}</span>
 									</div>
 								</div>
 								{#if $page.url.pathname === item.href}
