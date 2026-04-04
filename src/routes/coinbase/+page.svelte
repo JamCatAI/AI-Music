@@ -19,6 +19,15 @@ let mouseX = $state(0);
 let mouseY = $state(0);
 let flashStates = $state({});
 let searchInputRef = $state(null);
+let favorites = $state(new Set());
+let compareMode = $state(false);
+let compareList = $state([]);
+let tooltip = $state({ show: false, text: '', x: 0, y: 0 });
+let showFavoritesOnly = $state(false);
+let priceAlertThreshold = $state(5);
+let showToast = $state(null);
+let cardRefs = $state({});
+let focusedIndex = $state(-1);
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY'];
 const FEATURED = ['BTC', 'ETH', 'SOL', 'DOGE', 'XRP', 'ADA', 'AVAX', 'DOT', 'LINK', 'MATIC', 'UNI', 'ATOM', 'ARB', 'OP', 'NEAR', 'APT', 'SUI', 'SEI'];
@@ -33,6 +42,7 @@ const CATEGORIES = [
 ];
 const SORT_OPTIONS = [
 { key: 'featured', label: '⭐ Featured' },
+{ key: 'favorites', label: '💛 Favorites First' },
 { key: 'price-desc', label: 'Price: High → Low' },
 { key: 'price-asc', label: 'Price: Low → High' },
 { key: 'change-desc', label: '24h: Gainers First' },
@@ -164,6 +174,7 @@ let result = Object.entries(rates)
 .filter(([sym]) => sym !== 'USD')
 .filter(([sym]) => {
 if (searchQuery) return sym.toLowerCase().includes(searchQuery.toLowerCase());
+if (showFavoritesOnly && !favorites.has(sym)) return false;
 if (selectedCategory === 'all') return true;
 const cat = CATEGORIES.find(c => c.key === selectedCategory);
 if (cat?.filter === 'gainers') return coinInfo(sym).change24h > 0;
@@ -186,6 +197,13 @@ result.sort((a, b) => coinInfo(a[0]).change24h - coinInfo(b[0]).change24h);
 break;
 case 'name':
 result.sort((a, b) => a[0].localeCompare(b[0]));
+break;
+case 'favorites':
+result.sort((a, b) => {
+const aFav = favorites.has(a[0]) ? 1 : 0;
+const bFav = favorites.has(b[0]) ? 1 : 0;
+return bFav - aFav;
+});
 break;
 default:
 result.sort((a, b) => {
@@ -227,6 +245,28 @@ if (e.key === 'Escape' && searchQuery) {
 searchQuery = '';
 searchInputRef?.blur();
 }
+if (e.key === 'f' && document.activeElement !== searchInputRef && focusedIndex >= 0) {
+e.preventDefault();
+const item = filtered[focusedIndex];
+if (item) toggleFavorite(item[0]);
+}
+if (e.key === 'c' && document.activeElement !== searchInputRef) {
+e.preventDefault();
+compareMode = !compareMode;
+if (!compareMode) compareList = [];
+}
+if (e.key === 'w' && document.activeElement !== searchInputRef) {
+e.preventDefault();
+showFavoritesOnly = !showFavoritesOnly;
+}
+if (e.key === 'ArrowDown' && document.activeElement !== searchInputRef && filtered.length > 0) {
+e.preventDefault();
+focusedIndex = Math.min(focusedIndex + 1, filtered.length - 1);
+}
+if (e.key === 'ArrowUp' && document.activeElement !== searchInputRef && filtered.length > 0) {
+e.preventDefault();
+focusedIndex = Math.max(focusedIndex - 1, 0);
+}
 }
 
 function getTimeAgo(date) {
@@ -236,6 +276,48 @@ if (secs < 10) return 'just now';
 if (secs < 60) return `${secs}s ago`;
 if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
 return `${Math.floor(secs / 3600)}h ago`;
+}
+
+function toggleFavorite(sym, e) {
+e?.stopPropagation();
+const newFavorites = new Set(favorites);
+if (newFavorites.has(sym)) {
+newFavorites.delete(sym);
+showToast = { type: 'info', message: `${sym} removed from watchlist` };
+} else {
+newFavorites.add(sym);
+showToast = { type: 'success', message: `${sym} added to watchlist` };
+}
+favorites = newFavorites;
+if (typeof localStorage !== 'undefined') {
+localStorage.setItem('coinbase_favorites', JSON.stringify([...favorites]));
+}
+setTimeout(() => showToast = null, 2000);
+}
+
+function toggleCompare(sym, e) {
+e?.stopPropagation();
+if (compareList.includes(sym)) {
+compareList = compareList.filter(s => s !== sym);
+} else if (compareList.length < 4) {
+compareList = [...compareList, sym];
+} else {
+showToast = { type: 'warning', message: 'Maximum 4 coins for comparison' };
+setTimeout(() => showToast = null, 2000);
+}
+}
+
+function showTooltip(text, e) {
+tooltip = { show: true, text, x: e.clientX, y: e.clientY - 30 };
+}
+
+function hideTooltip() {
+tooltip = { ...tooltip, show: false };
+}
+
+function showToastMessage(message, type = 'info') {
+showToast = { type, message };
+setTimeout(() => showToast = null, 2500);
 }
 
 const TICKER = '🔵 COINBASE · EXCHANGE RATES · BTC · ETH · SOL · LIVE CRYPTO PRICES · REAL-TIME RATES · DIGITAL ASSETS · BLOCKCHAIN · WEB3 · DEFI · ';
@@ -248,6 +330,10 @@ mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 10;
 }
 
 onMount(() => {
+if (typeof localStorage !== 'undefined') {
+const saved = localStorage.getItem('coinbase_favorites');
+if (saved) favorites = new Set(JSON.parse(saved));
+}
 fetchRates();
 const iv = setInterval(fetchRates, 600_000);
 return () => { clearInterval(iv); };
@@ -385,6 +471,26 @@ class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
 {view === 'list' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}">☰</button>
 </div>
 
+<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
+class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
+{showFavoritesOnly ? 'border-yellow-500/40 bg-yellow-500/15 text-yellow-400' : 'border-white/[0.06] bg-white/[0.02] text-white/50 hover:text-white/70'}">
+<span class="text-sm">{showFavoritesOnly ? '★' : '☆'}</span>
+<span class="hidden lg:inline">Watchlist</span>
+{#if favorites.size > 0}
+<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
+{/if}
+</button>
+
+<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
+class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
+{compareMode ? 'border-[#0052ff]/40 bg-[#0052ff]/15 text-[#0052ff]' : 'border-white/[0.06] bg-white/[0.02] text-white/50 hover:text-white/70'}">
+<span>⚖️</span>
+<span class="hidden lg:inline">Compare</span>
+{#if compareList.length > 0}
+<span class="ml-1 rounded-full bg-[#0052ff]/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
+{/if}
+</button>
+
 <button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] font-bold text-white/60 transition-all hover:border-white/10 sm:hidden">
 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
@@ -425,12 +531,18 @@ Try Again
 {@const spark = sparkSvg(coin.spark, coin.info.color)}
 {@const change = coin.info.change24h}
 {@const isPositive = change >= 0}
-<button
-class="group relative overflow-hidden rounded-xl border border-white/[0.05] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-4 text-left backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1"
+{@const isFavorite = favorites.has(coin.sym)}
+{@const isInCompare = compareList.includes(coin.sym)}
+{@const isBigMover = Math.abs(change) >= priceAlertThreshold}
+<div
+class="group relative overflow-hidden rounded-xl border border-white/[0.05] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-4 text-left backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1 cursor-pointer {isFavorite ? 'ring-1 ring-yellow-500/30' : ''} {focusedIndex === i ? 'ring-2 ring-[#0052ff]/50' : ''}"
 style="animation:slideUp 0.5s cubic-bezier(.22,1,.36,1) {i * 40}ms both"
 onmouseenter={() => hoveredCard = coin.sym}
 onmouseleave={() => hoveredCard = null}
-onclick={() => flipCard = flipCard === coin.sym ? null : coin.sym}>
+onclick={() => { if (compareMode) { toggleCompare(coin.sym); } else { flipCard = flipCard === coin.sym ? null : coin.sym; } }}
+role="button"
+tabindex="0"
+aria-label="{coin.info.name} price: {currSym()}{fmt(coin.converted)}">
 
 <div class="absolute -top-20 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40"
  style="background:{coin.info.color}"></div>
@@ -441,10 +553,38 @@ onclick={() => flipCard = flipCard === coin.sym ? null : coin.sym}>
  style="background:linear-gradient(135deg,{coin.info.color},{coin.info.color}aa);box-shadow:0 4px 16px {coin.info.color}40">
 {coin.sym[0]}
 </div>
+<div class="flex flex-col items-end gap-1.5">
+{#if isBigMover}
+<div class="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold {isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'} animate-pulse"
+ onmouseenter={(e) => showTooltip(Math.abs(change).toFixed(1) + '% 24h change', e)}
+ onmouseleave={hideTooltip}>
+<span>{isPositive ? '🔥' : '❄️'}</span>
+</div>
+{/if}
 <div class="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold {isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}">
 <span>{isPositive ? '↑' : '↓'}</span>
 <span>{Math.abs(change).toFixed(1)}%</span>
 </div>
+</div>
+</div>
+
+<div class="absolute right-0 top-10 flex flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+<button
+onclick={(e) => toggleFavorite(coin.sym, e)}
+class="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-sm transition-all hover:bg-white/10 hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/30'}"
+aria-label={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}
+onmouseenter={(e) => showTooltip(isFavorite ? 'Remove from watchlist (f)' : 'Add to watchlist (f)', e)}
+onmouseleave={hideTooltip}>
+{isFavorite ? '★' : '☆'}
+</button>
+{#if compareMode}
+<button
+onclick={(e) => { e.stopPropagation(); toggleCompare(coin.sym); }}
+class="flex h-7 w-7 items-center justify-center rounded-full text-sm transition-all {isInCompare ? 'bg-[#0052ff] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}"
+aria-label={isInCompare ? 'Remove from comparison' : 'Add to comparison'}>
+{isInCompare ? '✓' : '+'}
+</button>
+{/if}
 </div>
 
 {#if flipCard === coin.sym}
@@ -489,7 +629,7 @@ class:text-white={!flashStates[coin.sym]}
 </svg>
 {/if}
 </div>
-</button>
+</div>
 {/each}
 </div>
 </div>
@@ -524,8 +664,12 @@ class:text-white={!flashStates[coin.sym]}
 {@const featured = FEATURED.includes(sym)}
 {@const change = info.change24h}
 {@const isPositive = change >= 0}
-<div class="group relative overflow-hidden rounded-xl border border-white/[0.04] bg-white/[0.02] p-3 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.10] hover:bg-white/[0.04] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5"
- style="animation:fadeIn 0.3s ease {Math.min(i * 10, 400)}ms both">
+{@const isFavorite = favorites.has(sym)}
+{@const isInCompare = compareList.includes(sym)}
+{@const isFocused = focusedIndex === i + featuredRates.length}
+<div class="group relative overflow-hidden rounded-xl border border-white/[0.04] bg-white/[0.02] p-3 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.10] hover:bg-white/[0.04] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 {isFavorite ? 'ring-1 ring-yellow-500/20' : ''} {isFocused ? 'ring-2 ring-[#0052ff]/50' : ''}"
+ style="animation:fadeIn 0.3s ease {Math.min(i * 10, 400)}ms both"
+ aria-label="{info.name} price: {currSym()}{fmt(convertRate(usdRate))}">
 <div class="flex items-center gap-2.5">
 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black transition-transform group-hover:scale-110"
  style="background:{info.color}20;color:{info.color}">
@@ -539,7 +683,22 @@ class:text-white={!flashStates[coin.sym]}
 <span class="h-1 w-1 rounded-full" style="background:{info.color}"></span>
 {/if}
 </div>
+<div class="flex items-center gap-1">
+<button
+onclick={() => toggleFavorite(sym)}
+class="text-[10px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/20 hover:text-white/40'}"
+aria-label={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}>
+{isFavorite ? '★' : '☆'}
+</button>
+{#if compareMode}
+<button
+onclick={() => toggleCompare(sym)}
+class="text-[10px] transition-all {isInCompare ? 'text-[#0052ff]' : 'text-white/20 hover:text-white/40'}">
+{isInCompare ? '✓' : '+'}
+</button>
+{/if}
 <span class="text-[9px] font-bold {isPositive ? 'text-emerald-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</span>
+</div>
 </div>
 <button
 onclick={() => copyToClipboard(fmt(convertRate(usdRate)), sym)}
@@ -562,15 +721,18 @@ class:text-white={!flashStates[sym]}
 </div>
 {:else}
 <div class="overflow-hidden rounded-2xl border border-white/[0.04] bg-white/[0.01] backdrop-blur-sm">
-<div class="grid grid-cols-[3rem_1fr_10rem_8rem] items-center gap-2 border-b border-white/[0.04] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-white/12">
+<div class="grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.04] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-white/12">
 <span>#</span>
 <span>Asset</span>
 <span class="text-right">Rate ({selectedCurrency})</span>
 <span class="text-right text-white/8">USD</span>
+<span></span>
 </div>
 {#each filtered.slice(0, 80) as [sym, usdRate], i (sym)}
 {@const info = coinInfo(sym)}
-<div class="group grid grid-cols-[3rem_1fr_10rem_8rem] items-center gap-2 border-b border-white/[0.015] px-5 py-3 transition-colors last:border-0 hover:bg-white/[0.015]"
+{@const isFavorite = favorites.has(sym)}
+{@const isInCompare = compareList.includes(sym)}
+<div class="group grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.015] px-5 py-3 transition-colors last:border-0 hover:bg-white/[0.015]"
  style="animation:slideRight 0.2s ease {Math.min(i * 8, 400)}ms both">
 <span class="text-[10px] font-black text-white/10">{i + 1}</span>
 <div class="flex items-center gap-3">
@@ -596,6 +758,20 @@ class:text-white={!flashStates[sym]}
 {/if}
 </button>
 <p class="text-right text-[10px] text-white/15">${fmtBig(invertRate(usdRate))}</p>
+<div class="flex items-center justify-end gap-1">
+<button
+onclick={() => toggleFavorite(sym)}
+class="text-[12px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/20 hover:text-white/40'}">
+{isFavorite ? '★' : '☆'}
+</button>
+{#if compareMode}
+<button
+onclick={() => toggleCompare(sym)}
+class="text-[12px] transition-all {isInCompare ? 'text-[#0052ff]' : 'text-white/20 hover:text-white/40'}">
+{isInCompare ? '✓' : '+'}
+</button>
+{/if}
+</div>
 </div>
 {/each}
 </div>
@@ -606,10 +782,28 @@ class:text-white={!flashStates[sym]}
 {/if}
 </div>
 {:else if !loading && !error}
-<div class="rounded-2xl border border-white/[0.04] bg-white/[0.01] p-20 text-center backdrop-blur-sm">
-<p class="mb-3 text-5xl opacity-30">∅</p>
-<p class="text-sm font-black text-white/30">No assets found</p>
-<p class="mt-1 text-xs text-white/12">Try a different search or category</p>
+<div class="rounded-2xl border border-white/[0.04] bg-white/[0.01] p-16 text-center backdrop-blur-sm">
+{#if showFavoritesOnly && favorites.size === 0}
+<div class="mb-4 text-6xl opacity-30">☆</div>
+<p class="mb-2 text-lg font-black text-white/40">No watchlist items</p>
+<p class="mb-6 text-xs text-white/20">Star your favorite coins to track them here</p>
+<button onclick={() => showFavoritesOnly = false}
+class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-2.5 text-xs font-bold text-white/50 transition hover:border-[#0052ff]/20 hover:text-white/70">
+View All Assets
+</button>
+{:else if searchQuery}
+<div class="mb-4 text-6xl opacity-30">🔍</div>
+<p class="mb-2 text-lg font-black text-white/40">No results found</p>
+<p class="mb-6 text-xs text-white/20">Try a different search term</p>
+<button onclick={() => searchQuery = ''}
+class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-2.5 text-xs font-bold text-white/50 transition hover:border-[#0052ff]/20 hover:text-white/70">
+Clear Search
+</button>
+{:else}
+<div class="mb-4 text-6xl opacity-30">∅</div>
+<p class="mb-2 text-lg font-black text-white/40">No assets found</p>
+<p class="text-xs text-white/20">Try a different category</p>
+{/if}
 </div>
 {/if}
 
@@ -624,10 +818,22 @@ class:text-white={!flashStates[sym]}
 Coinbase API · {Object.keys(rates).length} assets · 10min refresh
 </p>
 </div>
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center gap-2 text-[9px] text-white/10">
+<span class="rounded bg-white/5 px-1.5 py-0.5">/</span>
+<span>search</span>
+<span class="rounded bg-white/5 px-1.5 py-0.5">c</span>
+<span>compare</span>
+<span class="rounded bg-white/5 px-1.5 py-0.5">w</span>
+<span>watchlist</span>
+<span class="rounded bg-white/5 px-1.5 py-0.5">f</span>
+<span>favorite</span>
+</div>
 <div class="flex gap-5">
 {#each ['Coinbase API', 'Status', 'Docs'] as link}
 <span class="cursor-pointer text-[9px] text-white/10 transition hover:text-white/25">{link}</span>
 {/each}
+</div>
 </div>
 </div>
 </div>
@@ -668,6 +874,30 @@ class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold t
 </div>
 
 <div class="mb-4">
+<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Quick Filters</p>
+<div class="flex gap-2">
+<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
+class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
+{showFavoritesOnly ? 'border-yellow-500/50 bg-yellow-500/20 text-yellow-400' : 'border-white/10 bg-white/5 text-white/60'}">
+<span>{showFavoritesOnly ? '★' : '☆'}</span>
+<span>Watchlist</span>
+{#if favorites.size > 0}
+<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
+{/if}
+</button>
+<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
+class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
+{compareMode ? 'border-[#0052ff]/50 bg-[#0052ff]/20 text-[#0052ff]' : 'border-white/10 bg-white/5 text-white/60'}">
+<span>⚖️</span>
+<span>Compare</span>
+{#if compareList.length > 0}
+<span class="ml-1 rounded-full bg-[#0052ff]/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
+{/if}
+</button>
+</div>
+</div>
+
+<div class="mb-4">
 <p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Currency</p>
 <div class="flex flex-wrap gap-2">
 {#each CURRENCIES as cur}
@@ -694,6 +924,66 @@ class="rounded-full border px-3 py-2 text-xs font-bold transition-all
 <button onclick={() => showMobileFilters = false} class="w-full rounded-xl bg-[#0052ff] py-3 text-sm font-bold text-white transition hover:bg-[#0052ff]/90">
 Show {filtered.length} Assets
 </button>
+</div>
+{/if}
+
+{#if compareList.length > 0}
+<div class="fixed bottom-6 left-1/2 z-40 w-full max-w-2xl -translate-x-1/2 px-4" in:fly={{ y: 100, duration: 300 }}>
+<div class="rounded-2xl border border-white/10 bg-[#0a0f1c]/95 p-4 shadow-2xl backdrop-blur-xl">
+<div class="mb-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-white">Compare</span>
+<span class="rounded-full bg-[#0052ff]/20 px-2 py-0.5 text-[10px] font-bold text-[#0052ff]">{compareList.length}/4</span>
+</div>
+<button onclick={() => compareList = []} class="text-[10px] text-white/40 hover:text-white/70">Clear all</button>
+</div>
+<div class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+{#each compareList as sym}
+{@const info = coinInfo(sym)}
+{@const rate = rates[sym]}
+{@const change = info.change24h}
+{@const isPositive = change >= 0}
+<div class="rounded-xl border border-white/5 bg-white/[0.03] p-3">
+<div class="mb-2 flex items-center justify-between">
+<span class="text-xs font-bold" style="color:{info.color}">{sym}</span>
+<button onclick={() => toggleCompare(sym)} class="text-white/30 hover:text-white/60">×</button>
+</div>
+<p class="text-lg font-black text-white">{currSym()}{rate ? fmt(convertRate(rate)) : '—'}</p>
+<p class="text-[10px] {isPositive ? 'text-emerald-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</p>
+</div>
+{/each}
+</div>
+<button onclick={() => compareMode = false} class="w-full rounded-xl bg-[#0052ff] py-2.5 text-xs font-bold text-white transition hover:bg-[#0052ff]/90">
+Done
+</button>
+</div>
+</div>
+{/if}
+
+{#if showToast}
+<div class="fixed bottom-6 right-6 z-50" in:fly={{ y: 20, duration: 200 }} out:fade={{ duration: 150 }}>
+<div class="rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-xl
+ {showToast.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10' :
+  showToast.type === 'warning' ? 'border-yellow-500/30 bg-yellow-500/10' :
+  'border-white/10 bg-white/5'}">
+<p class="flex items-center gap-2 text-sm font-bold text-white">
+{#if showToast.type === 'success'}
+<span class="text-emerald-400">✓</span>
+{:else if showToast.type === 'warning'}
+<span class="text-yellow-400">⚠</span>
+{:else}
+<span class="text-[#0052ff]">ℹ</span>
+{/if}
+{showToast.message}
+</p>
+</div>
+</div>
+{/if}
+
+{#if tooltip.show}
+<div class="fixed z-50 pointer-events-none rounded-lg border border-white/10 bg-black/80 px-3 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-sm"
+ style="left:{tooltip.x}px;top:{tooltip.y}px;transform:translateX(-50%)">
+{tooltip.text}
 </div>
 {/if}
 

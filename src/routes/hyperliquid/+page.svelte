@@ -339,7 +339,7 @@ onMount(() => {
 
 <div class="relative min-h-screen overflow-hidden bg-[#04080f]">
   <!-- Enhanced background glows -->
-  <div class="pointer-events-none fixed inset-0" onmousemove={handleMouseMove}>
+  <div class="pointer-events-none fixed inset-0" aria-hidden="true">
     <div class="absolute left-[-20%] top-[-10%] h-[700px] w-[700px] rounded-full opacity-[0.08] blur-[140px] transition-transform duration-[3s]"
       style="background:radial-gradient(circle,#00E5BE,transparent 70%);transform:translate({mouseX * 2}px,{mouseY * 2}px)"></div>
     <div class="absolute right-[-15%] bottom-[-20%] h-[600px] w-[600px] rounded-full opacity-[0.06] blur-[120px] transition-transform duration-[3s]"
@@ -427,7 +427,7 @@ onMount(() => {
             placeholder="Search markets... (/)"
             class="w-48 rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-9 text-sm text-white placeholder-white/30 outline-none backdrop-blur-sm transition-all focus:w-60 focus:border-[#00E5BE]/40 focus:bg-white/[0.06] focus:shadow-[0_0_20px_rgba(0,229,190,0.1)]" />
           {#if searchQuery}
-            <button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors">
+            <button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors" aria-label="Clear search">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
@@ -460,7 +460,7 @@ onMount(() => {
           <button onclick={() => view = 'list'}
             class="rounded-lg px-3 py-2 text-[10px] font-bold transition-all {view==='list'?'bg-white/15 text-white shadow-sm':'text-white/40 hover:text-white/70'}">☰</button>
         </div>
-        <button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[11px] font-bold text-white/60 sm:hidden hover:bg-white/[0.05]">
+        <button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[11px] font-bold text-white/60 sm:hidden hover:bg-white/[0.05]" aria-label="Toggle filters">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
           </svg>
@@ -599,7 +599,10 @@ onMount(() => {
               {@const spark = sparkSvg(m.spark.slice(0, 20), isPositive)}
               <div class="group relative overflow-hidden rounded-xl border border-white/[0.05] bg-white/[0.03] p-3 backdrop-blur-sm transition-all duration-200 hover:border-[#00E5BE]/20 hover:bg-white/[0.05] hover:-translate-y-0.5 cursor-pointer"
                 style="animation:fadeIn 0.3s ease {Math.min(i*10,400)}ms both"
-                onclick={() => openMarketDetail(m)}>
+                role="button" tabindex="0"
+                aria-label="Open {m.name} market details"
+                onclick={() => openMarketDetail(m)}
+                onkeydown={(e) => e.key === 'Enter' && openMarketDetail(m)}>
                 <div class="flex items-center gap-2.5">
                   <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-black transition-all group-hover:scale-110"
                     style="background:{color}20;color:{color}">
@@ -646,7 +649,10 @@ onMount(() => {
               {@const fundingVal = parseFloat(m.funding)}
               <div class="group grid grid-cols-[3rem_1fr_9rem_8rem_9rem_8rem] items-center gap-2 border-b border-white/[0.03] px-5 py-3.5 transition-all cursor-pointer hover:bg-white/[0.04] last:border-0"
                 style="animation:slideRight 0.2s ease {Math.min(i*8,400)}ms both"
-                onclick={() => openMarketDetail(m)}>
+                role="button" tabindex="0"
+                aria-label="Open {m.name} market details"
+                onclick={() => openMarketDetail(m)}
+                onkeydown={(e) => e.key === 'Enter' && openMarketDetail(m)}>
                 <span class="text-[10px] font-black text-white/20">{i+1}</span>
                 <div class="flex items-center gap-3">
                   <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black"
@@ -716,7 +722,7 @@ onMount(() => {
     in:fly={{y:100,duration:300}}>
     <div class="mb-4 flex items-center justify-between">
       <h3 class="text-lg font-bold text-white">Filters</h3>
-      <button onclick={() => showMobileFilters = false} class="rounded-full bg-white/5 p-2 text-white/50 hover:bg-white/10 hover:text-white">
+      <button onclick={() => showMobileFilters = false} class="rounded-full bg-white/5 p-2 text-white/50 hover:bg-white/10 hover:text-white" aria-label="Close filters">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -786,7 +792,7 @@ onMount(() => {
             </p>
           </div>
         </div>
-        <button onclick={closeMarketModal} class="rounded-full bg-white/[0.05] p-2.5 text-white/40 transition-all hover:bg-white/[0.1] hover:text-white">
+        <button onclick={closeMarketModal} class="rounded-full bg-white/[0.05] p-2.5 text-white/40 transition-all hover:bg-white/[0.1] hover:text-white" aria-label="Close modal">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
