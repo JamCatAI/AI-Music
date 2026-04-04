@@ -421,77 +421,220 @@
 		</div>
 	{/if}
 
-	<!-- ── Mobile Menu ── -->
+	<!-- ── Mobile Menu (Bottom Sheet Style) ── -->
 	{#if mobileMenuOpen}
+		<!-- Backdrop -->
 		<div
-			class="fixed inset-0 top-[60px] z-40 bg-[#020207] md:hidden"
-			transition:fly={{ y: -20, duration: 200, easing: cubicOut }}>
+			class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm md:hidden"
+			transition:fade={{ duration: 200 }}
+			onclick={() => mobileMenuOpen = false}>
+		</div>
 
-			<div class="mx-auto max-w-7xl px-4 py-6">
-				<!-- Primary Section -->
-				<div class="mb-6">
-					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">Primary</p>
+		<!-- Bottom Sheet -->
+		<div
+			class="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-hidden rounded-t-3xl border-t border-white/[0.08] bg-[#0a0a12] shadow-2xl shadow-black md:hidden"
+			in:fly={{ y: 100, duration: 300, easing: cubicOut }}
+			out:fly={{ y: 100, duration: 200 }}>
+
+			<!-- Drag Handle -->
+			<button class="flex w-full justify-center pt-3 pb-2" onclick={() => mobileMenuOpen = false} aria-label="Close menu">
+				<div class="h-1.5 w-12 rounded-full bg-white/20"></div>
+			</button>
+
+			<!-- Header -->
+			<div class="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
+				<div class="flex items-center gap-3">
+					<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-lg">😺</span>
+					<div>
+						<p class="text-sm font-bold text-white">JamCat</p>
+						<p class="text-[10px] text-white/40">Navigation</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<button
+						onclick={() => { mobileMenuOpen = false; searchOpen = true; tick().then(() => searchInputEl?.focus()); }}
+						class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] text-white/60 transition hover:bg-white/[0.1] hover:text-white">
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+					</button>
+					<button
+						onclick={() => mobileMenuOpen = false}
+						class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] text-white/60 transition hover:bg-white/[0.1] hover:text-white">
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Scrollable Content -->
+			<div class="max-h-[60vh] overflow-y-auto px-3 py-4">
+				<!-- Quick Actions Row -->
+				<div class="mb-6 grid grid-cols-4 gap-2">
+					{#each [
+						{ label: 'Swap', emoji: '🔄', href: '/swap', color: 'from-emerald-500/20 to-teal-500/20' },
+						{ label: 'Portfolio', emoji: '💼', href: '/portfolio', color: 'from-blue-500/20 to-cyan-500/20' },
+						{ label: 'News', emoji: '📰', href: '/news', color: 'from-violet-500/20 to-purple-500/20' },
+						{ label: 'Dex', emoji: '📊', href: '/dex', color: 'from-orange-500/20 to-red-500/20' }
+					] as quick}
+					{@const active = $page.url.pathname === quick.href}
+					<a href={quick.href}
+						onclick={() => mobileMenuOpen = false}
+						class="flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.06] bg-gradient-to-br {quick.color} p-3 transition-all active:scale-95 {active ? 'ring-1 ring-white/20' : ''}">
+						<span class="text-xl">{quick.emoji}</span>
+						<span class="text-[10px] font-bold text-white/80">{quick.label}</span>
+					</a>
+					{/each}
+				</div>
+
+				<!-- Markets Section -->
+				<div class="mb-4">
+					<p class="mb-2 flex items-center gap-2 px-2 text-[11px] font-black uppercase tracking-wider text-white/30">
+						<span class="h-1 w-1 rounded-full bg-emerald-400"></span>
+						Markets
+					</p>
 					<div class="grid grid-cols-2 gap-2">
-						{#each PRIMARY as tab (tab.href)}
-							{@const active = $page.url.pathname === tab.href}
-							<a href={tab.href}
-								onclick={() => mobileMenuOpen = false}
-								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
-									{active
-									? 'bg-white/[0.08] text-white'
-									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
-								<span class="text-[18px]">{tab.emoji}</span>
-								<span>{tab.label}</span>
-								{#if active}
-									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
-								{/if}
-							</a>
+						{#each PRIMARY.filter(t => t.category === 'Market') as tab}
+						{@const active = $page.url.pathname === tab.href}
+						<a href={tab.href}
+							onclick={() => mobileMenuOpen = false}
+							class="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 transition-all active:scale-95 {active ? 'border-emerald-500/30 bg-emerald-500/10' : 'hover:bg-white/[0.04]'}"
+							>
+							<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-lg group-active:scale-95">{tab.emoji}</span>
+							<div class="flex-1 min-w-0">
+								<p class="truncate text-sm font-bold {active ? 'text-white' : 'text-white/70'}">{tab.label}</p>
+							</div>
+							{#if tab.badge}
+								<span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[8px] font-black text-amber-400">{tab.badge}</span>
+							{/if}
+							{#if active}
+								<span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+							{/if}
+						</a>
 						{/each}
 					</div>
 				</div>
 
-				<!-- Secondary Section -->
-				<div class="mb-6">
-					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">Secondary</p>
+				<!-- DeFi Section -->
+				<div class="mb-4">
+					<p class="mb-2 flex items-center gap-2 px-2 text-[11px] font-black uppercase tracking-wider text-white/30">
+						<span class="h-1 w-1 rounded-full bg-blue-400"></span>
+						DeFi & Trading
+					</p>
 					<div class="grid grid-cols-2 gap-2">
-						{#each SECONDARY as tab (tab.href)}
-							{@const active = $page.url.pathname === tab.href}
-							<a href={tab.href}
-								onclick={() => mobileMenuOpen = false}
-								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
-									{active
-									? 'bg-white/[0.08] text-white'
-									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
-								<span class="text-[18px]">{tab.emoji}</span>
-								<span>{tab.label}</span>
-								{#if active}
-									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
-								{/if}
-							</a>
+						{#each SECONDARY.filter(t => t.category === 'DeFi') as tab}
+						{@const active = $page.url.pathname === tab.href}
+						<a href={tab.href}
+							onclick={() => mobileMenuOpen = false}
+							class="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 transition-all active:scale-95 {active ? 'border-blue-500/30 bg-blue-500/10' : 'hover:bg-white/[0.04]'}"
+							>
+							<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-lg group-active:scale-95">{tab.emoji}</span>
+							<div class="flex-1 min-w-0">
+								<p class="truncate text-sm font-bold {active ? 'text-white' : 'text-white/70'}">{tab.label}</p>
+							</div>
+							{#if active}
+								<span class="h-2 w-2 rounded-full bg-blue-400"></span>
+							{/if}
+						</a>
 						{/each}
 					</div>
 				</div>
 
-				<!-- More Section -->
-				<div>
-					<p class="mb-3 text-[11px] font-bold uppercase tracking-wider text-white/20">More</p>
+				<!-- Chains Section -->
+				<div class="mb-4">
+					<p class="mb-2 flex items-center gap-2 px-2 text-[11px] font-black uppercase tracking-wider text-white/30">
+						<span class="h-1 w-1 rounded-full bg-violet-400"></span>
+						Chains
+					</p>
 					<div class="grid grid-cols-2 gap-2">
-						{#each MORE_ITEMS as tab (tab.href)}
-							{@const active = $page.url.pathname === tab.href}
-							<a href={tab.href}
-								onclick={() => mobileMenuOpen = false}
-								class="flex items-center gap-3 rounded-xl px-4 py-3 text-[14px] font-medium transition-all
-									{active
-									? 'bg-white/[0.08] text-white'
-									: 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/90'}">
-								<span class="text-[18px]">{tab.emoji}</span>
-								<span>{tab.label}</span>
-								{#if active}
-									<span class="ml-auto h-2 w-2 rounded-full bg-white/60"></span>
-								{/if}
-							</a>
+						{#each SECONDARY.filter(t => t.category === 'Chain') as tab}
+						{@const active = $page.url.pathname === tab.href}
+						<a href={tab.href}
+							onclick={() => mobileMenuOpen = false}
+							class="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 transition-all active:scale-95 {active ? 'border-violet-500/30 bg-violet-500/10' : 'hover:bg-white/[0.04]'}"
+							>
+							<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-lg group-active:scale-95">{tab.emoji}</span>
+							<div class="flex-1 min-w-0">
+								<p class="truncate text-sm font-bold {active ? 'text-white' : 'text-white/70'}">{tab.label}</p>
+							</div>
+							{#if tab.highlight}
+								<span class="h-1.5 w-1.5 rounded-full bg-pink-400"></span>
+							{/if}
+							{#if active}
+								<span class="h-2 w-2 rounded-full bg-violet-400"></span>
+							{/if}
+						</a>
 						{/each}
 					</div>
+				</div>
+
+				<!-- Tech Section -->
+				<div class="mb-4">
+					<p class="mb-2 flex items-center gap-2 px-2 text-[11px] font-black uppercase tracking-wider text-white/30">
+						<span class="h-1 w-1 rounded-full bg-pink-400"></span>
+						Tech & AI
+					</p>
+					<div class="grid grid-cols-2 gap-2">
+						{#each SECONDARY.filter(t => t.category === 'Tech') as tab}
+						{@const active = $page.url.pathname === tab.href}
+						<a href={tab.href}
+							onclick={() => mobileMenuOpen = false}
+							class="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 transition-all active:scale-95 {active ? 'border-pink-500/30 bg-pink-500/10' : 'hover:bg-white/[0.04]'}"
+							>
+							<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-lg group-active:scale-95">{tab.emoji}</span>
+							<div class="flex-1 min-w-0">
+								<p class="truncate text-sm font-bold {active ? 'text-white' : 'text-white/70'}">{tab.label}</p>
+							</div>
+							{#if tab.badge}
+								<span class="rounded bg-pink-500/20 px-1.5 py-0.5 text-[8px] font-black text-pink-400">{tab.badge}</span>
+							{/if}
+							{#if active}
+								<span class="h-2 w-2 rounded-full bg-pink-400"></span>
+							{/if}
+						</a>
+						{/each}
+					</div>
+				</div>
+
+				<!-- More Items -->
+				<div class="mb-4">
+					<p class="mb-2 flex items-center gap-2 px-2 text-[11px] font-black uppercase tracking-wider text-white/30">
+						<span class="h-1 w-1 rounded-full bg-white/40"></span>
+						More
+					</p>
+					<div class="grid grid-cols-2 gap-2">
+						{#each [...SECONDARY.filter(t => !['DeFi','Chain','Tech'].includes(t.category)), ...MORE_ITEMS] as tab}
+						{@const active = $page.url.pathname === tab.href}
+						<a href={tab.href}
+							onclick={() => mobileMenuOpen = false}
+							class="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 transition-all active:scale-95 {active ? 'border-white/20 bg-white/[0.06]' : 'hover:bg-white/[0.04]'}"
+							>
+							<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-lg group-active:scale-95">{tab.emoji}</span>
+							<div class="flex-1 min-w-0">
+								<p class="truncate text-sm font-bold {active ? 'text-white' : 'text-white/70'}">{tab.label}</p>
+							</div>
+							{#if active}
+								<span class="h-2 w-2 rounded-full bg-white/60"></span>
+							{/if}
+						</a>
+						{/each}
+					</div>
+				</div>
+			</div>
+
+			<!-- Footer -->
+			<div class="border-t border-white/[0.06] px-5 py-4">
+				<div class="flex items-center justify-between">
+					<span class="text-[10px] text-white/30">v2.0 • JamCat</span>
+					<button
+						onclick={() => mobileMenuOpen = false}
+						class="flex items-center gap-2 rounded-lg bg-white/[0.06] px-4 py-2 text-xs font-bold text-white/70 transition hover:bg-white/[0.1] hover:text-white">
+						<span>Close</span>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						</svg>
+					</button>
 				</div>
 			</div>
 		</div>
