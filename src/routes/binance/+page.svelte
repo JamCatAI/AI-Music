@@ -52,6 +52,32 @@ BONK:'#FF6B35', CAKE:'#D1884F', DEFAULT:'#F0B90B',
 function baseSymbol(sym) { return sym.replace(/USDT$|BUSD$|BTC$|ETH$|BNB$/, ''); }
 function coinColor(sym) { const b = baseSymbol(sym); return COIN_COLORS[b] ?? COIN_COLORS.DEFAULT; }
 
+/** Compact ticker text for avatar chips (no single-letter ambiguity). */
+function symbolBadge(base, maxLen = 5) {
+	const b = String(base).toUpperCase();
+	if (b.length <= maxLen) return b;
+	return b.slice(0, Math.max(3, maxLen - 1)) + '…';
+}
+
+const TOP_GAINER_MIN_QUOTE_VOL = 300_000;
+
+function pickTopGainer(list) {
+	if (!list.length) return null;
+	const liquid = list.filter(t => parseFloat(t.quoteVolume) >= TOP_GAINER_MIN_QUOTE_VOL);
+	const pool = liquid.length ? liquid : list;
+	/** Skip 1-letter "bases" (e.g. DUSDT → "D") so the headline stays recognizable. */
+	const named = pool.filter(t => baseSymbol(t.symbol).length > 1);
+	const candidates = named.length ? named : pool;
+	return [...candidates].sort((a, b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))[0];
+}
+
+/** Label for the stats card: never a lone ambiguous letter. */
+function topGainerLabel(sym) {
+	const b = baseSymbol(sym);
+	if (b.length <= 1) return sym;
+	return b;
+}
+
 function fmt(n) {
 const v = parseFloat(n);
 if (isNaN(v)) return '—';
@@ -158,6 +184,28 @@ mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 10;
 }
 
 let tickerMap = $derived(Object.fromEntries(tickers.map(t => [t.symbol, t])));
+
+let topGainerTicker = $derived(pickTopGainer(tickers));
+
+let statCards = $derived.by(() => {
+	const totalVol = tickers.reduce((acc, t) => acc + parseFloat(t.quoteVolume), 0);
+	const g = topGainerTicker;
+	let gSub = null;
+	let gSubClass = '';
+	let gValue = '--';
+	if (g) {
+		gValue = topGainerLabel(g.symbol);
+		const ch = parseFloat(g.priceChangePercent);
+		gSub = `${ch >= 0 ? '+' : ''}${ch.toFixed(2)}% · 24h`;
+		gSubClass = ch >= 0 ? 'text-green-400' : 'text-red-400';
+	}
+	return [
+		{ label: 'Total Pairs', value: tickers.length.toString(), hi: true, trend: '+12', key: 'pairs', icon: '🟡' },
+		{ label: '24h Volume', value: fmtVol(totalVol), trend: '↗', key: 'vol', icon: '📊' },
+		{ label: 'Top Gainer', value: gValue, sub: gSub, subClass: gSubClass, trend: '🔥', key: 'gainer', icon: '🚀' },
+		{ label: 'Updated', value: getTimeAgo(lastUpdated) || 'now', trend: '●', key: 'time', icon: '⏱' },
+	];
+});
 
 let featured = $derived.by(() =>
 FEATURED.filter(sym => tickerMap[sym]).map(sym => ({
@@ -296,19 +344,21 @@ onMount(() => {
 		{:else}
 			<!-- ── Stats Bar ── -->
 			<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-				{#each [
-					{ label: 'Total Pairs', value: tickers.length.toString(), hi: true, trend: '+12', key: 'pairs', icon: '🟡' },
-					{ label: '24h Volume', value: fmtVol(tickers.reduce((acc, t) => acc + parseFloat(t.quoteVolume), 0)), trend: '↗', key: 'vol', icon: '📊' },
-					{ label: 'Top Gainer', value: tickers.length ? baseSymbol([...tickers].sort((a,b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent))[0]?.symbol) : '--', trend: '🔥', key: 'gainer', icon: '🚀' },
-					{ label: 'Updated', value: getTimeAgo(lastUpdated) || 'now', trend: '●', key: 'time', icon: '⏱' },
-				] as s (s.key)}
-					<div class="group relative overflow-hidden rounded-2xl border {s.hi ? 'border-amber-400/30 bg-amber-400/5' : 'border-white/5 bg-white/[0.02]'} p-4 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/10 backdrop-blur-sm">
+				{#each statCards as s (s.key)}
+					<div class="group relative min-w-0 overflow-hidden rounded-2xl border {s.hi ? 'border-amber-400/30 bg-amber-400/5' : 'border-white/5 bg-white/[0.02]'} p-4 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/10 backdrop-blur-sm">
 						<div class="absolute right-0 top-0 h-20 w-20 rounded-full bg-amber-400/5 blur-2xl group-hover:bg-amber-400/10 transition-all pointer-events-none"></div>
 						<div class="flex justify-between items-start mb-2">
 							<p class="text-[10px] uppercase tracking-widest text-slate-500">{s.icon} {s.label}</p>
 							<span class="rounded-full bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold text-amber-400">{s.trend}</span>
 						</div>
-						<p class="text-2xl font-extrabold {s.hi ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]' : 'text-white'}">{s.value}</p>
+						<div class="min-h-[3.25rem] min-w-0">
+							<p
+								class="text-2xl font-extrabold leading-tight [overflow-wrap:anywhere] {s.hi ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]' : 'text-white'}"
+								title={s.value}>{s.value}</p>
+							{#if s.sub}
+								<p class="mt-0.5 text-xs font-bold [overflow-wrap:anywhere] {s.subClass}" title={s.sub}>{s.sub}</p>
+							{/if}
+						</div>
 						<div class="mt-3 h-7 flex items-end gap-0.5">
 							{#each sparklineData as height, idx (idx)}
 								<div class="flex-1 bg-gradient-to-t from-amber-400/10 to-amber-400/30 rounded-t transition-all" style="height: {height}%"></div>
@@ -343,8 +393,10 @@ onMount(() => {
 								
 								<div class="relative z-10">
 									<div class="mb-3 flex items-start justify-between">
-										<div class="flex h-10 w-10 items-center justify-center rounded-xl border {coinColor.border} {coinColor.bg} text-sm font-black {coinColor.text} transition-all duration-300 group-hover:scale-110">
-											{baseSymbol(coin.sym).slice(0,1)}
+										<div
+											class="flex h-10 min-h-10 min-w-[2.75rem] max-w-[4.25rem] shrink-0 items-center justify-center rounded-xl border {coinColor.border} {coinColor.bg} px-1.5 transition-all duration-300 group-hover:scale-110"
+											title="{baseSymbol(coin.sym)}/USDT">
+											<span class="truncate text-center text-[9px] font-black leading-tight tracking-tight {coinColor.text}">{symbolBadge(baseSymbol(coin.sym), 6)}</span>
 										</div>
 										<div class="flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold backdrop-blur-sm transition-colors {isPositive?'bg-green-400/15 text-green-400 border border-green-400/20':'bg-red-400/15 text-red-400 border border-red-400/20'}">
 											<span class="text-[8px]">{isPositive?'▲':'▼'}</span>
@@ -464,8 +516,10 @@ onMount(() => {
 								<div class="group relative overflow-hidden rounded-xl border {coinColor.border} bg-white/[0.015] p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.035] hover:{coinColor.glow}"
 									style="animation:fadeIn 0.3s ease {Math.min(i * 10, 400)}ms both">
 									<div class="flex items-center gap-2.5">
-										<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} text-[9px] font-black {coinColor.text} transition-transform group-hover:scale-110">
-											{baseSymbol(t.symbol).slice(0,2)}
+										<div
+											class="flex h-8 min-w-[2.25rem] max-w-[3.25rem] shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} px-1 transition-transform group-hover:scale-110"
+											title="{baseSymbol(t.symbol)}/USDT">
+											<span class="truncate text-center text-[8px] font-black leading-none {coinColor.text}">{symbolBadge(baseSymbol(t.symbol), 5)}</span>
 										</div>
 										<div class="min-w-0 flex-1">
 											<div class="flex items-center justify-between">
@@ -506,8 +560,10 @@ onMount(() => {
 									style="animation:slideRight 0.2s ease {Math.min(i * 8, 400)}ms both">
 									<span class="text-[10px] font-black text-slate-600">{i + 1}</span>
 									<div class="flex items-center gap-3">
-										<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} text-[9px] font-black {coinColor.text}">
-											{baseSymbol(t.symbol).slice(0,3)}
+										<div
+											class="flex h-8 min-w-[2.25rem] max-w-[3.5rem] shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} px-1"
+											title="{baseSymbol(t.symbol)}/USDT">
+											<span class="truncate text-center text-[8px] font-black leading-none {coinColor.text}">{symbolBadge(baseSymbol(t.symbol), 5)}</span>
 										</div>
 										<div class="min-w-0">
 											<p class="text-xs font-bold text-white">{baseSymbol(t.symbol)}</p>

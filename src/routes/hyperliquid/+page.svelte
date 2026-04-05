@@ -354,8 +354,8 @@ onMount(() => {
 	class="relative z-30 border-b border-[#00E5BE]/20 bg-black/55 backdrop-blur-2xl"
 	style="box-shadow: 0 0 48px rgba(0,229,190,0.06);"
 >
-	<div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-6">
-		<div class="flex flex-wrap items-center gap-3 sm:gap-4">
+	<div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-3 py-1.5 sm:gap-3 sm:px-6 sm:py-2">
+		<div class="flex flex-wrap items-center gap-2 sm:gap-4">
 			<div class="flex items-center gap-2">
 				<span
 					class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] {pulse ? 'animate-ping' : 'animate-pulse'}"
@@ -368,11 +368,11 @@ onMount(() => {
 				>
 			</div>
 			<div class="hidden h-4 w-px bg-white/15 sm:block"></div>
-			<span class="text-[9px] tracking-wider text-white/35" style="font-family: 'JetBrains Mono', monospace;"
+			<span class="hidden text-[9px] tracking-wider text-white/35 sm:inline" style="font-family: 'JetBrains Mono', monospace;"
 				>api.hyperliquid.xyz/info</span
 			>
 		</div>
-		<div class="min-w-0 flex-1 overflow-hidden px-2 sm:px-6">
+		<div class="hidden min-w-0 flex-1 overflow-hidden px-2 sm:px-6 md:flex">
 			<div class="flex w-max animate-hl-marquee gap-5 whitespace-nowrap">
 				{#each [0, 1] as _}
 					{#each TICKER_SEGMENTS as seg}
@@ -414,37 +414,37 @@ onMount(() => {
       style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,190,0.12) 2px, rgba(0,229,190,0.12) 3px);"></div>
   </div>
 
-  <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+  <div class="relative mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 md:py-10 lg:px-8">
 
     <!-- Header + global metrics -->
-    <div class="mb-10 flex flex-col gap-8 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
-      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
+    <div class="mb-4 flex flex-col gap-3 md:mb-10 md:gap-8 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+      <div class="flex flex-row items-center gap-3 sm:gap-6">
         <div class="relative shrink-0 group">
-          <div class="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03] sm:h-20 sm:w-20 sm:rounded-3xl"
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03] sm:h-20 sm:w-20 sm:rounded-3xl"
             style="background:linear-gradient(145deg,{HL.teal},{HL.tealMid});box-shadow:0 8px 40px rgba(0,229,190,0.45),0 0 60px rgba(0,229,190,0.2),inset 0 1px 0 rgba(255,255,255,0.25)">
-            <svg class="h-10 w-10 sm:h-11 sm:w-11" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <svg class="h-7 w-7 sm:h-11 sm:w-11" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path d="M6 6h4v8h12V6h4v20h-4v-8H10v8H6V6z" fill="white"/>
             </svg>
           </div>
-          <div class="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-400 ring-2 ring-[#04080f] sm:h-4 sm:w-4 {pulse ? 'scale-110' : ''} transition-transform duration-300">
+          <div class="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-[#04080f] sm:h-4 sm:w-4 {pulse ? 'scale-110' : ''} transition-transform duration-300">
             <div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/45"></div>
           </div>
         </div>
-        <div class="min-w-0 text-left">
-          <p class="mb-1 text-[10px] font-bold uppercase tracking-[0.35em] text-[#00E5BE]/70" style="font-family: 'JetBrains Mono', monospace;">
+        <div class="min-w-0 flex-1 text-left">
+          <p class="mb-0.5 text-[9px] font-bold uppercase tracking-[0.28em] text-[#00E5BE]/70 sm:mb-1 sm:text-[10px] sm:tracking-[0.35em]" style="font-family: 'JetBrains Mono', monospace;">
             decentralized perps · L1
           </p>
-          <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl"
+          <h1 class="text-2xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl"
             style="text-shadow: 0 0 50px rgba(0,229,190,0.35), 0 0 100px rgba(0,229,190,0.12);">
             Hyperliquid
           </h1>
-          <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/45">
+          <p class="mt-1 hidden max-w-xl text-sm leading-relaxed text-white/45 sm:mt-2 sm:block">
             Live mark prices, 24h notionals, funding, and open interest from the public <span class="font-mono text-[#00E5BE]/80">info</span> API — refresh every 5 seconds.
           </p>
         </div>
       </div>
 
-      <div class="grid w-full grid-cols-2 gap-2 sm:max-w-md sm:grid-cols-4 lg:max-w-xl lg:shrink-0">
+      <div class="grid w-full grid-cols-4 gap-1.5 sm:max-w-md sm:gap-2 md:grid-cols-4 lg:max-w-xl lg:shrink-0">
         {#each [
           { k: 'Markets', v: String(markets.length), sub: 'universe' },
           { k: '24h Vol', v: fmtVol(totalVolume), sub: 'notional' },
@@ -452,27 +452,27 @@ onMount(() => {
           { k: 'Latency', v: lastUpdated ? getTimeAgo(lastUpdated) : '…', sub: 'poll 5s' }
         ] as tile, ti (tile.k)}
           <div
-            class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 backdrop-blur-xl transition hover:border-[#00E5BE]/25 hover:shadow-[0_0_28px_rgba(0,229,190,0.08)]"
+            class="rounded-lg border border-white/[0.07] bg-white/[0.03] p-2 backdrop-blur-xl transition hover:border-[#00E5BE]/25 hover:shadow-[0_0_28px_rgba(0,229,190,0.08)] sm:rounded-xl sm:p-3"
             in:fly={{ y: 10, duration: 320, delay: 40 + ti * 45 }}
           >
-            <p class="text-[8px] font-bold uppercase tracking-[0.2em] text-white/30" style="font-family: 'JetBrains Mono', monospace;">{tile.k}</p>
-            <p class="mt-1 truncate text-lg font-black tabular-nums text-white sm:text-xl">{tile.v}</p>
-            <p class="mt-0.5 text-[9px] text-white/25">{tile.sub}</p>
+            <p class="text-[7px] font-bold uppercase tracking-wider text-white/30 sm:text-[8px] sm:tracking-[0.2em]" style="font-family: 'JetBrains Mono', monospace;">{tile.k}</p>
+            <p class="mt-0.5 truncate text-sm font-black tabular-nums text-white sm:mt-1 sm:text-lg md:text-xl">{tile.v}</p>
+            <p class="mt-0.5 hidden text-[9px] text-white/25 sm:block">{tile.sub}</p>
           </div>
         {/each}
       </div>
     </div>
 
     <!-- Enhanced Controls -->
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="relative group">
+    <div class="mb-3 flex flex-col gap-3 sm:mb-6 md:flex-row md:items-center md:justify-between md:gap-4">
+      <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div class="relative group w-full sm:w-auto">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 transition-colors group-focus-within:text-[#00E5BE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           <input bind:this={searchInputRef} bind:value={searchQuery}
             placeholder="Search… (press /)"
-            class="w-48 rounded-xl border border-white/[0.08] bg-black/30 py-2.5 pl-10 pr-9 font-mono text-xs text-white placeholder-white/28 outline-none backdrop-blur-md transition-all focus:w-60 focus:border-[#00E5BE]/45 focus:bg-black/40 focus:shadow-[0_0_24px_rgba(0,229,190,0.12)]" />
+            class="w-full rounded-xl border border-white/[0.08] bg-black/30 py-2 pl-10 pr-9 font-mono text-xs text-white placeholder-white/28 outline-none backdrop-blur-md transition-all focus:border-[#00E5BE]/45 focus:bg-black/40 focus:shadow-[0_0_24px_rgba(0,229,190,0.12)] sm:w-48 sm:py-2.5 sm:focus:w-60" />
           {#if searchQuery}
             <button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors" aria-label="Clear search">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,10 +481,10 @@ onMount(() => {
             </button>
           {/if}
         </div>
-        <div class="flex flex-wrap gap-1.5">
+        <div class="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {#each CATEGORIES as cat}
             <button onclick={() => { selectedCategory = cat.key; searchQuery = ''; }}
-              class="flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[10px] font-bold transition-all duration-200
+              class="flex shrink-0 snap-start items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[10px] font-bold transition-all duration-200 sm:gap-1.5 sm:rounded-xl sm:px-3 sm:py-2
               {selectedCategory === cat.key && !searchQuery
                 ? 'border-[#00E5BE]/50 bg-gradient-to-b from-[#00E5BE]/15 to-[#00E5BE]/5 text-[#00E5BE] shadow-[0_0_15px_rgba(0,229,190,0.15)]'
                 : 'border-white/[0.06] bg-white/[0.03] text-white/50 hover:border-white/15 hover:text-white/70 hover:bg-white/[0.05]'}">
@@ -495,7 +495,7 @@ onMount(() => {
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <select bind:value={sortBy} class="rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 font-mono text-[10px] font-bold text-white/75 outline-none backdrop-blur-md cursor-pointer hover:border-[#00E5BE]/25 hover:bg-white/[0.04] transition-all">
           {#each SORT_OPTIONS as opt}
             <option value={opt.key}>{opt.label}</option>
@@ -532,9 +532,9 @@ onMount(() => {
       </div>
     {/if}
 
-        <!-- Enhanced Featured top markets -->
+        <!-- Featured top markets (desktop/tablet — hidden on phones so the main grid appears first) -->
     {#if topMarkets.length && !searchQuery && selectedCategory === 'all'}
-      <div class="mb-10">
+      <div class="mb-6 hidden md:mb-10 md:block">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
           <p class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.28em] text-white/40">
             <span class="h-2 w-2 rounded-full bg-[#00E5BE] shadow-[0_0_12px_#00E5BE]"></span>
@@ -617,24 +617,24 @@ onMount(() => {
 
     <!-- Skeleton -->
     {#if loading && !markets.length}
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 mb-8">
-        {#each Array(12) as _, i}
-          <div class="h-40 animate-pulse rounded-2xl bg-white/[0.03] border border-white/[0.04]" style="animation-delay:{i*50}ms"></div>
+      <div class="mb-4 grid grid-cols-3 gap-2 sm:mb-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3">
+        {#each Array(9) as _, i}
+          <div class="h-28 animate-pulse rounded-xl border border-white/[0.04] bg-white/[0.03] sm:h-40 sm:rounded-2xl" style="animation-delay:{i*40}ms"></div>
         {/each}
       </div>
     {/if}
 
     <!-- All Markets -->
     {#if filtered.length}
-      <div class="mb-6">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div class="mb-4 sm:mb-6">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-2 sm:mb-4">
           <div class="flex items-center gap-3">
             <p class="text-[10px] font-black uppercase tracking-[0.28em] text-white/35">
               {searchQuery ? 'Results' : CATEGORIES.find(c=>c.key===selectedCategory)?.label ?? 'All'} markets
             </p>
             <span class="rounded-md border border-white/[0.06] bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] font-bold text-[#00E5BE]/80">{filtered.length}</span>
           </div>
-          <p class="font-mono text-[9px] text-white/25">Modal: copy price · charts</p>
+          <p class="hidden font-mono text-[9px] text-white/25 sm:block">Modal: copy price · charts</p>
         </div>
 
         {#if view === 'grid'}
