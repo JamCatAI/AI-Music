@@ -322,669 +322,627 @@ setTimeout(() => showToast = null, 2500);
 
 const TICKER = '🔵 COINBASE · EXCHANGE RATES · BTC · ETH · SOL · LIVE CRYPTO PRICES · REAL-TIME RATES · DIGITAL ASSETS · BLOCKCHAIN · WEB3 · DEFI · ';
 
-function handleMouseMove(e) {
-const rect = e.currentTarget?.getBoundingClientRect();
-if (!rect) return;
-mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
-mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 10;
-}
+// ── BLUE NEON COLOR SYSTEM (x402 cyberpunk style) ──
+const neonColors = [
+	{ ring: 'ring-blue-400',   text: 'text-blue-400',   bg: 'bg-blue-400/10',   border: 'border-blue-400/30',   glow: 'shadow-[0_0_20px_rgba(96,165,250,0.3)]',   bar: 'bg-blue-400'   },
+	{ ring: 'ring-cyan-400',   text: 'text-cyan-400',   bg: 'bg-cyan-400/10',   border: 'border-cyan-400/30',   glow: 'shadow-[0_0_20px_rgba(34,211,238,0.3)]',   bar: 'bg-cyan-400'   },
+	{ ring: 'ring-sky-400',    text: 'text-sky-400',    bg: 'bg-sky-400/10',    border: 'border-sky-400/30',    glow: 'shadow-[0_0_20px_rgba(56,189,248,0.3)]',    bar: 'bg-sky-400'    },
+	{ ring: 'ring-indigo-400', text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/30', glow: 'shadow-[0_0_20px_rgba(129,140,248,0.3)]', bar: 'bg-indigo-400' },
+	{ ring: 'ring-blue-500',   text: 'text-blue-500',   bg: 'bg-blue-500/10',   border: 'border-blue-500/30',   glow: 'shadow-[0_0_20px_rgba(59,130,246,0.3)]',   bar: 'bg-blue-500'   },
+];
+
+let sparklineData = $state(Array.from({ length: 12 }, () => Math.random() * 100));
 
 onMount(() => {
-if (typeof localStorage !== 'undefined') {
-const saved = localStorage.getItem('coinbase_favorites');
-if (saved) favorites = new Set(JSON.parse(saved));
-}
-fetchRates();
-const iv = setInterval(fetchRates, 600_000);
-return () => { clearInterval(iv); };
+	if (typeof localStorage !== 'undefined') {
+		const saved = localStorage.getItem('coinbase_favorites');
+		if (saved) favorites = new Set(JSON.parse(saved));
+	}
+	fetchRates();
+	const iv = setInterval(() => {
+		fetchRates();
+		sparklineData = sparklineData.map(() => Math.random() * 100);
+	}, 600_000);
+	return () => { clearInterval(iv); };
 });
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 <svelte:head><title>Coinbase | JamCat</title></svelte:head>
 
-<div class="overflow-hidden border-b border-white/5 bg-[#0052ff]/10 py-2 backdrop-blur-xl">
-<div class="flex whitespace-nowrap" style="animation:marquee 35s linear infinite">
-{#each [TICKER, TICKER, TICKER] as t}
-<span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em]" style="color:#0052ff">{t}</span>
-{/each}
-</div>
+<!-- Page wrapper with dark futuristic background -->
+<div class="relative min-h-screen overflow-hidden bg-[#040d14] font-mono text-white">
+	<!-- Ambient background glows -->
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
+		<div class="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-blue-500/8 blur-[120px]"></div>
+		<div class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-cyan-500/6 blur-[140px]"></div>
+		<div class="absolute top-1/2 left-0 h-64 w-64 rounded-full bg-indigo-500/5 blur-[100px]"></div>
+	</div>
+
+	<!-- Scanline overlay -->
+	<div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59,130,246,0.5) 2px, rgba(59,130,246,0.5) 3px)"></div>
+
+	<!-- Ticker marquee -->
+	<div class="overflow-hidden border-b border-white/5 bg-gradient-to-r from-blue-500/10 via-cyan-500/5 to-transparent py-2 backdrop-blur-xl">
+		<div class="flex whitespace-nowrap" style="animation:marquee 35s linear infinite">
+			{#each [TICKER, TICKER, TICKER] as t}
+				<span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">{t}</span>
+			{/each}
+		</div>
+	</div>
+
+	<div class="relative mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-10">
+		<!-- ── Header ── -->
+		<div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+			<div>
+				<div class="flex items-center gap-3 flex-wrap">
+					<div class="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500 to-cyan-500 text-2xl font-black text-white shadow-lg shadow-blue-500/30">
+						<svg class="h-9 w-9" viewBox="0 0 32 32" fill="none">
+							<path d="M16 28c6.627 0 12-5.373 12-12S22.627 4 16 4 4 9.373 4 16s5.373 12 12 12z" fill="white"/>
+							<path d="M16 24c-4.418 0-8-3.582-8-8s3.582-8 8-8c4.067 0 7.422 3.04 7.923 6.968h-3.965c-.462-1.71-2.007-2.968-3.958-2.968-2.21 0-4 1.79-4 4s1.79 4 4 4c1.951 0 3.496-1.258 3.958-2.968h3.965C23.422 20.96 20.067 24 16 24z" fill="#0052ff"/>
+						</svg>
+					</div>
+					<div>
+						<div class="flex items-center gap-2 flex-wrap">
+							<h1 class="text-4xl font-black tracking-tight">
+								<span class="text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]">Coinbase</span>
+							</h1>
+							<span class="rounded-md border border-blue-400/30 bg-blue-400/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]">
+								EXCHANGE RATES
+							</span>
+							<span class="flex items-center gap-1.5 rounded-full border border-blue-400/20 bg-blue-400/5 px-3 py-1 text-xs text-blue-400">
+								<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.8)]"></span>LIVE
+							</span>
+						</div>
+						<p class="mt-1.5 text-xs text-blue-400/40">
+							{Object.keys(rates).length} assets · {selectedCurrency} base · Updated {getTimeAgo(lastUpdated)}
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="flex flex-wrap items-center gap-2">
+				{#each CATEGORIES.slice(0, 5) as cat}
+					<button onclick={() => { selectedCategory = cat.key; searchQuery = ''; }}
+						class="group relative overflow-hidden rounded-xl border px-3 py-2 text-xs font-bold transition-all
+						{selectedCategory === cat.key && !searchQuery
+							? 'border-blue-400/50 bg-blue-400/10 text-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.3)]'
+							: 'border-white/10 bg-white/5 text-slate-400 hover:border-blue-400/30 hover:bg-white/10 hover:text-white'}">
+						<span class="relative z-10 flex items-center gap-1.5">
+							<span>{cat.emoji}</span>{cat.label}
+						</span>
+						{#if selectedCategory === cat.key && !searchQuery}
+							<div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-blue-400/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></div>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		{#if error}
+			<div class="relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/10 p-12 text-center backdrop-blur-sm">
+				<div class="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-red-500/10 blur-3xl"></div>
+				<div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/20 text-3xl">⚠️</div>
+				<h2 class="text-xl font-bold text-red-400">Connection Interrupted</h2>
+				<p class="mt-2 text-sm text-slate-400">{error}</p>
+				<button onclick={fetchRates} class="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-6 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500/20">↻ Retry</button>
+			</div>
+		{:else}
+			<!-- ── Stats Bar ── -->
+			<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+				{#each [
+					{ label: 'Total Assets', value: Object.keys(rates).length.toString(), hi: true, trend: '+24', key: 'assets', icon: '🔵' },
+					{ label: 'Base Currency', value: selectedCurrency, trend: '↗', key: 'currency', icon: '💱' },
+					{ label: 'Watchlist', value: favorites.size.toString(), trend: '★', key: 'favs', icon: '⭐' },
+					{ label: 'Updated', value: getTimeAgo(lastUpdated) || 'now', trend: '●', key: 'time', icon: '⏱' },
+				] as s (s.key)}
+					<div class="group relative overflow-hidden rounded-2xl border {s.hi ? 'border-blue-400/30 bg-blue-400/5' : 'border-white/5 bg-white/[0.02]'} p-4 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/10 backdrop-blur-sm">
+						<div class="absolute right-0 top-0 h-20 w-20 rounded-full bg-blue-400/5 blur-2xl group-hover:bg-blue-400/10 transition-all pointer-events-none"></div>
+						<div class="flex justify-between items-start mb-2">
+							<p class="text-[10px] uppercase tracking-widest text-slate-500">{s.icon} {s.label}</p>
+							<span class="rounded-full bg-blue-400/10 px-2 py-0.5 text-[9px] font-bold text-blue-400">{s.trend}</span>
+						</div>
+						<p class="text-2xl font-extrabold {s.hi ? 'text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.4)]' : 'text-white'}">{s.value}</p>
+						<div class="mt-3 h-7 flex items-end gap-0.5">
+							{#each sparklineData as height, idx (idx)}
+								<div class="flex-1 bg-gradient-to-t from-blue-400/10 to-blue-400/30 rounded-t transition-all" style="height: {height}%"></div>
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</div>
+
+			<!-- ── Controls ── -->
+			<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="flex flex-wrap items-center gap-2">
+					<div class="relative">
+						<svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+						<input bind:this={searchInputRef} bind:value={searchQuery}
+							placeholder="Search assets... (/)"
+							class="w-44 rounded-xl border border-white/10 bg-white/[0.02] py-2.5 pl-10 pr-9 text-sm text-white placeholder-slate-600 outline-none backdrop-blur-sm transition-all focus:w-56 focus:border-blue-400/30 focus:bg-white/[0.04] font-mono" />
+						{#if searchQuery}
+							<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white/60">
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+								</svg>
+							</button>
+						{/if}
+					</div>
+				</div>
+
+				<div class="flex items-center gap-2">
+					<select bind:value={sortBy} class="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[11px] font-bold text-slate-400 outline-none backdrop-blur-sm transition-all hover:border-blue-400/20 cursor-pointer font-mono">
+						{#each SORT_OPTIONS as opt}
+							<option value={opt.key}>{opt.label}</option>
+						{/each}
+					</select>
+
+					<div class="hidden sm:flex gap-0.5 rounded-xl border border-white/10 bg-white/[0.02] p-1 backdrop-blur-sm">
+						{#each CURRENCIES.slice(0, 4) as cur}
+							<button onclick={() => selectedCurrency = cur}
+								class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
+								{selectedCurrency === cur ? 'bg-blue-400/20 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.3)]' : 'text-slate-500 hover:text-white'}">
+								{cur}
+							</button>
+						{/each}
+					</div>
+
+					<div class="flex gap-0.5 rounded-xl border border-white/10 bg-white/[0.02] p-1 backdrop-blur-sm">
+						<button onclick={() => view = 'grid'}
+							class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
+							{view === 'grid' ? 'bg-blue-400/20 text-blue-400' : 'text-slate-500 hover:text-white'}">⊞</button>
+						<button onclick={() => view = 'list'}
+							class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
+							{view === 'list' ? 'bg-blue-400/20 text-blue-400' : 'text-slate-500 hover:text-white'}">☰</button>
+					</div>
+
+					<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
+						class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
+						{showFavoritesOnly ? 'border-yellow-400/40 bg-yellow-400/15 text-yellow-400' : 'border-white/10 bg-white/[0.02] text-slate-400 hover:text-white'}">
+						<span class="text-sm">{showFavoritesOnly ? '★' : '☆'}</span>
+						<span class="hidden lg:inline">Watchlist</span>
+						{#if favorites.size > 0}
+							<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
+						{/if}
+					</button>
+
+					<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
+						class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
+						{compareMode ? 'border-blue-400/40 bg-blue-400/15 text-blue-400' : 'border-white/10 bg-white/[0.02] text-slate-400 hover:text-white'}">
+						<span>⚖️</span>
+						<span class="hidden lg:inline">Compare</span>
+						{#if compareList.length > 0}
+							<span class="ml-1 rounded-full bg-blue-400/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
+						{/if}
+					</button>
+
+					<button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[11px] font-bold text-slate-400 transition-all hover:border-white/20 sm:hidden">
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+						</svg>
+					</button>
+
+					<button onclick={fetchRates} disabled={loading}
+						class="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[11px] font-black text-slate-500 backdrop-blur-sm transition hover:border-blue-400/20 hover:text-blue-400 disabled:opacity-20 {pulse ? 'text-blue-400' : ''}">
+						{loading ? '⟳' : '↻'}
+					</button>
+				</div>
+			</div>
+
+			<!-- ── Featured Cards ── -->
+			{#if featuredRates.length && !searchQuery}
+				<div class="mb-8">
+					<div class="mb-4 flex items-center gap-2">
+						<span class="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></span>
+						<p class="text-[11px] font-black uppercase tracking-[0.3em] text-blue-400/60">Featured Assets</p>
+					</div>
+					<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+						{#each featuredRates as coin, i (coin.sym)}
+							{@const spark = sparkSvg(coin.spark, coin.info.color)}
+							{@const change = coin.info.change24h}
+							{@const isPositive = change >= 0}
+							{@const isFavorite = favorites.has(coin.sym)}
+							{@const isInCompare = compareList.includes(coin.sym)}
+							{@const coinColor = neonColors[i % neonColors.length]}
+							<div
+								class="group relative overflow-hidden rounded-2xl border {coinColor.border} bg-white/[0.015] p-4 text-left backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:bg-white/[0.035] hover:{coinColor.glow} cursor-pointer {isFavorite ? 'ring-1 ring-yellow-400/30' : ''}"
+								style="animation:slideUp 0.5s cubic-bezier(.22,1,.36,1) {i * 40}ms both"
+								onclick={() => { if (compareMode) { toggleCompare(coin.sym); } else { flipCard = flipCard === coin.sym ? null : coin.sym; } }}>
+								
+								<div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full {coinColor.bg} blur-2xl opacity-0 transition-opacity group-hover:opacity-100"></div>
+								
+								<div class="relative z-10">
+									<div class="mb-3 flex items-start justify-between">
+										<div class="flex h-10 w-10 items-center justify-center rounded-xl border {coinColor.border} {coinColor.bg} text-sm font-black {coinColor.text} transition-all duration-300 group-hover:scale-110">
+											{coin.sym[0]}
+										</div>
+										<div class="flex flex-col items-end gap-1.5">
+											{#if Math.abs(change) >= priceAlertThreshold}
+												<div class="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold {isPositive ? 'bg-green-400/20 text-green-400' : 'bg-red-400/20 text-red-400'} animate-pulse">
+													<span>{isPositive ? '🔥' : '❄️'}</span>
+												</div>
+											{/if}
+											<div class="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold {isPositive ? 'bg-green-400/15 text-green-400 border border-green-400/20' : 'bg-red-400/15 text-red-400 border border-red-400/20'}">
+												<span>{isPositive ? '↑' : '↓'}</span>
+												<span>{Math.abs(change).toFixed(1)}%</span>
+											</div>
+										</div>
+									</div>
+
+									<div class="absolute right-0 top-10 flex flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+										<button onclick={(e) => toggleFavorite(coin.sym, e)} class="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-sm transition-all hover:bg-white/10 hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-slate-400'}">
+											{isFavorite ? '★' : '☆'}
+										</button>
+										{#if compareMode}
+											<button onclick={(e) => { e.stopPropagation(); toggleCompare(coin.sym); }} class="flex h-7 w-7 items-center justify-center rounded-full text-sm transition-all {isInCompare ? 'bg-blue-400 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}">
+												{isInCompare ? '✓' : '+'}
+											</button>
+										{/if}
+									</div>
+
+									{#if flipCard === coin.sym}
+										<div class="animate-[flipIn_0.3s_ease]">
+											<p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{coin.sym}</p>
+											<p class="text-sm font-bold text-white">{coin.info.name}</p>
+											<p class="mt-2 text-[9px] text-slate-600">Current Rate</p>
+											<button onclick={(e) => { e.stopPropagation(); copyToClipboard(fmtBig(coin.converted), coin.sym); }} class="relative text-lg font-black text-white cursor-pointer hover:scale-105 transition-transform">
+												{currSym()}{fmtBig(coin.converted)}
+												{#if flashStates[coin.sym + '_copied']}
+													<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-bold text-green-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
+												{/if}
+											</button>
+										</div>
+									{:else}
+										<p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{coin.sym}</p>
+										<button onclick={(e) => { e.stopPropagation(); copyToClipboard(fmt(coin.converted), coin.sym); }} class="relative text-xl font-black tracking-tight transition-all cursor-pointer text-white group-hover:{coinColor.text}">
+											{currSym()}{fmt(coin.converted)}
+											{#if flashStates[coin.sym + '_copied']}
+												<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-bold text-green-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
+											{/if}
+										</button>
+
+										<svg viewBox="0 0 80 32" class="mt-2 h-6 w-full opacity-50 transition-opacity group-hover:opacity-80" preserveAspectRatio="none">
+											<defs>
+												<linearGradient id="g-{coin.sym}" x1="0" y1="0" x2="0" y2="1">
+													<stop offset="0%" stop-color={isPositive ? '#4ade80' : '#f87171'} stop-opacity="0.4"/>
+													<stop offset="100%" stop-color={isPositive ? '#4ade80' : '#f87171'} stop-opacity="0"/>
+												</linearGradient>
+											</defs>
+											<path d={spark.area} fill="url(#g-{coin.sym})"/>
+											<path d={spark.line} fill="none" stroke={isPositive ? '#4ade80' : '#f87171'} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+										</svg>
+									{/if}
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			<!-- ── Skeleton ── -->
+			{#if loading && !Object.keys(rates).length}
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+					{#each Array(12) as _, i}
+						<div class="h-32 animate-pulse rounded-2xl bg-white/[0.02] border border-white/5" style="animation-delay:{i * 50}ms"></div>
+					{/each}
+				</div>
+			{/if}
+
+			<!-- ── All Pairs ── -->
+			{#if filtered.length}
+				<div class="mb-6">
+					<div class="mb-4 flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+								{searchQuery ? 'Results' : CATEGORIES.find(c => c.key === selectedCategory)?.label ?? 'All'} Rates
+							</p>
+							<span class="rounded-full bg-blue-400/10 border border-blue-400/20 px-2 py-0.5 text-[9px] font-bold text-blue-400">{filtered.length}</span>
+						</div>
+						<p class="text-[9px] text-slate-600">click to copy</p>
+					</div>
+
+					{#if view === 'grid'}
+						<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+							{#each filtered.slice(0, 60) as [sym, usdRate], i (sym)}
+								{@const coinColor = neonColors[i % neonColors.length]}
+								{@const info = coinInfo(sym)}
+								{@const change = info.change24h}
+								{@const isPositive = change >= 0}
+								{@const isFavorite = favorites.has(sym)}
+								{@const isInCompare = compareList.includes(sym)}
+								<div class="group relative overflow-hidden rounded-xl border {coinColor.border} bg-white/[0.015] p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.035] hover:{coinColor.glow}"
+									style="animation:fadeIn 0.3s ease {Math.min(i * 10, 400)}ms both">
+									<div class="flex items-center gap-2.5">
+										<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} text-[9px] font-black {coinColor.text} transition-transform group-hover:scale-110">
+											{sym.slice(0, 2)}
+										</div>
+										<div class="min-w-0 flex-1">
+											<div class="flex items-center justify-between">
+												<p class="truncate text-[11px] font-bold text-white">{sym}</p>
+												<div class="flex items-center gap-1">
+													<button onclick={() => toggleFavorite(sym)} class="text-[10px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-slate-600 hover:text-slate-400'}">
+														{isFavorite ? '★' : '☆'}
+													</button>
+													{#if compareMode}
+														<button onclick={() => toggleCompare(sym)} class="text-[10px] transition-all {isInCompare ? 'text-blue-400' : 'text-slate-600 hover:text-slate-400'}">
+															{isInCompare ? '✓' : '+'}
+														</button>
+													{/if}
+													<span class="text-[9px] font-bold {isPositive ? 'text-green-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</span>
+												</div>
+											</div>
+											<button onclick={() => copyToClipboard(fmt(convertRate(usdRate)), sym)} class="relative truncate text-sm font-black transition-all cursor-pointer hover:scale-105 text-white group-hover:{coinColor.text}">
+												{currSym()}{fmt(convertRate(usdRate))}
+												{#if flashStates[sym + '_copied']}
+													<span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-green-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
+												{/if}
+											</button>
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="overflow-hidden rounded-2xl border border-white/[0.04] bg-white/[0.01] backdrop-blur-sm">
+							<div class="grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.04] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-slate-600 font-mono">
+								<span>#</span>
+								<span>Asset</span>
+								<span class="text-right">Rate ({selectedCurrency})</span>
+								<span class="text-right text-slate-700">USD</span>
+								<span></span>
+							</div>
+							{#each filtered.slice(0, 80) as [sym, usdRate], i (sym)}
+								{@const coinColor = neonColors[i % neonColors.length]}
+								{@const info = coinInfo(sym)}
+								{@const isFavorite = favorites.has(sym)}
+								{@const isInCompare = compareList.includes(sym)}
+								<div class="group grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.015] px-5 py-3 transition-colors last:border-0 hover:bg-white/[0.02]"
+									style="animation:slideRight 0.2s ease {Math.min(i * 8, 400)}ms both">
+									<span class="text-[10px] font-black text-slate-600">{i + 1}</span>
+									<div class="flex items-center gap-3">
+										<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border {coinColor.border} {coinColor.bg} text-[9px] font-black {coinColor.text}">
+											{sym.slice(0, 3)}
+										</div>
+										<div class="min-w-0">
+											<p class="text-xs font-bold text-white">{sym}</p>
+											<p class="text-[9px] text-slate-600">{info.name}</p>
+										</div>
+									</div>
+									<button onclick={() => copyToClipboard(fmtBig(convertRate(usdRate)), sym)} class="relative text-right text-sm font-black cursor-pointer hover:scale-105 transition-transform text-white">
+										{currSym()}{fmtBig(convertRate(usdRate))}
+										{#if flashStates[sym + '_copied']}
+											<span class="absolute -top-5 right-0 text-[8px] font-bold text-green-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
+										{/if}
+									</button>
+									<p class="text-right text-[10px] text-slate-600">${fmtBig(invertRate(usdRate))}</p>
+									<div class="flex items-center justify-end gap-1">
+										<button onclick={() => toggleFavorite(sym)} class="text-[12px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-slate-700 hover:text-slate-500'}">
+											{isFavorite ? '★' : '☆'}
+										</button>
+										{#if compareMode}
+											<button onclick={() => toggleCompare(sym)} class="text-[12px] transition-all {isInCompare ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}">
+												{isInCompare ? '✓' : '+'}
+											</button>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+
+					{#if filtered.length > 80}
+						<p class="mt-4 text-center text-[10px] text-slate-600">Showing 80 of {filtered.length} assets</p>
+					{/if}
+				</div>
+			{:else if !loading && !error}
+				<div class="rounded-2xl border border-white/[0.04] bg-white/[0.01] p-16 text-center backdrop-blur-sm">
+					{#if showFavoritesOnly && favorites.size === 0}
+						<div class="mb-4 text-6xl opacity-30">☆</div>
+						<p class="mb-2 text-lg font-black text-slate-500">No watchlist items</p>
+						<p class="mb-6 text-xs text-slate-700">Star your favorite coins to track them here</p>
+						<button onclick={() => showFavoritesOnly = false} class="rounded-xl border border-blue-400/30 bg-blue-400/10 px-6 py-2.5 text-xs font-bold text-blue-400 transition hover:bg-blue-400/20">
+							View All Assets
+						</button>
+					{:else if searchQuery}
+						<div class="mb-4 text-6xl opacity-30">🔍</div>
+						<p class="mb-2 text-lg font-black text-slate-500">No results found</p>
+						<p class="mb-6 text-xs text-slate-700">Try a different search term</p>
+						<button onclick={() => searchQuery = ''} class="rounded-xl border border-blue-400/30 bg-blue-400/10 px-6 py-2.5 text-xs font-bold text-blue-400 transition hover:bg-blue-400/20">
+							Clear Search
+						</button>
+					{:else}
+						<div class="mb-4 text-6xl opacity-30">∅</div>
+						<p class="mb-2 text-lg font-black text-slate-500">No assets found</p>
+						<p class="text-xs text-slate-700">Try a different category</p>
+					{/if}
+				</div>
+			{/if}
+
+			<!-- ── Footer ── -->
+			<div class="mt-14 border-t border-white/[0.03] pt-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<div class="flex items-center gap-3">
+						<div class="relative">
+							<div class="h-2 w-2 rounded-full bg-blue-400"></div>
+							<div class="absolute inset-0 animate-ping rounded-full bg-blue-400/50"></div>
+						</div>
+						<p class="text-[9px] text-slate-500 font-mono">
+							Coinbase API · {Object.keys(rates).length} assets · 10min refresh
+						</p>
+					</div>
+					<div class="flex items-center gap-4">
+						<div class="hidden sm:flex items-center gap-2 text-[9px] text-slate-600">
+							<span class="rounded bg-white/5 px-1.5 py-0.5">/</span>
+							<span>search</span>
+							<span class="rounded bg-white/5 px-1.5 py-0.5">c</span>
+							<span>compare</span>
+							<span class="rounded bg-white/5 px-1.5 py-0.5">w</span>
+							<span>watchlist</span>
+							<span class="rounded bg-white/5 px-1.5 py-0.5">f</span>
+							<span>favorite</span>
+						</div>
+						<div class="flex gap-5">
+							{#each ['Coinbase API', 'Status', 'Docs'] as link}
+								<span class="cursor-pointer text-[9px] text-slate-600 transition hover:text-blue-400">{link}</span>
+							{/each}
+						</div>
+					</div>
+				</div>
+			</div>
+
+		{/if}
+	</div>
 </div>
 
-<div class="relative min-h-screen overflow-hidden bg-[#060818]">
-<div class="pointer-events-none fixed inset-0" onmousemove={handleMouseMove}>
-<div class="absolute left-[-20%] top-[-10%] h-[700px] w-[700px] rounded-full opacity-[0.08] blur-[140px] transition-transform duration-[3s]"
- style="background:radial-gradient(circle,#0052ff,transparent 70%);transform:translate({mouseX * 2}px,{mouseY * 2}px)"></div>
-<div class="absolute right-[-15%] bottom-[-20%] h-[600px] w-[600px] rounded-full opacity-[0.05] blur-[120px] transition-transform duration-[3s]"
- style="background:radial-gradient(circle,#7c3aed,transparent 70%);transform:translate({-mouseX}px,{-mouseY}px)"></div>
-{#each Array(6) as _, i}
-<div class="absolute h-1 w-1 rounded-full bg-white/10"
- style="left:{15 + i * 14}%;top:{20 + (i * 17) % 60}%;animation:float {4 + i}s ease-in-out infinite;animation-delay:{i * 0.7}s"></div>
-{/each}
-<div class="absolute inset-0 opacity-[0.025]"
- style="background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:80px 80px"></div>
-</div>
-
-<div class="relative mx-auto max-w-7xl px-5 py-10 sm:px-8">
-
-<div class="mb-10 text-center">
-<div class="mb-5 inline-flex items-center gap-4">
-<div class="relative">
-<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0052ff] to-[#0040cc] shadow-2xl shadow-[#0052ff]/40">
-<svg class="h-8 w-8" viewBox="0 0 32 32" fill="none">
-<path d="M16 28c6.627 0 12-5.373 12-12S22.627 4 16 4 4 9.373 4 16s5.373 12 12 12z" fill="white"/>
-<path d="M16 24c-4.418 0-8-3.582-8-8s3.582-8 8-8c4.067 0 7.422 3.04 7.923 6.968h-3.965c-.462-1.71-2.007-2.968-3.958-2.968-2.21 0-4 1.79-4 4s1.79 4 4 4c1.951 0 3.496-1.258 3.958-2.968h3.965C23.422 20.96 20.067 24 16 24z" fill="#0052ff"/>
-</svg>
-</div>
-<div class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-emerald-400 {pulse ? 'scale-150' : ''} transition-transform">
-<div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/40"></div>
-</div>
-</div>
-<div class="text-left">
-<h1 class="text-4xl font-black tracking-tighter text-white sm:text-5xl lg:text-6xl" style="text-shadow:0 0 80px rgba(0,82,255,0.3)">Coinbase</h1>
-<p class="text-[11px] uppercase tracking-[0.3em] text-[#0052ff]/70">Exchange Rates · Live</p>
-</div>
-</div>
-
-<div class="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-white/[0.04] bg-white/[0.02] px-6 py-3 backdrop-blur-sm">
-<div class="flex items-center gap-2">
-<div class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-<span class="text-[10px] font-bold text-white/30">LIVE</span>
-</div>
-<div class="h-3 w-px bg-white/10"></div>
-<span class="text-[10px] font-bold text-white/40">
-<span class="font-black text-white/70">{Object.keys(rates).length}</span> assets
-</span>
-<div class="h-3 w-px bg-white/10"></div>
-<span class="text-[10px] font-bold text-white/40">
-<span class="font-black text-white/70">{selectedCurrency}</span> base
-</span>
-<div class="h-3 w-px bg-white/10"></div>
-<span class="text-[10px] text-white/20 flex items-center gap-1">
-{#if lastUpdated}
-{#if Math.floor((Date.now() - lastUpdated.getTime()) / 1000) < 60}
-<span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-{/if}
-{getTimeAgo(lastUpdated)}
-{:else}
-loading…
-{/if}
-</span>
-</div>
-</div>
-
-<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-<div class="flex flex-wrap items-center gap-2">
-<div class="relative">
-<svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-</svg>
-<input bind:this={searchInputRef} bind:value={searchQuery}
-placeholder="Search assets... (/)"
-class="w-44 rounded-xl border border-white/[0.06] bg-white/[0.02] py-2.5 pl-10 pr-9 text-sm text-white placeholder-white/25 outline-none backdrop-blur-sm transition-all focus:w-56 focus:border-[#0052ff]/30 focus:bg-white/[0.04] focus:shadow-lg focus:shadow-[#0052ff]/10" />
-{#if searchQuery}
-<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-</svg>
-</button>
-{/if}
-</div>
-
-<div class="flex flex-wrap gap-1.5">
-{#each CATEGORIES.slice(0, 5) as cat}
-<button onclick={() => { selectedCategory = cat.key; searchQuery = ''; }}
-class="flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[10px] font-bold transition-all
-{selectedCategory === cat.key && !searchQuery
-? 'border-[#0052ff]/40 bg-[#0052ff]/15 text-[#0052ff] shadow-md shadow-[#0052ff]/10'
-: 'border-white/[0.04] bg-white/[0.02] text-white/40 hover:border-white/10 hover:text-white/60'}">
-<span class="text-xs">{cat.emoji}</span>
-<span>{cat.label}</span>
-</button>
-{/each}
-</div>
-</div>
-
-<div class="flex items-center gap-2">
-<select bind:value={sortBy} class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] font-bold text-white/60 outline-none backdrop-blur-sm transition-all hover:border-white/10 focus:border-[#0052ff]/30 cursor-pointer">
-{#each SORT_OPTIONS as opt}
-<option value={opt.key}>{opt.label}</option>
-{/each}
-</select>
-
-<div class="hidden sm:flex gap-0.5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-1 backdrop-blur-sm">
-{#each CURRENCIES.slice(0, 4) as cur}
-<button onclick={() => selectedCurrency = cur}
-class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
-{selectedCurrency === cur ? 'bg-[#0052ff] text-white shadow-md shadow-[#0052ff]/30' : 'text-white/30 hover:text-white/60'}">
-{cur}
-</button>
-{/each}
-</div>
-
-<div class="flex gap-0.5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-1 backdrop-blur-sm">
-<button onclick={() => view = 'grid'}
-class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
-{view === 'grid' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}">⊞</button>
-<button onclick={() => view = 'list'}
-class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition
-{view === 'list' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}">☰</button>
-</div>
-
-<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
-class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
-{showFavoritesOnly ? 'border-yellow-500/40 bg-yellow-500/15 text-yellow-400' : 'border-white/[0.06] bg-white/[0.02] text-white/50 hover:text-white/70'}">
-<span class="text-sm">{showFavoritesOnly ? '★' : '☆'}</span>
-<span class="hidden lg:inline">Watchlist</span>
-{#if favorites.size > 0}
-<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
-{/if}
-</button>
-
-<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
-class="hidden sm:flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-bold transition-all
-{compareMode ? 'border-[#0052ff]/40 bg-[#0052ff]/15 text-[#0052ff]' : 'border-white/[0.06] bg-white/[0.02] text-white/50 hover:text-white/70'}">
-<span>⚖️</span>
-<span class="hidden lg:inline">Compare</span>
-{#if compareList.length > 0}
-<span class="ml-1 rounded-full bg-[#0052ff]/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
-{/if}
-</button>
-
-<button onclick={() => showMobileFilters = !showMobileFilters} class="flex items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] font-bold text-white/60 transition-all hover:border-white/10 sm:hidden">
-<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-</svg>
-</button>
-
-<button onclick={fetchRates} disabled={loading}
-class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] font-black text-white/40 backdrop-blur-sm transition hover:border-[#0052ff]/20 hover:text-white/70 disabled:opacity-20 {pulse ? 'text-[#0052ff]' : ''}">
-{loading ? '⟳' : '↻'}
-</button>
-</div>
-</div>
-
-{#if error}
-<div class="mb-8 rounded-2xl border border-red-500/20 bg-red-500/[0.06] p-8 text-center backdrop-blur-sm">
-<p class="mb-2 text-4xl">⚡</p>
-<p class="text-sm font-black text-red-400">Connection Interrupted</p>
-<p class="mt-1 text-xs text-white/30">{error}</p>
-<button onclick={fetchRates}
-class="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-6 py-2.5 text-xs font-black text-red-300 transition hover:bg-red-400/20">
-Try Again
-</button>
-</div>
-{/if}
-
-{#if featuredRates.length && !searchQuery}
-<div class="mb-8">
-<div class="mb-3 flex items-center justify-between">
-<p class="text-[10px] font-black uppercase tracking-[0.25em] text-white/20">Featured Assets</p>
-<div class="flex items-center gap-2">
-<span class="text-[9px] text-white/20">24h change</span>
-<div class="h-3 w-px bg-white/10"></div>
-<button onclick={() => flipCard = flipCard ? null : 'all'} class="text-[9px] text-white/30 hover:text-white/50 transition">Flip all</button>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-{#each featuredRates as coin, i (coin.sym)}
-{@const spark = sparkSvg(coin.spark, coin.info.color)}
-{@const change = coin.info.change24h}
-{@const isPositive = change >= 0}
-{@const isFavorite = favorites.has(coin.sym)}
-{@const isInCompare = compareList.includes(coin.sym)}
-{@const isBigMover = Math.abs(change) >= priceAlertThreshold}
-<div
-class="group relative overflow-hidden rounded-xl border border-white/[0.05] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-4 text-left backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1 cursor-pointer {isFavorite ? 'ring-1 ring-yellow-500/30' : ''} {focusedIndex === i ? 'ring-2 ring-[#0052ff]/50' : ''}"
-style="animation:slideUp 0.5s cubic-bezier(.22,1,.36,1) {i * 40}ms both"
-onmouseenter={() => hoveredCard = coin.sym}
-onmouseleave={() => hoveredCard = null}
-onclick={() => { if (compareMode) { toggleCompare(coin.sym); } else { flipCard = flipCard === coin.sym ? null : coin.sym; } }}
-role="button"
-tabindex="0"
-aria-label="{coin.info.name} price: {currSym()}{fmt(coin.converted)}">
-
-<div class="absolute -top-20 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40"
- style="background:{coin.info.color}"></div>
-
-<div class="relative">
-<div class="mb-3 flex items-start justify-between">
-<div class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-black text-white shadow-lg transition-transform duration-300 group-hover:scale-110"
- style="background:linear-gradient(135deg,{coin.info.color},{coin.info.color}aa);box-shadow:0 4px 16px {coin.info.color}40">
-{coin.sym[0]}
-</div>
-<div class="flex flex-col items-end gap-1.5">
-{#if isBigMover}
-<div class="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold {isPositive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'} animate-pulse"
- onmouseenter={(e) => showTooltip(Math.abs(change).toFixed(1) + '% 24h change', e)}
- onmouseleave={hideTooltip}>
-<span>{isPositive ? '🔥' : '❄️'}</span>
-</div>
-{/if}
-<div class="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold {isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}">
-<span>{isPositive ? '↑' : '↓'}</span>
-<span>{Math.abs(change).toFixed(1)}%</span>
-</div>
-</div>
-</div>
-
-<div class="absolute right-0 top-10 flex flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-<button
-onclick={(e) => toggleFavorite(coin.sym, e)}
-class="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-sm transition-all hover:bg-white/10 hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/30'}"
-aria-label={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}
-onmouseenter={(e) => showTooltip(isFavorite ? 'Remove from watchlist (f)' : 'Add to watchlist (f)', e)}
-onmouseleave={hideTooltip}>
-{isFavorite ? '★' : '☆'}
-</button>
-{#if compareMode}
-<button
-onclick={(e) => { e.stopPropagation(); toggleCompare(coin.sym); }}
-class="flex h-7 w-7 items-center justify-center rounded-full text-sm transition-all {isInCompare ? 'bg-[#0052ff] text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}"
-aria-label={isInCompare ? 'Remove from comparison' : 'Add to comparison'}>
-{isInCompare ? '✓' : '+'}
-</button>
-{/if}
-</div>
-
-{#if flipCard === coin.sym}
-<div class="animate-[flipIn_0.3s_ease]">
-<p class="text-[10px] font-bold uppercase tracking-wider text-white/30">{coin.sym}</p>
-<p class="text-sm font-bold text-white/70">{coin.info.name}</p>
-<p class="mt-2 text-[9px] text-white/20">Current Rate</p>
-<button
-onclick={(e) => { e.stopPropagation(); copyToClipboard(fmtBig(coin.converted), coin.sym); }}
-class="relative text-lg font-black text-white cursor-pointer hover:scale-105 active:scale-95 transition-transform"
->
-{currSym()}{fmtBig(coin.converted)}
-{#if flashStates[coin.sym + '_copied']}
-<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-bold text-emerald-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
-{/if}
-</button>
-</div>
-{:else}
-<p class="text-[10px] font-bold uppercase tracking-wider text-white/30">{coin.sym}</p>
-<button
-onclick={(e) => { e.stopPropagation(); copyToClipboard(fmt(coin.converted), coin.sym); }}
-class="relative text-xl font-black tracking-tight transition-all cursor-pointer hover:scale-105 active:scale-95"
-class:text-emerald-400={flashStates[coin.sym] === 'up'}
-class:text-red-400={flashStates[coin.sym] === 'down'}
-class:text-white={!flashStates[coin.sym]}
->
-{currSym()}{fmt(coin.converted)}
-{#if flashStates[coin.sym + '_copied']}
-<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-bold text-emerald-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
-{/if}
-</button>
-
-<svg viewBox="0 0 80 32" class="mt-2 h-7 w-full opacity-50 transition-opacity group-hover:opacity-80" preserveAspectRatio="none">
-<defs>
-<linearGradient id="g-{coin.sym}" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color={isPositive ? '#10b981' : '#ef4444'} stop-opacity="0.4"/>
-<stop offset="100%" stop-color={isPositive ? '#10b981' : '#ef4444'} stop-opacity="0"/>
-</linearGradient>
-</defs>
-<path d={spark.area} fill="url(#g-{coin.sym})"/>
-<path d={spark.line} fill="none" stroke={isPositive ? '#10b981' : '#ef4444'} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-{/if}
-</div>
-</div>
-{/each}
-</div>
-</div>
-{/if}
-
-{#if loading && !Object.keys(rates).length}
-<div class="space-y-6">
-<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-{#each Array(12) as _, i}
-<div class="h-36 animate-pulse rounded-2xl bg-white/[0.02]" style="animation-delay:{i * 50}ms"></div>
-{/each}
-</div>
-</div>
-{/if}
-
-{#if filtered.length}
-<div class="mb-6">
-<div class="mb-4 flex items-center justify-between">
-<div class="flex items-center gap-3">
-<p class="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">
-{searchQuery ? 'Results' : CATEGORIES.find(c => c.key === selectedCategory)?.label ?? 'All'} Rates
-</p>
-<span class="rounded-full bg-white/[0.04] px-2 py-0.5 text-[9px] font-bold text-white/20">{filtered.length}</span>
-</div>
-<p class="text-[9px] text-white/10">click to copy</p>
-</div>
-
-{#if view === 'grid'}
-<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-{#each filtered.slice(0, 60) as [sym, usdRate], i (sym)}
-{@const info = coinInfo(sym)}
-{@const featured = FEATURED.includes(sym)}
-{@const change = info.change24h}
-{@const isPositive = change >= 0}
-{@const isFavorite = favorites.has(sym)}
-{@const isInCompare = compareList.includes(sym)}
-{@const isFocused = focusedIndex === i + featuredRates.length}
-<div class="group relative overflow-hidden rounded-xl border border-white/[0.04] bg-white/[0.02] p-3 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.10] hover:bg-white/[0.04] hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5 {isFavorite ? 'ring-1 ring-yellow-500/20' : ''} {isFocused ? 'ring-2 ring-[#0052ff]/50' : ''}"
- style="animation:fadeIn 0.3s ease {Math.min(i * 10, 400)}ms both"
- aria-label="{info.name} price: {currSym()}{fmt(convertRate(usdRate))}">
-<div class="flex items-center gap-2.5">
-<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black transition-transform group-hover:scale-110"
- style="background:{info.color}20;color:{info.color}">
-{sym.slice(0, 2)}
-</div>
-<div class="min-w-0 flex-1">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-1">
-<p class="truncate text-[11px] font-bold text-white/70">{sym}</p>
-{#if featured}
-<span class="h-1 w-1 rounded-full" style="background:{info.color}"></span>
-{/if}
-</div>
-<div class="flex items-center gap-1">
-<button
-onclick={() => toggleFavorite(sym)}
-class="text-[10px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/20 hover:text-white/40'}"
-aria-label={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}>
-{isFavorite ? '★' : '☆'}
-</button>
-{#if compareMode}
-<button
-onclick={() => toggleCompare(sym)}
-class="text-[10px] transition-all {isInCompare ? 'text-[#0052ff]' : 'text-white/20 hover:text-white/40'}">
-{isInCompare ? '✓' : '+'}
-</button>
-{/if}
-<span class="text-[9px] font-bold {isPositive ? 'text-emerald-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</span>
-</div>
-</div>
-<button
-onclick={() => copyToClipboard(fmt(convertRate(usdRate)), sym)}
-class="relative truncate text-sm font-black transition-all cursor-pointer hover:scale-105 active:scale-95"
-class:text-emerald-400={flashStates[sym] === 'up'}
-class:text-red-400={flashStates[sym] === 'down'}
-class:text-white={!flashStates[sym]}
->
-{currSym()}{fmt(convertRate(usdRate))}
-{#if flashStates[sym + '_copied']}
-<span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-emerald-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
-{/if}
-</button>
-</div>
-</div>
-<div class="absolute bottom-0 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full"
- style="background: linear-gradient(to right, {isPositive ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'}, {isPositive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}, transparent)"></div>
-</div>
-{/each}
-</div>
-{:else}
-<div class="overflow-hidden rounded-2xl border border-white/[0.04] bg-white/[0.01] backdrop-blur-sm">
-<div class="grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.04] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-white/12">
-<span>#</span>
-<span>Asset</span>
-<span class="text-right">Rate ({selectedCurrency})</span>
-<span class="text-right text-white/8">USD</span>
-<span></span>
-</div>
-{#each filtered.slice(0, 80) as [sym, usdRate], i (sym)}
-{@const info = coinInfo(sym)}
-{@const isFavorite = favorites.has(sym)}
-{@const isInCompare = compareList.includes(sym)}
-<div class="group grid grid-cols-[3rem_1fr_10rem_8rem_3rem] items-center gap-2 border-b border-white/[0.015] px-5 py-3 transition-colors last:border-0 hover:bg-white/[0.015]"
- style="animation:slideRight 0.2s ease {Math.min(i * 8, 400)}ms both">
-<span class="text-[10px] font-black text-white/10">{i + 1}</span>
-<div class="flex items-center gap-3">
-<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black"
- style="background:{info.color}12;color:{info.color}">
-{sym.slice(0, 3)}
-</div>
-<div class="min-w-0">
-<p class="text-xs font-bold text-white/60">{sym}</p>
-<p class="text-[9px] text-white/15">{info.name}</p>
-</div>
-</div>
-<button
-onclick={() => copyToClipboard(fmtBig(convertRate(usdRate)), sym)}
-class="relative text-right text-sm font-black cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-class:text-emerald-400={flashStates[sym] === 'up'}
-class:text-red-400={flashStates[sym] === 'down'}
-class:text-white={!flashStates[sym]}
->
-{currSym()}{fmtBig(convertRate(usdRate))}
-{#if flashStates[sym + '_copied']}
-<span class="absolute -top-5 right-0 text-[8px] font-bold text-emerald-400 whitespace-nowrap" in:fade={{ duration: 150 }}>Copied!</span>
-{/if}
-</button>
-<p class="text-right text-[10px] text-white/15">${fmtBig(invertRate(usdRate))}</p>
-<div class="flex items-center justify-end gap-1">
-<button
-onclick={() => toggleFavorite(sym)}
-class="text-[12px] transition-all hover:scale-110 {isFavorite ? 'text-yellow-400' : 'text-white/20 hover:text-white/40'}">
-{isFavorite ? '★' : '☆'}
-</button>
-{#if compareMode}
-<button
-onclick={() => toggleCompare(sym)}
-class="text-[12px] transition-all {isInCompare ? 'text-[#0052ff]' : 'text-white/20 hover:text-white/40'}">
-{isInCompare ? '✓' : '+'}
-</button>
-{/if}
-</div>
-</div>
-{/each}
-</div>
-{/if}
-
-{#if filtered.length > 80}
-<p class="mt-4 text-center text-[10px] text-white/10">Showing 80 of {filtered.length} assets</p>
-{/if}
-</div>
-{:else if !loading && !error}
-<div class="rounded-2xl border border-white/[0.04] bg-white/[0.01] p-16 text-center backdrop-blur-sm">
-{#if showFavoritesOnly && favorites.size === 0}
-<div class="mb-4 text-6xl opacity-30">☆</div>
-<p class="mb-2 text-lg font-black text-white/40">No watchlist items</p>
-<p class="mb-6 text-xs text-white/20">Star your favorite coins to track them here</p>
-<button onclick={() => showFavoritesOnly = false}
-class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-2.5 text-xs font-bold text-white/50 transition hover:border-[#0052ff]/20 hover:text-white/70">
-View All Assets
-</button>
-{:else if searchQuery}
-<div class="mb-4 text-6xl opacity-30">🔍</div>
-<p class="mb-2 text-lg font-black text-white/40">No results found</p>
-<p class="mb-6 text-xs text-white/20">Try a different search term</p>
-<button onclick={() => searchQuery = ''}
-class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-2.5 text-xs font-bold text-white/50 transition hover:border-[#0052ff]/20 hover:text-white/70">
-Clear Search
-</button>
-{:else}
-<div class="mb-4 text-6xl opacity-30">∅</div>
-<p class="mb-2 text-lg font-black text-white/40">No assets found</p>
-<p class="text-xs text-white/20">Try a different category</p>
-{/if}
-</div>
-{/if}
-
-<div class="mt-14 border-t border-white/[0.03] pt-6">
-<div class="flex flex-wrap items-center justify-between gap-4">
-<div class="flex items-center gap-3">
-<div class="relative">
-<div class="h-2 w-2 rounded-full bg-emerald-400/60"></div>
-<div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/20"></div>
-</div>
-<p class="text-[9px] text-white/12">
-Coinbase API · {Object.keys(rates).length} assets · 10min refresh
-</p>
-</div>
-<div class="flex items-center gap-4">
-<div class="hidden sm:flex items-center gap-2 text-[9px] text-white/10">
-<span class="rounded bg-white/5 px-1.5 py-0.5">/</span>
-<span>search</span>
-<span class="rounded bg-white/5 px-1.5 py-0.5">c</span>
-<span>compare</span>
-<span class="rounded bg-white/5 px-1.5 py-0.5">w</span>
-<span>watchlist</span>
-<span class="rounded bg-white/5 px-1.5 py-0.5">f</span>
-<span>favorite</span>
-</div>
-<div class="flex gap-5">
-{#each ['Coinbase API', 'Status', 'Docs'] as link}
-<span class="cursor-pointer text-[9px] text-white/10 transition hover:text-white/25">{link}</span>
-{/each}
-</div>
-</div>
-</div>
-</div>
-
-</div>
-</div>
-
+<!-- ── Mobile Filters ── -->
 {#if showMobileFilters}
-<button onclick={() => showMobileFilters = false}
-class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
-in:fade={{ duration: 200 }} aria-label="Close filters"></button>
+	<button onclick={() => showMobileFilters = false}
+		class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+		in:fade={{ duration: 200 }} aria-label="Close filters"></button>
 
-<div class="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t border-white/10 bg-[#0a0f1c] p-6"
- in:fly={{ y: 100, duration: 300 }}>
-<div class="mb-4 flex items-center justify-between">
-<h3 class="text-lg font-bold text-white">Filters</h3>
-<button onclick={() => showMobileFilters = false} class="rounded-full bg-white/5 p-2 text-white/50 transition hover:bg-white/10 hover:text-white">
-<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-</svg>
-</button>
-</div>
+	<div class="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t border-blue-400/20 bg-[#040d14] p-6"
+		in:fly={{ y: 100, duration: 300 }}>
+		<div class="mb-4 flex items-center justify-between">
+			<h3 class="text-lg font-bold text-white">Filters</h3>
+			<button onclick={() => showMobileFilters = false} class="rounded-full bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white">
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
 
-<div class="mb-4">
-<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Categories</p>
-<div class="flex flex-wrap gap-2">
-{#each CATEGORIES as cat}
-<button onclick={() => { selectedCategory = cat.key; searchQuery = ''; }}
-class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
-   {selectedCategory === cat.key && !searchQuery
-     ? 'border-[#0052ff]/50 bg-[#0052ff]/20 text-[#0052ff]'
-     : 'border-white/10 bg-white/5 text-white/60'}">
-<span>{cat.emoji}</span>
-<span>{cat.label}</span>
-</button>
-{/each}
-</div>
-</div>
+		<div class="mb-4">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Categories</p>
+			<div class="flex flex-wrap gap-2">
+				{#each CATEGORIES as cat}
+					<button onclick={() => { selectedCategory = cat.key; searchQuery = ''; }}
+						class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
+						   {selectedCategory === cat.key && !searchQuery
+						     ? 'border-blue-400/50 bg-blue-400/20 text-blue-400'
+						     : 'border-white/10 bg-white/5 text-slate-400'}">
+						<span>{cat.emoji}</span>
+						<span>{cat.label}</span>
+					</button>
+				{/each}
+			</div>
+		</div>
 
-<div class="mb-4">
-<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Quick Filters</p>
-<div class="flex gap-2">
-<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
-class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
-{showFavoritesOnly ? 'border-yellow-500/50 bg-yellow-500/20 text-yellow-400' : 'border-white/10 bg-white/5 text-white/60'}">
-<span>{showFavoritesOnly ? '★' : '☆'}</span>
-<span>Watchlist</span>
-{#if favorites.size > 0}
-<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
+		<div class="mb-4">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Quick Filters</p>
+			<div class="flex gap-2">
+				<button onclick={() => showFavoritesOnly = !showFavoritesOnly}
+					class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
+					{showFavoritesOnly ? 'border-yellow-400/50 bg-yellow-400/20 text-yellow-400' : 'border-white/10 bg-white/5 text-slate-400'}">
+					<span>{showFavoritesOnly ? '★' : '☆'}</span>
+					<span>Watchlist</span>
+					{#if favorites.size > 0}
+						<span class="ml-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{favorites.size}</span>
+					{/if}
+				</button>
+				<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
+					class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
+					{compareMode ? 'border-blue-400/50 bg-blue-400/20 text-blue-400' : 'border-white/10 bg-white/5 text-slate-400'}">
+					<span>⚖️</span>
+					<span>Compare</span>
+					{#if compareList.length > 0}
+						<span class="ml-1 rounded-full bg-blue-400/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
+					{/if}
+				</button>
+			</div>
+		</div>
+
+		<div class="mb-4">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Currency</p>
+			<div class="flex flex-wrap gap-2">
+				{#each CURRENCIES as cur}
+					<button onclick={() => selectedCurrency = cur}
+						class="rounded-full border px-3 py-2 text-xs font-bold transition-all
+						   {selectedCurrency === cur
+						     ? 'border-blue-400 bg-blue-400/20 text-blue-400'
+						     : 'border-white/10 bg-white/5 text-slate-400'}">
+						{cur}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<div class="mb-6">
+			<p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Sort By</p>
+			<select bind:value={sortBy} class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white outline-none font-mono">
+				{#each SORT_OPTIONS as opt}
+					<option value={opt.key}>{opt.label}</option>
+				{/each}
+			</select>
+		</div>
+
+		<button onclick={() => showMobileFilters = false} class="w-full rounded-xl border border-blue-400/30 bg-blue-400/10 py-3 text-sm font-bold text-blue-400 transition hover:bg-blue-400/20">
+			Show {filtered.length} Assets
+		</button>
+	</div>
 {/if}
-</button>
-<button onclick={() => { compareMode = !compareMode; if (!compareMode) compareList = []; }}
-class="flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-bold transition-all
-{compareMode ? 'border-[#0052ff]/50 bg-[#0052ff]/20 text-[#0052ff]' : 'border-white/10 bg-white/5 text-white/60'}">
-<span>⚖️</span>
-<span>Compare</span>
+
+<!-- ── Compare Bar ── -->
 {#if compareList.length > 0}
-<span class="ml-1 rounded-full bg-[#0052ff]/30 px-1.5 py-0.5 text-[9px]">{compareList.length}</span>
-{/if}
-</button>
-</div>
-</div>
-
-<div class="mb-4">
-<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Currency</p>
-<div class="flex flex-wrap gap-2">
-{#each CURRENCIES as cur}
-<button onclick={() => selectedCurrency = cur}
-class="rounded-full border px-3 py-2 text-xs font-bold transition-all
-   {selectedCurrency === cur
-     ? 'border-[#0052ff] bg-[#0052ff] text-white'
-     : 'border-white/10 bg-white/5 text-white/50'}">
-{cur}
-</button>
-{/each}
-</div>
-</div>
-
-<div class="mb-6">
-<p class="mb-2 text-xs font-bold uppercase tracking-wider text-white/30">Sort By</p>
-<select bind:value={sortBy} class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white outline-none">
-{#each SORT_OPTIONS as opt}
-<option value={opt.key}>{opt.label}</option>
-{/each}
-</select>
-</div>
-
-<button onclick={() => showMobileFilters = false} class="w-full rounded-xl bg-[#0052ff] py-3 text-sm font-bold text-white transition hover:bg-[#0052ff]/90">
-Show {filtered.length} Assets
-</button>
-</div>
+	<div class="fixed bottom-6 left-1/2 z-40 w-full max-w-2xl -translate-x-1/2 px-4" in:fly={{ y: 100, duration: 300 }}>
+		<div class="rounded-2xl border border-blue-400/20 bg-[#040d14]/95 p-4 shadow-2xl backdrop-blur-xl">
+			<div class="mb-3 flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<span class="text-sm font-bold text-white">Compare</span>
+					<span class="rounded-full bg-blue-400/20 px-2 py-0.5 text-[10px] font-bold text-blue-400">{compareList.length}/4</span>
+				</div>
+				<button onclick={() => compareList = []} class="text-[10px] text-slate-500 hover:text-white">Clear all</button>
+			</div>
+			<div class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+				{#each compareList as sym}
+					{@const info = coinInfo(sym)}
+					{@const rate = rates[sym]}
+					{@const change = info.change24h}
+					{@const isPositive = change >= 0}
+					<div class="rounded-xl border border-white/5 bg-white/[0.03] p-3">
+						<div class="mb-2 flex items-center justify-between">
+							<span class="text-xs font-bold" style="color:{info.color}">{sym}</span>
+							<button onclick={() => toggleCompare(sym)} class="text-slate-600 hover:text-white">×</button>
+						</div>
+						<p class="text-lg font-black text-white">{currSym()}{rate ? fmt(convertRate(rate)) : '—'}</p>
+						<p class="text-[10px] {isPositive ? 'text-green-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</p>
+					</div>
+				{/each}
+			</div>
+			<button onclick={() => compareMode = false} class="w-full rounded-xl border border-blue-400/30 bg-blue-400/10 py-2.5 text-xs font-bold text-blue-400 transition hover:bg-blue-400/20">
+				Done
+			</button>
+		</div>
+	</div>
 {/if}
 
-{#if compareList.length > 0}
-<div class="fixed bottom-6 left-1/2 z-40 w-full max-w-2xl -translate-x-1/2 px-4" in:fly={{ y: 100, duration: 300 }}>
-<div class="rounded-2xl border border-white/10 bg-[#0a0f1c]/95 p-4 shadow-2xl backdrop-blur-xl">
-<div class="mb-3 flex items-center justify-between">
-<div class="flex items-center gap-2">
-<span class="text-sm font-bold text-white">Compare</span>
-<span class="rounded-full bg-[#0052ff]/20 px-2 py-0.5 text-[10px] font-bold text-[#0052ff]">{compareList.length}/4</span>
-</div>
-<button onclick={() => compareList = []} class="text-[10px] text-white/40 hover:text-white/70">Clear all</button>
-</div>
-<div class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-{#each compareList as sym}
-{@const info = coinInfo(sym)}
-{@const rate = rates[sym]}
-{@const change = info.change24h}
-{@const isPositive = change >= 0}
-<div class="rounded-xl border border-white/5 bg-white/[0.03] p-3">
-<div class="mb-2 flex items-center justify-between">
-<span class="text-xs font-bold" style="color:{info.color}">{sym}</span>
-<button onclick={() => toggleCompare(sym)} class="text-white/30 hover:text-white/60">×</button>
-</div>
-<p class="text-lg font-black text-white">{currSym()}{rate ? fmt(convertRate(rate)) : '—'}</p>
-<p class="text-[10px] {isPositive ? 'text-emerald-400' : 'text-red-400'}">{isPositive ? '+' : ''}{change.toFixed(1)}%</p>
-</div>
-{/each}
-</div>
-<button onclick={() => compareMode = false} class="w-full rounded-xl bg-[#0052ff] py-2.5 text-xs font-bold text-white transition hover:bg-[#0052ff]/90">
-Done
-</button>
-</div>
-</div>
-{/if}
-
+<!-- ── Toast ── -->
 {#if showToast}
-<div class="fixed bottom-6 right-6 z-50" in:fly={{ y: 20, duration: 200 }} out:fade={{ duration: 150 }}>
-<div class="rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-xl
- {showToast.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10' :
-  showToast.type === 'warning' ? 'border-yellow-500/30 bg-yellow-500/10' :
-  'border-white/10 bg-white/5'}">
-<p class="flex items-center gap-2 text-sm font-bold text-white">
-{#if showToast.type === 'success'}
-<span class="text-emerald-400">✓</span>
-{:else if showToast.type === 'warning'}
-<span class="text-yellow-400">⚠</span>
-{:else}
-<span class="text-[#0052ff]">ℹ</span>
-{/if}
-{showToast.message}
-</p>
-</div>
-</div>
+	<div class="fixed bottom-6 right-6 z-50" in:fly={{ y: 20, duration: 200 }} out:fade={{ duration: 150 }}>
+		<div class="rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-xl
+		 {showToast.type === 'success' ? 'border-green-400/30 bg-green-400/10' :
+		  showToast.type === 'warning' ? 'border-yellow-400/30 bg-yellow-400/10' :
+		  'border-blue-400/30 bg-blue-400/10'}">
+			<p class="flex items-center gap-2 text-sm font-bold text-white">
+				{#if showToast.type === 'success'}
+					<span class="text-green-400">✓</span>
+				{:else if showToast.type === 'warning'}
+					<span class="text-yellow-400">⚠</span>
+				{:else}
+					<span class="text-blue-400">ℹ</span>
+				{/if}
+				{showToast.message}
+			</p>
+		</div>
+	</div>
 {/if}
 
+<!-- ── Tooltip ── -->
 {#if tooltip.show}
-<div class="fixed z-50 pointer-events-none rounded-lg border border-white/10 bg-black/80 px-3 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-sm"
- style="left:{tooltip.x}px;top:{tooltip.y}px;transform:translateX(-50%)">
-{tooltip.text}
-</div>
+	<div class="fixed z-50 pointer-events-none rounded-lg border border-blue-400/20 bg-[#040d14]/90 px-3 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-sm"
+	 style="left:{tooltip.x}px;top:{tooltip.y}px;transform:translateX(-50%)">
+		{tooltip.text}
+	</div>
 {/if}
 
 <style>
