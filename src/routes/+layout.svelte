@@ -22,6 +22,7 @@
 		{ label: 'Solana',     emoji: '◎',  href: '/solana',     category: 'Chain', highlight: true },
 		{ label: 'Bitcoin',    emoji: '₿',  href: '/bitcoin',    category: 'Chain', highlight: true },
 		{ label: 'Staking',    emoji: '💎', href: '/staking',    category: 'DeFi' },
+		{ label: 'PendleFi',   emoji: '⚡', href: '/pendle',     category: 'DeFi', highlight: true },
 		{ label: 'DEX',        emoji: '📊', href: '/dex',        category: 'DeFi' },
 		{ label: 'Perps',      emoji: '📈', href: '/perps',      category: 'DeFi' },
 		{ label: 'Predict',    emoji: '🔮', href: '/predict',    category: 'DeFi' },

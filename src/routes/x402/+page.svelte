@@ -76,17 +76,17 @@
 			wallet: randAddr(),
 			status: pick(statusCycle),
 			task: pick(taskPool),
-			balance: +(Math.random() * 4 + 0.5).toFixed(4),
-			earned:  +(Math.random() * 12).toFixed(4),
-			spent:   +(Math.random() * 6).toFixed(4),
-			txCount: Math.floor(Math.random() * 300) + 10,
-			tasksCompleted: Math.floor(Math.random() * 140) + 5,
-			uptime: Math.floor(Math.random() * 1380) + 5,
+			balance: +(Math.random() * 18 + 2).toFixed(4),
+			earned:  +(Math.random() * 45 + 5).toFixed(4),
+			spent:   +(Math.random() * 38 + 4).toFixed(4),
+			txCount: Math.floor(Math.random() * 450) + 50,
+			tasksCompleted: Math.floor(Math.random() * 180) + 20,
+			uptime: Math.floor(Math.random() * 2880) + 120,
 			statusTick: Math.floor(Math.random() * statusCycle.length),
 			traits: {
-				speed:    Math.floor(Math.random() * 40 + 60),
-				accuracy: Math.floor(Math.random() * 30 + 70),
-				economy:  Math.floor(Math.random() * 50 + 50),
+				speed:    Math.floor(Math.random() * 25 + 55),
+				accuracy: Math.floor(Math.random() * 20 + 65),
+				economy:  Math.floor(Math.random() * 30 + 55),
 			},
 		};
 	}
@@ -101,7 +101,7 @@
 		})
 	);
 
-	let stats = $state({ activeAgents: 8, totalTx: 14821, solSpent: 38.42, tasksDone: 9204 });
+	let stats = $state({ activeAgents: 247, totalTx: 15847, solSpent: 45.8, tasksDone: 3842 });
 
 	// SOL Flow history for the sparkline
 	let solFlowHistory = $state(Array.from({ length: 20 }, () => Math.random() * 80 + 10));
@@ -134,14 +134,14 @@
 				const newStatus = statusCycle[newTick];
 				const svc = pick(services);
 				const paid = newStatus === 'paying' ? svc.cost : 0;
-				const earned = Math.random() < 0.2 ? +(Math.random() * 0.003).toFixed(5) : 0;
+				const earned = Math.random() < 0.15 ? +(Math.random() * 0.015).toFixed(5) : 0;
 				return { ...a, statusTick: newTick, status: newStatus,
-					task: Math.random() < 0.07 ? pick(taskPool) : a.task,
+					task: Math.random() < 0.05 ? pick(taskPool) : a.task,
 					balance: Math.max(0, +(a.balance - paid + earned).toFixed(4)),
 					spent: +(a.spent + paid).toFixed(4),
 					earned: +(a.earned + earned).toFixed(4),
 					txCount: a.txCount + (paid > 0 ? 1 : 0),
-					tasksCompleted: a.tasksCompleted + (Math.random() < 0.05 ? 1 : 0),
+					tasksCompleted: a.tasksCompleted + (Math.random() < 0.08 ? 1 : 0),
 					uptime: a.uptime + 1,
 				};
 			});
@@ -150,10 +150,10 @@
 			txFeed = [{ id: `new-${tick}`, agent: ag.name, color: ag.color,
 				service: svc.name, icon: svc.icon, amount: svc.cost, time: 'just now' },
 				...txFeed.slice(0, 9)];
-			stats.totalTx += Math.floor(Math.random() * 4) + 1;
-			stats.solSpent = +(stats.solSpent + Math.random() * 0.02).toFixed(3);
-			stats.tasksDone += Math.random() < 0.3 ? 1 : 0;
-			if (tick % 12 === 0) agents = agents.map(a => a.balance < 0.1 ? { ...a, balance: +(a.balance + 2).toFixed(4) } : a);
+			stats.totalTx += Math.floor(Math.random() * 12) + 3;
+			stats.solSpent = +(stats.solSpent + Math.random() * 0.08).toFixed(3);
+			stats.tasksDone += Math.random() < 0.25 ? 1 : 0;
+			if (tick % 20 === 0) agents = agents.map(a => a.balance < 0.5 ? { ...a, balance: +(a.balance + 5).toFixed(4) } : a);
 			if (tick % 3 === 0) {
 				sparklineData = sparklineData.map(() => Math.random() * 100);
 				solFlowHistory = [...solFlowHistory.slice(1), Math.random() * 80 + 10];
@@ -215,17 +215,17 @@
 		<!-- ── Stats Bar ── -->
 		<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
 			{#each [
-				{ label: 'Active Agents', value: stats.activeAgents,              hi: true,  trend: '+2',   key: 'agents', icon: '🤖' },
-				{ label: 'Total Txns',    value: stats.totalTx.toLocaleString(), trend: '+' + (Math.floor(tick * 3.2) || 142),  key: 'txns',  icon: '⚡' },
-				{ label: 'SOL Spent',     value: `${stats.solSpent.toFixed(2)} SOL`, trend: '+0.24', key: 'sol',    icon: '◎' },
-				{ label: 'Tasks Done',    value: stats.tasksDone.toLocaleString(), trend: '+8',    key: 'tasks',  icon: '✓' },
+				{ label: 'Active Agents', value: stats.activeAgents.toLocaleString(), hi: true, trend: '+12', key: 'agents', icon: '🤖' },
+				{ label: 'Total Txns',    value: stats.totalTx.toLocaleString(), trend: '+847', key: 'txns',  icon: '⚡' },
+				{ label: 'SOL Spent',     value: `${stats.solSpent.toFixed(1)} SOL`, trend: '+2.4', key: 'sol',    icon: '◎' },
+				{ label: 'Tasks Done',    value: stats.tasksDone.toLocaleString(), trend: '+156', key: 'tasks',  icon: '✓' },
 			] as s (s.key)}
 				<div class="group relative overflow-hidden rounded-2xl border {s.hi ? 'border-green-400/30 bg-green-400/5' : 'border-white/5 bg-white/[0.02]'} p-4 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/10 backdrop-blur-sm">
 					<!-- glow corner top right -->
 					<div class="absolute right-0 top-0 h-20 w-20 rounded-full bg-green-400/5 blur-2xl group-hover:bg-green-400/10 transition-all pointer-events-none"></div>
 					<div class="flex justify-between items-start mb-2">
 						<p class="text-[10px] uppercase tracking-widest text-slate-500">{s.icon} {s.label}</p>
-						<span class="rounded-full bg-green-400/10 px-2 py-0.5 text-[9px] font-black text-green-400">{s.trend}</span>
+						<span class="rounded-full bg-green-400/10 px-2 py-0.5 text-[9px] font-bold text-green-400">{s.trend}</span>
 					</div>
 					<p class="text-2xl font-extrabold {s.hi ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.4)]' : 'text-white'}">{s.value}</p>
 					<!-- Sparkline -->
@@ -311,14 +311,14 @@
 									⚡ PAYING
 								</div>
 							{/if}
-							{#if agent.tasksCompleted > 100}
-								<div class="absolute top-0 left-0 rounded-tl-2xl rounded-br-xl bg-amber-400/20 px-2 py-0.5 text-[9px] font-black text-amber-300 border-r border-b border-amber-400/20">
+							{#if agent.tasksCompleted > 1000}
+								<div class="absolute top-0 left-0 rounded-tl-2xl rounded-br-xl bg-amber-400/20 px-2 py-0.5 font-bold text-amber-300 border-r border-b border-amber-400/20">
 									🏆 TOP
 								</div>
 							{/if}
 
 							<!-- Agent header -->
-							<div class="flex items-center gap-3 relative z-10 {agent.tasksCompleted > 100 ? 'mt-2' : ''}">
+							<div class="flex items-center gap-3 relative z-10 {agent.tasksCompleted > 1000 ? 'mt-2' : ''}">
 								<div class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border {agent.color.border} ring-1 {agent.color.ring} {agent.color.bg} transition-transform duration-300 group-hover:scale-110">
 									<span class="text-sm font-black {agent.color.text}">{agent.name[0]}</span>
 									<span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full {statusDot(agent.status)} border-2 border-[#040d14]"></span>
@@ -326,7 +326,7 @@
 								<div class="min-w-0 flex-1">
 									<div class="flex items-center gap-2 flex-wrap">
 										<p class="text-sm font-bold {agent.color.text}">AGENT_{agent.name}</p>
-										{#if agent.balance > 2}
+										{#if agent.balance > 15}
 											<span class="rounded bg-green-400/15 px-1.5 py-0.5 text-[8px] font-black text-green-400 border border-green-400/20">PROFITABLE</span>
 										{/if}
 									</div>
