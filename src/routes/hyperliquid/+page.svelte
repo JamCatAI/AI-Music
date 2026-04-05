@@ -316,7 +316,23 @@ let filtered = $derived.by(() => {
   return result;
 });
 
-const TICKER_TEXT = '🟢 HYPERLIQUID · PERPS · BTC · ETH · SOL · LIVE FUNDING RATES · OPEN INTEREST · MARK PRICES · DECENTRALIZED PERPS · ON-CHAIN · ';
+const HL = { teal: '#00E5BE', tealMid: '#00c9a3' };
+
+const TICKER_SEGMENTS = [
+	{ text: 'HYPERLIQUID', style: 'text-[#00E5BE]' },
+	{ text: 'MAINNET', style: 'text-white/40' },
+	{ text: '●', style: 'text-emerald-400 animate-pulse' },
+	{ text: 'PERPS', style: 'text-teal-300/80' },
+	{ text: 'MARK_PX', style: 'text-white/35' },
+	{ text: 'FUNDING', style: 'text-violet-400/90' },
+	{ text: 'OPEN_INT', style: 'text-cyan-300/70' },
+	{ text: 'DEX_L2', style: 'text-emerald-400/50' },
+	{ text: 'INFO_API', style: 'text-white/30' }
+];
+
+let syncClock = $derived(
+	lastUpdated ? lastUpdated.toLocaleTimeString('en-GB', { hour12: false }) : '—'
+);
 
 onMount(() => {
   fetchMarkets();
@@ -326,18 +342,60 @@ onMount(() => {
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
-<svelte:head><title>Hyperliquid | JamCat</title></svelte:head>
+<svelte:head>
+	<title>Hyperliquid | JamCat</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap');
+	</style>
+</svelte:head>
 
-<!-- Ticker -->
-<div class="overflow-hidden border-b border-white/5 bg-gradient-to-r from-[#00E5BE]/10 via-[#00E5BE]/5 to-transparent py-2.5 backdrop-blur-xl">
-  <div class="flex whitespace-nowrap" style="animation:marquee 30s linear infinite">
-    {#each [TICKER_TEXT, TICKER_TEXT] as t}
-      <span class="mr-0 text-[10px] font-black uppercase tracking-[0.3em]" style="color:#00E5BE">{t}</span>
-    {/each}
-  </div>
+<!-- Command strip -->
+<div
+	class="relative z-30 border-b border-[#00E5BE]/20 bg-black/55 backdrop-blur-2xl"
+	style="box-shadow: 0 0 48px rgba(0,229,190,0.06);"
+>
+	<div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-6">
+		<div class="flex flex-wrap items-center gap-3 sm:gap-4">
+			<div class="flex items-center gap-2">
+				<span
+					class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] {pulse ? 'animate-ping' : 'animate-pulse'}"
+					style="animation-duration: {pulse ? '0.55s' : '2s'};"
+				></span>
+				<span
+					class="text-[10px] font-bold tracking-[0.2em] text-emerald-400/90"
+					style="font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 10px rgba(52,211,153,0.35);"
+					>STREAM</span
+				>
+			</div>
+			<div class="hidden h-4 w-px bg-white/15 sm:block"></div>
+			<span class="text-[9px] tracking-wider text-white/35" style="font-family: 'JetBrains Mono', monospace;"
+				>api.hyperliquid.xyz/info</span
+			>
+		</div>
+		<div class="min-w-0 flex-1 overflow-hidden px-2 sm:px-6">
+			<div class="flex w-max animate-hl-marquee gap-5 whitespace-nowrap">
+				{#each [0, 1] as _}
+					{#each TICKER_SEGMENTS as seg}
+						<span class="text-[10px] font-bold tracking-wider {seg.style}" style="font-family: 'JetBrains Mono', monospace;"
+							>{seg.text}</span
+						>
+						<span class="text-white/20" style="font-family: 'JetBrains Mono', monospace;">//</span>
+					{/each}
+				{/each}
+			</div>
+		</div>
+		<div class="font-mono text-[9px] text-white/40">
+			SYNC <span class="text-[#00E5BE]">{syncClock}</span>
+			<span class="text-white/25"> · 5s</span>
+		</div>
+	</div>
 </div>
 
-<div class="relative min-h-screen overflow-hidden bg-[#04080f]">
+<div
+	class="hl-root relative min-h-screen overflow-hidden bg-[#04080f]"
+	style="font-family: 'Outfit', system-ui, sans-serif;"
+	onmousemove={handleMouseMove}
+>
   <!-- Enhanced background glows -->
   <div class="pointer-events-none fixed inset-0" aria-hidden="true">
     <div class="absolute left-[-20%] top-[-10%] h-[700px] w-[700px] rounded-full opacity-[0.08] blur-[140px] transition-transform duration-[3s]"
@@ -350,69 +408,58 @@ onMount(() => {
       <div class="absolute h-1 w-1 rounded-full bg-white/15"
         style="left:{10+i*11}%;top:{15+(i*23)%70}%;animation:float {4+i*0.5}s ease-in-out infinite;animation-delay:{i*0.8}s"></div>
     {/each}
+    <div class="absolute inset-0 opacity-[0.035]"
+      style="background-image:linear-gradient(rgba(0,229,190,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,190,.15) 1px,transparent 1px);background-size:56px 56px"></div>
     <div class="absolute inset-0 opacity-[0.02]"
-      style="background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:80px 80px"></div>
+      style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,190,0.12) 2px, rgba(0,229,190,0.12) 3px);"></div>
   </div>
 
-  <div class="relative mx-auto max-w-7xl px-5 py-12 sm:px-8">
+  <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
-    <!-- Enhanced Header -->
-    <div class="mb-12 text-center">
-      <div class="mb-6 inline-flex items-center gap-5">
-        <div class="relative group">
-          <div class="flex h-20 w-20 items-center justify-center rounded-3xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
-            style="background:linear-gradient(135deg,#00E5BE,#00b89a);box-shadow:0 8px 40px #00E5BE50,0 0 80px #00E5BE30,0 0 120px #00E5BE15">
-            <!-- HL logo -->
-            <svg class="h-11 w-11" viewBox="0 0 32 32" fill="none">
+    <!-- Header + global metrics -->
+    <div class="mb-10 flex flex-col gap-8 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
+        <div class="relative shrink-0 group">
+          <div class="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03] sm:h-20 sm:w-20 sm:rounded-3xl"
+            style="background:linear-gradient(145deg,{HL.teal},{HL.tealMid});box-shadow:0 8px 40px rgba(0,229,190,0.45),0 0 60px rgba(0,229,190,0.2),inset 0 1px 0 rgba(255,255,255,0.25)">
+            <svg class="h-10 w-10 sm:h-11 sm:w-11" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path d="M6 6h4v8h12V6h4v20h-4v-8H10v8H6V6z" fill="white"/>
             </svg>
           </div>
-          <div class="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#04080f] {pulse ? 'scale-125' : ''} transition-transform duration-300">
-            <div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/50"></div>
+          <div class="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-emerald-400 ring-2 ring-[#04080f] sm:h-4 sm:w-4 {pulse ? 'scale-110' : ''} transition-transform duration-300">
+            <div class="absolute inset-0 animate-ping rounded-full bg-emerald-400/45"></div>
           </div>
-          <!-- Glow ring -->
-          <div class="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#00E5BE] to-emerald-400 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-40"></div>
         </div>
-        <div class="text-left">
-          <h1 class="text-5xl font-black tracking-tighter text-white sm:text-6xl lg:text-7xl"
-            style="text-shadow:0 0 60px rgba(0,229,190,0.4),0 0 120px rgba(0,229,190,0.2)">Hyperliquid</h1>
-          <p class="text-[12px] uppercase tracking-[0.4em] mt-2" style="color:#00E5BE99">Perpetuals · Live · On-Chain</p>
+        <div class="min-w-0 text-left">
+          <p class="mb-1 text-[10px] font-bold uppercase tracking-[0.35em] text-[#00E5BE]/70" style="font-family: 'JetBrains Mono', monospace;">
+            decentralized perps · L1
+          </p>
+          <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl"
+            style="text-shadow: 0 0 50px rgba(0,229,190,0.35), 0 0 100px rgba(0,229,190,0.12);">
+            Hyperliquid
+          </h1>
+          <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/45">
+            Live mark prices, 24h notionals, funding, and open interest from the public <span class="font-mono text-[#00E5BE]/80">info</span> API — refresh every 5 seconds.
+          </p>
         </div>
       </div>
 
-      <!-- Enhanced Stats bar -->
-      <div class="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-8 py-5 backdrop-blur-xl"
-        style="box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.06),0 0 40px rgba(0,229,190,0.05)">
-        <div class="flex items-center gap-2.5">
-          <div class="relative">
-            <div class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-            <div class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40"></div>
+      <div class="grid w-full grid-cols-2 gap-2 sm:max-w-md sm:grid-cols-4 lg:max-w-xl lg:shrink-0">
+        {#each [
+          { k: 'Markets', v: String(markets.length), sub: 'universe' },
+          { k: '24h Vol', v: fmtVol(totalVolume), sub: 'notional' },
+          { k: 'Open int.', v: fmtVol(totalOI), sub: 'USD est.' },
+          { k: 'Latency', v: lastUpdated ? getTimeAgo(lastUpdated) : '…', sub: 'poll 5s' }
+        ] as tile, ti (tile.k)}
+          <div
+            class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 backdrop-blur-xl transition hover:border-[#00E5BE]/25 hover:shadow-[0_0_28px_rgba(0,229,190,0.08)]"
+            in:fly={{ y: 10, duration: 320, delay: 40 + ti * 45 }}
+          >
+            <p class="text-[8px] font-bold uppercase tracking-[0.2em] text-white/30" style="font-family: 'JetBrains Mono', monospace;">{tile.k}</p>
+            <p class="mt-1 truncate text-lg font-black tabular-nums text-white sm:text-xl">{tile.v}</p>
+            <p class="mt-0.5 text-[9px] text-white/25">{tile.sub}</p>
           </div>
-          <span class="text-[11px] font-bold text-white/50">LIVE</span>
-        </div>
-        <div class="h-5 w-px bg-white/10"></div>
-        <span class="text-[11px] font-bold text-white/50">
-          <span class="font-black text-white">{markets.length}</span> markets
-        </span>
-        <div class="h-5 w-px bg-white/10"></div>
-        <span class="text-[11px] font-bold text-white/50">
-          Vol <span class="font-black text-white">{fmtVol(totalVolume)}</span>
-        </span>
-        <div class="h-5 w-px bg-white/10"></div>
-        <span class="text-[11px] font-bold text-white/50">
-          OI <span class="font-black text-white">{fmtVol(totalOI)}</span>
-        </span>
-        <div class="h-5 w-px bg-white/10"></div>
-        <span class="text-[11px] text-white/40 flex items-center gap-2">
-          {#if lastUpdated}
-            {#if Math.floor((Date.now() - lastUpdated.getTime()) / 1000) < 10}
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-            {/if}
-            {getTimeAgo(lastUpdated)}
-          {:else}
-            loading…
-          {/if}
-        </span>
+        {/each}
       </div>
     </div>
 
@@ -424,8 +471,8 @@ onMount(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           <input bind:this={searchInputRef} bind:value={searchQuery}
-            placeholder="Search markets... (/)"
-            class="w-48 rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-9 text-sm text-white placeholder-white/30 outline-none backdrop-blur-sm transition-all focus:w-60 focus:border-[#00E5BE]/40 focus:bg-white/[0.06] focus:shadow-[0_0_20px_rgba(0,229,190,0.1)]" />
+            placeholder="Search… (press /)"
+            class="w-48 rounded-xl border border-white/[0.08] bg-black/30 py-2.5 pl-10 pr-9 font-mono text-xs text-white placeholder-white/28 outline-none backdrop-blur-md transition-all focus:w-60 focus:border-[#00E5BE]/45 focus:bg-black/40 focus:shadow-[0_0_24px_rgba(0,229,190,0.12)]" />
           {#if searchQuery}
             <button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors" aria-label="Clear search">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -449,7 +496,7 @@ onMount(() => {
       </div>
 
       <div class="flex items-center gap-2">
-        <select bind:value={sortBy} class="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[11px] font-bold text-white/70 outline-none backdrop-blur-sm cursor-pointer hover:border-white/15 hover:bg-white/[0.05] transition-all">
+        <select bind:value={sortBy} class="rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 font-mono text-[10px] font-bold text-white/75 outline-none backdrop-blur-md cursor-pointer hover:border-[#00E5BE]/25 hover:bg-white/[0.04] transition-all">
           {#each SORT_OPTIONS as opt}
             <option value={opt.key}>{opt.label}</option>
           {/each}
@@ -487,22 +534,22 @@ onMount(() => {
 
         <!-- Enhanced Featured top markets -->
     {#if topMarkets.length && !searchQuery && selectedCategory === 'all'}
-      <div class="mb-12">
-        <div class="mb-5 flex items-center justify-between">
-          <p class="text-[11px] font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-2">
-            <span class="h-2 w-2 rounded-full bg-[#00E5BE] shadow-[0_0_10px_#00E5BE]"></span>
-            Top Markets by Volume
+      <div class="mb-10">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <p class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.28em] text-white/40">
+            <span class="h-2 w-2 rounded-full bg-[#00E5BE] shadow-[0_0_12px_#00E5BE]"></span>
+            Top by volume
           </p>
-          <span class="text-[10px] text-white/30">Click cards for detailed view</span>
+          <span class="font-mono text-[9px] text-white/28">Click card · depth + funding</span>
         </div>
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
           {#each topMarkets.slice(0, 12) as m, i (m.name)}
             {@const color = coinColor(m.name)}
             {@const isPositive = m.change24h >= 0}
             {@const spark = sparkSvg(m.spark, isPositive)}
             {@const fundingVal = parseFloat(m.funding)}
             <div
-              class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 cursor-pointer backdrop-blur-md transition-all duration-500 hover:border-[#00E5BE]/40 hover:shadow-[0_12px_40px_rgba(0,229,190,0.2)] hover:-translate-y-2"
+              class="group relative overflow-hidden rounded-2xl border border-white/[0.09] bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-all duration-500 hover:border-[#00E5BE]/45 hover:shadow-[0_12px_48px_rgba(0,229,190,0.18)] hover:-translate-y-1.5 sm:p-5 cursor-pointer"
               style="animation:slideUp 0.6s cubic-bezier(.22,1,.36,1) {i*50}ms both"
               role="button" tabindex="0"
               onclick={() => openMarketDetail(m)}
@@ -580,14 +627,14 @@ onMount(() => {
     <!-- All Markets -->
     {#if filtered.length}
       <div class="mb-6">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-3">
-            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-white/15">
-              {searchQuery ? 'Results' : CATEGORIES.find(c=>c.key===selectedCategory)?.label ?? 'All'} Markets
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-white/35">
+              {searchQuery ? 'Results' : CATEGORIES.find(c=>c.key===selectedCategory)?.label ?? 'All'} markets
             </p>
-            <span class="rounded-full bg-white/[0.04] px-2 py-0.5 text-[9px] font-bold text-white/20">{filtered.length}</span>
+            <span class="rounded-md border border-white/[0.06] bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] font-bold text-[#00E5BE]/80">{filtered.length}</span>
           </div>
-          <p class="text-[9px] text-white/10">click price to copy</p>
+          <p class="font-mono text-[9px] text-white/25">Modal: copy price · charts</p>
         </div>
 
         {#if view === 'grid'}
@@ -633,21 +680,22 @@ onMount(() => {
           </div>
         {:else}
           <!-- Enhanced List view -->
-          <div class="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm"
-            style="box-shadow:0 4px 24px rgba(0,0,0,0.2)">
-            <div class="grid grid-cols-[3rem_1fr_9rem_8rem_9rem_8rem] items-center gap-2 border-b border-white/[0.06] px-5 py-3.5 text-[9px] font-black uppercase tracking-[0.2em] text-white/20 bg-white/[0.02]">
+          <div class="overflow-hidden rounded-2xl border border-[#00E5BE]/15 bg-black/35 shadow-[0_8px_40px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(0,229,190,0.06)] backdrop-blur-xl">
+            <div class="hl-scroll max-h-[min(68vh,640px)] overflow-auto">
+            <div class="min-w-[720px]">
+            <div class="grid grid-cols-[3rem_1fr_9rem_8rem_9rem_8rem] items-center gap-2 border-b border-[#00E5BE]/10 px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 bg-[#00E5BE]/[0.04] sm:px-5 sm:py-3.5">
               <span>#</span>
               <span>Market</span>
-              <span class="text-right">Mark Price</span>
-              <span class="text-right">24h Change</span>
-              <span class="text-right">Volume 24h</span>
-              <span class="text-right">Funding/h</span>
+              <span class="text-right">Mark</span>
+              <span class="text-right">24h</span>
+              <span class="text-right">Vol 24h</span>
+              <span class="text-right">Fund</span>
             </div>
             {#each filtered.slice(0, 80) as m, i (m.name)}
               {@const color = coinColor(m.name)}
               {@const isPositive = m.change24h >= 0}
               {@const fundingVal = parseFloat(m.funding)}
-              <div class="group grid grid-cols-[3rem_1fr_9rem_8rem_9rem_8rem] items-center gap-2 border-b border-white/[0.03] px-5 py-3.5 transition-all cursor-pointer hover:bg-white/[0.04] last:border-0"
+              <div class="group grid grid-cols-[3rem_1fr_9rem_8rem_9rem_8rem] items-center gap-2 border-b border-white/[0.04] px-4 py-3 transition-all cursor-pointer hover:bg-[#00E5BE]/[0.04] last:border-0 sm:px-5 sm:py-3.5"
                 style="animation:slideRight 0.2s ease {Math.min(i*8,400)}ms both"
                 role="button" tabindex="0"
                 aria-label="Open {m.name} market details"
@@ -669,12 +717,14 @@ onMount(() => {
                     <p class="text-[9px] text-white/30">max {m.maxLeverage}x · OI {fmtOI(m.openInterest, m.markPx)}</p>
                   </div>
                 </div>
-                <p class="text-right text-sm font-black text-white/90 group-hover:text-[#00E5BE] transition-colors">${fmt(m.markPx)}</p>
-                <p class="text-right text-sm font-bold {isPositive?'text-emerald-400':'text-red-400'}">{isPositive?'+':''}{m.change24h.toFixed(2)}%</p>
-                <p class="text-right text-[11px] font-bold text-white/50">{fmtVol(m.volume24h)}</p>
-                <p class="text-right text-[11px] font-bold {fundingVal>=0?'text-emerald-400/80':'text-red-400/80'}">{fmtFunding(m.funding)}</p>
+                <p class="text-right font-mono text-sm font-black text-white/90 group-hover:text-[#00E5BE] transition-colors">${fmt(m.markPx)}</p>
+                <p class="text-right font-mono text-sm font-bold {isPositive?'text-emerald-400':'text-red-400'}">{isPositive?'+':''}{m.change24h.toFixed(2)}%</p>
+                <p class="text-right font-mono text-[11px] font-bold text-white/50">{fmtVol(m.volume24h)}</p>
+                <p class="text-right font-mono text-[11px] font-bold {fundingVal>=0?'text-emerald-400/80':'text-red-400/80'}">{fmtFunding(m.funding)}</p>
               </div>
             {/each}
+            </div>
+            </div>
           </div>
         {/if}
 
@@ -691,21 +741,21 @@ onMount(() => {
     {/if}
 
     <!-- Enhanced Footer -->
-    <div class="mt-14 border-t border-white/[0.06] pt-6">
+    <div class="mt-12 border-t border-white/[0.08] pt-6">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div class="relative">
             <div class="h-2 w-2 rounded-full animate-pulse" style="background:#00E5BE99"></div>
             <div class="absolute inset-0 animate-ping rounded-full" style="background:#00E5BE33"></div>
           </div>
-          <p class="text-[9px] text-white/20">
-            Hyperliquid API · {markets.length} markets · 5s refresh
+          <p class="font-mono text-[9px] text-white/30">
+            POST /info · metaAndAssetCtxs · {markets.length} markets · 5s poll
           </p>
         </div>
-        <div class="flex gap-5">
-          {#each ['Hyperliquid', 'Docs', 'Status'] as link}
-            <span class="cursor-pointer text-[9px] text-white/15 transition-colors hover:text-[#00E5BE]">{link}</span>
-          {/each}
+        <div class="flex flex-wrap gap-4 sm:gap-6">
+          <a href="https://hyperliquid.xyz" target="_blank" rel="noopener noreferrer" class="text-[9px] font-semibold text-white/35 transition-colors hover:text-[#00E5BE]">Trade</a>
+          <a href="https://hyperliquid.gitbook.io/hyperliquid-docs" target="_blank" rel="noopener noreferrer" class="text-[9px] font-semibold text-white/35 transition-colors hover:text-[#00E5BE]">Docs</a>
+          <a href="https://hyperliquid.statuspage.io" target="_blank" rel="noopener noreferrer" class="text-[9px] font-semibold text-white/35 transition-colors hover:text-[#00E5BE]">Status</a>
         </div>
       </div>
     </div>
@@ -772,7 +822,8 @@ onMount(() => {
     aria-label="Close modal"></button>
   
   <div 
-    class="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-white/[0.1] bg-[#0a0f1c]/95 backdrop-blur-2xl shadow-2xl shadow-black/80"
+    class="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-[#00E5BE]/20 bg-[#080d14]/95 backdrop-blur-2xl shadow-2xl shadow-black/80"
+    style="box-shadow: 0 0 0 1px rgba(0,229,190,0.08), 0 25px 80px rgba(0,0,0,0.65);"
     in:scale={{start:0.9, duration:300, easing:cubicOut}}
     out:scale={{start:1, duration:200}}>
     
@@ -955,9 +1006,31 @@ onMount(() => {
 {/if}
 
 <style>
-@keyframes marquee {
+@keyframes hl-marquee {
   from { transform: translateX(0); }
-  to   { transform: translateX(-33.33%); }
+  to   { transform: translateX(-50%); }
+}
+.animate-hl-marquee {
+  animation: hl-marquee 34s linear infinite;
+}
+.hl-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 190, 0.35) rgba(0, 0, 0, 0.35);
+}
+.hl-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.hl-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
+}
+.hl-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 190, 0.28);
+  border-radius: 3px;
+}
+.hl-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 190, 0.45);
 }
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px) scale(0.96); }

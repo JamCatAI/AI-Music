@@ -15,6 +15,7 @@
 		{ label: 'CoinGecko', emoji: '🦎', href: '/coingecko', category: 'Market' },
 		{ label: 'Coinbase',  emoji: '🔵', href: '/coinbase',  category: 'Market' },
 		{ label: 'Binance',   emoji: '🟡', href: '/binance',   category: 'Market', highlight: true, badge: 'TOP' },
+		{ label: 'Kraken',    emoji: '🐙', href: '/kraken',    category: 'Market' },
 		{ label: 'Hyperliquid', emoji: '🟢', href: '/hyperliquid', category: 'Market', highlight: true, badge: 'HOT' },
 	];
 
