@@ -15,7 +15,6 @@
 		{ label: 'CoinGecko', emoji: '🦎', href: '/coingecko', category: 'Market' },
 		{ label: 'Coinbase',  emoji: '🔵', href: '/coinbase',  category: 'Market' },
 		{ label: 'Binance',   emoji: '🟡', href: '/binance',   category: 'Market', highlight: true, badge: 'TOP' },
-		{ label: 'Kraken',    emoji: '🐙', href: '/kraken',    category: 'Market' },
 		{ label: 'Hyperliquid', emoji: '🟢', href: '/hyperliquid', category: 'Market', highlight: true, badge: 'HOT' },
 	];
 
@@ -25,8 +24,7 @@
 		{ label: 'Staking',    emoji: '💎', href: '/staking',    category: 'DeFi' },
 		{ label: 'PendleFi',   emoji: '⚡', href: '/pendle',     category: 'DeFi', highlight: true },
 		{ label: 'DEX',        emoji: '📊', href: '/dex',        category: 'DeFi' },
-		{ label: 'Perps',      emoji: '📈', href: '/perps',      category: 'DeFi' },
-		{ label: 'Predict',    emoji: '🔮', href: '/predict',    category: 'DeFi' },
+		{ label: 'GeckoTerminal', emoji: '🦎', href: '/geckoterminal', category: 'DeFi', highlight: true, badge: 'NEW' },
 		{ label: 'AI',         emoji: '🧠', href: '/ai',         category: 'Tech', highlight: true },
 		{ label: 'AI Agent',   emoji: '🤖', href: '/ai-agent',   category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'GitHub',     emoji: '📦', href: '/github',     category: 'Tech', highlight: true, badge: 'NEW' },
@@ -34,8 +32,6 @@
 		{ label: 'Crypto',     emoji: '📊', href: '/crypto',     category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'x402',       emoji: '🤖', href: '/x402',       category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'OpenClaw',   emoji: '⚡', href: '/openclaw',   category: 'Tech', highlight: true, badge: 'NEW' },
-		{ label: 'Airdrop',    emoji: '🪂', href: '/airdrop',    category: 'Platform' },
-		{ label: 'Memes',      emoji: '🤣', href: '/memes',      category: 'Fun' },
 		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Fun', highlight: true },
 		{ label: 'NFT',        emoji: '🎵', href: '/drops',      category: 'Platform' },
 	];
