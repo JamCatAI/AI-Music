@@ -16,13 +16,13 @@
 			founded: 2015,
 			valuation: '$157B',
 			models: [
-				{ name: 'GPT-4o',       ctx: '128K', input: 2.50,  output: 10.00, mmlu: 88.7, modal: true  },
+				{ name: 'GPT-5.4',      ctx: '1M',   input: 2.50,  output: 15.00, mmlu: 91.4, modal: true  },
 				{ name: 'o3',           ctx: '200K', input: 10.00, output: 40.00, mmlu: 96.7, modal: false },
 				{ name: 'GPT-4o mini',  ctx: '128K', input: 0.15,  output: 0.60,  mmlu: 82.0, modal: true  }
 			],
 			hq: 'San Francisco',
 			api: true, open: false,
-			news: 'o3 scores 96.7% on MMLU, surpasses PhD-level reasoning on most benchmarks'
+			news: 'GPT-5.4 unifies GPT and Codex lines with Tool Search. Leads SWE-bench at 74.9%.'
 		},
 		{
 			id: 'anthropic',
@@ -35,13 +35,13 @@
 			founded: 2021,
 			valuation: '$61B',
 			models: [
-				{ name: 'Claude Sonnet 4.6', ctx: '200K', input: 3.00,  output: 15.00, mmlu: 90.2, modal: true  },
-				{ name: 'Claude Opus 4.6',   ctx: '200K', input: 15.00, output: 75.00, mmlu: 93.5, modal: true  },
+				{ name: 'Claude Sonnet 4.6', ctx: '1M',   input: 3.00,  output: 15.00, mmlu: 90.5, modal: true  },
+				{ name: 'Claude Opus 4.6',   ctx: '1M',   input: 5.00,  output: 25.00, mmlu: 90.5, modal: true  },
 				{ name: 'Claude Haiku 4.5',  ctx: '200K', input: 0.80,  output: 4.00,  mmlu: 85.0, modal: true  }
 			],
 			hq: 'San Francisco',
 			api: true, open: false,
-			news: 'Claude 4.6 family ships with extended thinking and 200K context across all tiers'
+			news: 'Claude Opus 4.6 leads SWE-bench Verified at 80.8%. Adaptive Thinking mode ships.'
 		},
 		{
 			id: 'xai',
@@ -54,13 +54,13 @@
 			founded: 2023,
 			valuation: '$50B',
 			models: [
-				{ name: 'Grok-3',       ctx: '131K', input: 3.00,  output: 15.00, mmlu: 92.7, modal: true  },
+				{ name: 'Grok 4.20',    ctx: '128K', input: 2.00,  output: 10.00, mmlu: 93.5, modal: true  },
 				{ name: 'Grok-3 mini',  ctx: '131K', input: 0.30,  output: 0.50,  mmlu: 87.4, modal: false },
 				{ name: 'Grok-2',       ctx: '131K', input: 2.00,  output: 10.00, mmlu: 87.5, modal: true  }
 			],
 			hq: 'Austin, TX',
 			api: true, open: false,
-			news: 'Grok-3 beats GPT-4o on math & coding; live X/Twitter data gives real-time edge'
+			news: 'Grok 4.20 uses four-agent architecture. Real-time X/Twitter data unique to frontier models.'
 		},
 		{
 			id: 'mistral',
@@ -92,13 +92,13 @@
 			founded: 2010,
 			valuation: 'Alphabet ($2T)',
 			models: [
-				{ name: 'Gemini 2.5 Pro',   ctx: '1M',  input: 3.50,  output: 10.50, mmlu: 90.0, modal: true  },
+				{ name: 'Gemini 3.1 Pro',   ctx: '1M',  input: 2.00,  output: 12.00, mmlu: 94.1, modal: true  },
 				{ name: 'Gemini 2.0 Flash', ctx: '1M',  input: 0.10,  output: 0.40,  mmlu: 83.6, modal: true  },
-				{ name: 'Gemma 3 27B',      ctx: '128K', input: 0.00, output: 0.00,  mmlu: 76.0, modal: false }
+				{ name: 'Gemma 3 27B',      ctx: '128K', input: 0.00,  output: 0.00,  mmlu: 76.0, modal: false }
 			],
 			hq: 'London / Mountain View',
 			api: true, open: true,
-			news: 'Gemini 2.5 Pro tops Chatbot Arena with 1M context window and native multimodality'
+			news: 'Gemini 3.1 Pro leads MMLU at 94.1%. SWE-bench at 78.8%. Best price-performance ratio.'
 		},
 		{
 			id: 'deepseek',
@@ -111,13 +111,13 @@
 			founded: 2023,
 			valuation: 'Private',
 			models: [
+				{ name: 'DeepSeek V4',      ctx: '128K', input: 0.28,  output: 0.42, mmlu: 89.0, modal: true  },
 				{ name: 'DeepSeek R1',      ctx: '128K', input: 0.55,  output: 2.19, mmlu: 90.8, modal: false },
-				{ name: 'DeepSeek V3',      ctx: '128K', input: 0.27,  output: 1.10, mmlu: 88.5, modal: false },
-				{ name: 'DeepSeek R1 Zero', ctx: '128K', input: 0.55,  output: 2.19, mmlu: 89.1, modal: false }
+				{ name: 'DeepSeek V3',      ctx: '128K', input: 0.27,  output: 1.10, mmlu: 88.5, modal: false }
 			],
 			hq: 'Hangzhou, China',
 			api: true, open: true,
-			news: 'DeepSeek R1 trained for ~$6M, matched GPT-4o, triggered NVDA -17% in one day'
+			news: 'DeepSeek V4 trained on Huawei Ascend chips. 1T params, 90% of GPT-5.4 at 1/50th price.'
 		}
 	];
 
@@ -164,6 +164,271 @@
 	let filterOpen = $state(false);
 
 	const TICKER = '🧠 AI RACE 2026 · OPENAI · ANTHROPIC · GROK · MISTRAL · GOOGLE DEEPMIND · DEEPSEEK · LLAMA · GEMMA · CLAUDE · GPT · ';
+
+	// ── DETAILED MODELS from LLM page ───────────────────────────
+	const MODELS = [
+		{
+			id: 'gpt54',
+			name: 'GPT-5.4',
+			lab: 'OpenAI',
+			color: '#10a37f',
+			bg: 'from-[#10a37f] to-[#1a7f64]',
+			open: false,
+			params: '~500B',
+			context: 1_000_000,
+			launched: 'Mar 2026',
+			mmlu: 91.4,
+			humaneval: 74.9,
+			math: 83.0,
+			price_in: 2.50,
+			price_out: 15.00,
+			speed: 95,
+			vision: true, tools: true, finetune: true, streaming: true,
+			tags: ['Multimodal', 'Code', 'Vision', 'SOTA'],
+			desc: 'OpenAI\'s latest flagship. Unifies GPT and Codex lines. Tool Search for dynamic tool loading. 1M context.'
+		},
+		{
+			id: 'o3',
+			name: 'o3',
+			lab: 'OpenAI',
+			color: '#10a37f',
+			bg: 'from-[#0d8a6a] to-[#0a6e54]',
+			open: false,
+			params: 'Unknown',
+			context: 200_000,
+			launched: 'Jan 2025',
+			mmlu: 96.7,
+			humaneval: 99.5,
+			math: 97.9,
+			price_in: 10.00,
+			price_out: 40.00,
+			speed: 40,
+			vision: true, tools: true, finetune: false, streaming: true,
+			tags: ['Reasoning', 'Legacy', 'Code', 'Science'],
+			desc: 'OpenAI\'s reasoning model — superseded by GPT-5.4 but still strong at math and reasoning.'
+		},
+		{
+			id: 'claudeopus',
+			name: 'Claude Opus 4.6',
+			lab: 'Anthropic',
+			color: '#d97757',
+			bg: 'from-[#d97757] to-[#b85c35]',
+			open: false,
+			params: 'Unknown',
+			context: 1_000_000,
+			launched: 'Feb 2026',
+			mmlu: 90.5,
+			humaneval: 80.8,
+			math: 95.0,
+			price_in: 5.00,
+			price_out: 25.00,
+			speed: 50,
+			vision: true, tools: true, finetune: false, streaming: true,
+			tags: ['Safety', 'Reasoning', 'Long Context', 'Code'],
+			desc: 'Anthropic\'s most intelligent model. Leads SWE-bench Verified at 80.8%. Adaptive Thinking mode.'
+		},
+		{
+			id: 'gemini31',
+			name: 'Gemini 3.1 Pro',
+			lab: 'Google DeepMind',
+			color: '#4285f4',
+			bg: 'from-[#4285f4] to-[#1a56c4]',
+			open: false,
+			params: 'Unknown',
+			context: 1_000_000,
+			launched: 'Feb 2026',
+			mmlu: 94.1,
+			humaneval: 78.8,
+			math: 94.3,
+			price_in: 2.00,
+			price_out: 12.00,
+			speed: 85,
+			vision: true, tools: true, finetune: false, streaming: true,
+			tags: ['1M Context', 'Multimodal', 'Code', 'Science'],
+			desc: 'Google\'s strongest all-around model. Leads MMLU at 94.1%, SWE-bench at 78.8%. Unbeatable price-performance.'
+		},
+		{
+			id: 'kimi',
+			name: 'Kimi K1.5',
+			lab: 'Moonshot AI',
+			color: '#7c3aed',
+			bg: 'from-[#7c3aed] to-[#5b21b6]',
+			open: false,
+			params: '1T MoE',
+			context: 256_000,
+			launched: 'Jan 2025',
+			mmlu: 87.3,
+			humaneval: 89.2,
+			math: 95.8,
+			price_in: 0.50,
+			price_out: 2.00,
+			speed: 65,
+			vision: true, tools: true, finetune: false, streaming: true,
+			tags: ['Chinese', 'Long Context', 'Reasoning', '1T MoE'],
+			desc: 'Moonshot AI\'s Kimi K1.5 with 1 trillion parameter MoE. Native long-context king from China.'
+		},
+		{
+			id: 'grok420',
+			name: 'Grok 4.20',
+			lab: 'xAI',
+			color: '#e5e5e5',
+			bg: 'from-[#333] to-[#111]',
+			open: false,
+			params: '~300B',
+			context: 128_000,
+			launched: 'Feb 2026',
+			mmlu: 93.5,
+			humaneval: 70.0,
+			math: 92.0,
+			price_in: 2.00,
+			price_out: 10.00,
+			speed: 75,
+			vision: true, tools: true, finetune: false, streaming: true,
+			tags: ['Reasoning', 'Real-time', 'X/Twitter', 'Math'],
+			desc: 'Elon\'s four-agent architecture model. Real-time X/Twitter access. API not fully open yet.'
+		},
+		{
+			id: 'deepseekv4',
+			name: 'DeepSeek V4',
+			lab: 'DeepSeek',
+			color: '#4d6bfe',
+			bg: 'from-[#4d6bfe] to-[#2a3fbf]',
+			open: true,
+			params: '1T MoE',
+			context: 128_000,
+			launched: 'Mar 2026',
+			mmlu: 89.0,
+			humaneval: 77.8,
+			math: 90.0,
+			price_in: 0.28,
+			price_out: 0.42,
+			speed: 55,
+			vision: true, tools: true, finetune: true, streaming: true,
+			tags: ['Open Source', 'MoE', 'Cheap', 'Chat'],
+			desc: 'DeepSeek V4 with 1T params, 32B active. Trained on Huawei Ascend chips. 90% of GPT-5.4 at 1/50th price.'
+		},
+		{
+			id: 'deepseekr1',
+			name: 'DeepSeek R1',
+			lab: 'DeepSeek',
+			color: '#4d6bfe',
+			bg: 'from-[#4d6bfe] to-[#2a3fbf]',
+			open: true,
+			params: '671B',
+			context: 128_000,
+			launched: 'Jan 2025',
+			mmlu: 90.8,
+			humaneval: 92.5,
+			math: 97.3,
+			price_in: 0.55,
+			price_out: 2.19,
+			speed: 35,
+			vision: false, tools: true, finetune: true, streaming: true,
+			tags: ['Open Source', 'Math', 'Cheap', 'Reasoning'],
+			desc: 'Chinese open-source reasoning model that shocked the industry. 10x cheaper than o1.'
+		},
+		{
+			id: 'qwen35',
+			name: 'Qwen 3.5 9B',
+			lab: 'Alibaba',
+			color: '#ff6a00',
+			bg: 'from-[#ff6a00] to-[#c44a00]',
+			open: true,
+			params: '9B',
+			context: 128_000,
+			launched: 'Mar 2026',
+			mmlu: 85.0,
+			humaneval: 81.7,
+			math: 83.2,
+			price_in: 0.10,
+			price_out: 0.30,
+			speed: 80,
+			vision: true, tools: true, finetune: true, streaming: true,
+			tags: ['Open Source', 'MoE', 'Chinese', 'Fast'],
+			desc: 'Alibaba\'s Qwen 3.5 9B beats GPT-OSS-120B on GPQA. Runs locally on iPhone with 4GB RAM. 13x cheaper.'
+		},
+		{
+			id: 'mistral',
+			name: 'Mistral Large 2',
+			lab: 'Mistral AI',
+			color: '#f54a00',
+			bg: 'from-[#f54a00] to-[#c03a00]',
+			open: false,
+			params: '123B',
+			context: 128_000,
+			launched: 'Jul 2024',
+			mmlu: 84.0,
+			humaneval: 92.0,
+			math: 73.9,
+			price_in: 2.00,
+			price_out: 6.00,
+			speed: 95,
+			vision: false, tools: true, finetune: true, streaming: true,
+			tags: ['European', 'Fast', 'Code', 'Multilingual'],
+			desc: 'France\'s finest. Fast, capable, multilingual. GDPR-friendly EU-based hosting.'
+		},
+		{
+			id: 'llama4',
+			name: 'Llama 4 Maverick',
+			lab: 'Meta',
+			color: '#0064e0',
+			bg: 'from-[#0064e0] to-[#003fa3]',
+			open: true,
+			params: '400B MoE',
+			context: 1_000_000,
+			launched: 'Mar 2026',
+			mmlu: 89.8,
+			humaneval: 80.0,
+			math: 88.5,
+			price_in: 0.19,
+			price_out: 0.49,
+			speed: 120,
+			vision: true, tools: true, finetune: true, streaming: true,
+			tags: ['Open Source', 'MoE', 'Fast', 'Vision'],
+			desc: 'Meta\'s Llama 4 Maverick with 1M context. 17B active from 400B total. Best open-weight for on-prem.'
+		},
+		{
+			id: 'glm5',
+			name: 'GLM-5',
+			lab: 'Zhipu AI',
+			color: '#8b5cf6',
+			bg: 'from-[#8b5cf6] to-[#6d28d9]',
+			open: true,
+			params: '744B MoE',
+			context: 128_000,
+			launched: 'Feb 2026',
+			mmlu: 88.0,
+			humaneval: 77.8,
+			math: 92.7,
+			price_in: 0.15,
+			price_out: 0.45,
+			speed: 70,
+			vision: true, tools: true, finetune: true, streaming: true,
+			tags: ['Open Source', 'MoE', 'Chinese', 'Fast'],
+			desc: '744B total, 40B active. Trained on Huawei Ascend. #1 Chatbot Arena for open-source. AIME 92.7%.'
+		},
+	];
+
+	// ── DETAILED BENCHMARKS ─────────────────────────────────────
+	const DETAILED_BENCHMARKS = [
+		{ key: 'mmlu',      label: 'MMLU',       desc: 'Massive Multitask Language Understanding — PhD-level questions across 57 subjects', max: 100 },
+		{ key: 'humaneval', label: 'HumanEval',  desc: 'Code generation — pass@1 on Python programming problems', max: 100 },
+		{ key: 'math',      label: 'MATH',        desc: 'Competition math problems across 5 difficulty levels', max: 100 },
+	];
+
+	// ── MODEL FILTERING STATE ─────────────────────────────────
+	let activeBench  = $state('mmlu');
+	let sortKey      = $state('mmlu');
+	let sortDir      = $state(-1); // -1 = desc
+	let selectedLab  = $state('All');
+
+	const MODEL_LABS = ['All', ...new Set(MODELS.map(m => m.lab))];
+
+	let filteredModels = $derived(
+		MODELS
+			.filter(m => selectedLab === 'All' || m.lab === selectedLab)
+			.sort((a, b) => sortDir * (b[sortKey] - a[sortKey]))
+	);
 
 	onMount(() => {
 		const iv = setInterval(() => {
@@ -468,7 +733,7 @@
 
 		<!-- ── FUN FACTS ROW ─────────────────────────────────────── -->
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
-			 in:fly={{ y: 20, duration: 450, delay: 220 }}>
+				in:fly={{ y: 20, duration: 450, delay: 220 }}>
 			{#each [
 				{ icon: '💸', fact: 'DeepSeek R1 cost ~$6M to train vs GPT-4\'s ~$100M+',      color: '#4d6bfe' },
 				{ icon: '📏', fact: 'Gemini 2.5 Pro has the longest context: 1 million tokens', color: '#4285f4' },
@@ -478,11 +743,111 @@
 				{ icon: '⚡', fact: 'Grok has live X/Twitter data — no knowledge cutoff',        color: '#ffffff' }
 			] as f, i (i)}
 				<div class="rounded-2xl border border-white/6 bg-[#0c0c14] p-4"
-					 in:fly={{ y: 16, duration: 300, delay: i*40 }}>
+						in:fly={{ y: 16, duration: 300, delay: i*40 }}>
 					<p class="mb-2 text-xl">{f.icon}</p>
 					<p class="text-[10px] leading-snug text-white/40">{f.fact}</p>
 				</div>
 			{/each}
+		</div>
+
+		<!-- ── DETAILED MODELS SECTION ─────────────────────────────── -->
+		<div class="mt-12">
+			<div class="mb-6 flex items-center justify-between flex-wrap gap-4">
+				<p class="text-[10px] font-black uppercase tracking-widest text-white/25">Detailed Model Specifications</p>
+				<div class="flex items-center gap-3">
+					<!-- Lab Filter -->
+					<select bind:value={selectedLab} class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-violet-500/50">
+						{#each MODEL_LABS as lab}
+							<option value={lab}>{lab}</option>
+						{/each}
+					</select>
+					<!-- Sort -->
+					<button onclick={() => { if (sortKey === 'mmlu') sortDir *= -1; else { sortKey = 'mmlu'; sortDir = -1; }}}
+						class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 transition">
+						Sort by MMLU {sortKey === 'mmlu' ? (sortDir === 1 ? '↑' : '↓') : ''}
+					</button>
+				</div>
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{#each filteredModels as model (model.id)}
+					<div class="group relative overflow-hidden rounded-2xl border border-white/6 bg-[#0c0c14] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+						 style="border-color:{model.color}30">
+						<!-- Open Source Badge -->
+						{#if model.open}
+							<div class="absolute top-3 right-3 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black text-emerald-400">
+								⊕ Open
+							</div>
+						{/if}
+
+						<!-- Header -->
+						<div class="mb-4">
+							<div class="flex items-center gap-3 mb-2">
+								<div class="h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center text-lg"
+									 style="background:{model.bg}">
+									{model.name.charAt(0)}
+								</div>
+								<div>
+									<p class="text-sm font-black text-white">{model.name}</p>
+									<p class="text-[10px] text-white/40">{model.lab}</p>
+								</div>
+							</div>
+							<p class="text-xs italic text-white/35">"{model.desc}"</p>
+						</div>
+
+						<!-- Specs -->
+						<div class="mb-4 grid grid-cols-2 gap-2 text-[10px]">
+							<div class="rounded-lg border border-white/5 bg-white/2 px-2 py-1.5">
+								<p class="text-white/20">Params</p>
+								<p class="font-bold text-white/70">{model.params}</p>
+							</div>
+							<div class="rounded-lg border border-white/5 bg-white/2 px-2 py-1.5">
+								<p class="text-white/20">Context</p>
+								<p class="font-bold text-white/70">{model.context.toLocaleString()}</p>
+							</div>
+							<div class="rounded-lg border border-white/5 bg-white/2 px-2 py-1.5">
+								<p class="text-white/20">Speed</p>
+								<p class="font-bold text-white/70">{model.speed} tok/s</p>
+							</div>
+							<div class="rounded-lg border border-white/5 bg-white/2 px-2 py-1.5">
+								<p class="text-white/20">Launched</p>
+								<p class="font-bold text-white/70">{model.launched}</p>
+							</div>
+						</div>
+
+						<!-- Benchmarks -->
+						<div class="mb-4">
+							<div class="mb-2 flex gap-1 flex-wrap">
+								{#each DETAILED_BENCHMARKS as bench}
+									<span class="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-white/40">
+										{bench.label}: <span class="font-bold" style="color:{model.color}">{model[bench.key]}</span>
+									</span>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Features -->
+						<div class="mb-4 flex gap-1 flex-wrap">
+							{#if model.vision}<span class="rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[9px] font-black text-violet-400">👁 Vision</span>{/if}
+							{#if model.tools}<span class="rounded-full border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 text-[9px] font-black text-blue-400">🔧 Tools</span>{/if}
+							{#if model.finetune}<span class="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black text-emerald-400">⚡ Finetune</span>{/if}
+							{#if model.streaming}<span class="rounded-full border border-pink-500/25 bg-pink-500/10 px-2 py-0.5 text-[9px] font-black text-pink-400">🌊 Stream</span>{/if}
+						</div>
+
+						<!-- Tags -->
+						<div class="flex gap-1 flex-wrap">
+							{#each model.tags as tag}
+								<span class="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-white/50">{tag}</span>
+							{/each}
+						</div>
+
+						<!-- Pricing -->
+						<div class="mt-4 pt-4 border-t border-white/5 flex justify-between text-[10px]">
+							<span class="text-white/30">Price: <span class="font-bold text-white/60">${model.price_in} in / ${model.price_out} out</span></span>
+						</div>
+					</div>
+				{/each}
+			</div>
 		</div>
 
 	</div>

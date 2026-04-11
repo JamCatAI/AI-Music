@@ -46,6 +46,8 @@
 	let sidebarUpdatedAt = $state('');
 	let sparklineData = $state(Array.from({ length: 12 }, () => Math.random() * 100));
 	let newsSparkline = $state(Array.from({ length: 20 }, () => Math.random() * 60 + 20));
+	let isRefreshing = $state(false);
+	let showRefreshSuccess = $state(false);
 
 	let featuredNews = $derived(newsFeed.length > 0 ? newsFeed[0] : null);
 	let listNews = $derived(newsFeed.slice(1));
@@ -259,6 +261,18 @@
 		}
 	}
 
+	async function handleRefresh() {
+		isRefreshing = true;
+		showRefreshSuccess = false;
+		await Promise.allSettled([
+			fetchNews(activeCategory),
+			refreshSidebarData({ silent: false })
+		]);
+		isRefreshing = false;
+		showRefreshSuccess = true;
+		setTimeout(() => showRefreshSuccess = false, 2000);
+	}
+
 	// ── FORMATTERS ──
 	const fmtPrice = (price) => {
 		if (price === null || Number.isNaN(price)) return '--';
@@ -325,23 +339,24 @@
 </svelte:head>
 
 <!-- Editorial front page + data sidebars -->
-<div class="news-page relative min-h-screen overflow-hidden bg-[#0a0a0a] text-white">
+<div class="news-page relative min-h-screen overflow-hidden bg-[#080808] text-white">
 	<!-- Ambient background glows (broadcast red + neutral) -->
 	<div class="pointer-events-none absolute inset-0 overflow-hidden">
-		<div class="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-red-600/10 blur-[120px]"></div>
-		<div class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-red-900/15 blur-[140px]"></div>
-		<div class="absolute top-1/2 left-0 h-64 w-64 rounded-full bg-white/[0.03] blur-[100px]"></div>
+		<div class="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-red-600/8 blur-[120px]"></div>
+		<div class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-red-900/12 blur-[140px]"></div>
+		<div class="absolute top-1/2 left-0 h-64 w-64 rounded-full bg-white/[0.02] blur-[100px]"></div>
+		<div class="absolute top-20 right-20 h-32 w-32 rounded-full bg-cyan-500/5 blur-[80px]"></div>
 	</div>
 
 	<!-- Scanline overlay -->
-	<div class="pointer-events-none absolute inset-0 opacity-[0.02]" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(204,0,0,0.35) 2px, rgba(204,0,0,0.35) 3px)"></div>
+	<div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(204,0,0,0.3) 2px, rgba(204,0,0,0.3) 3px)"></div>
 
 	<div class="relative mx-auto max-w-7xl px-3 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-8 lg:px-10">
 		<!-- ── Masthead ── -->
-		<header class="news-masthead mb-4 border-b border-red-900/40 pb-3 sm:mb-8 sm:pb-6">
-			<div class="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+		<header class="news-masthead mb-6 border-b border-white/8 pb-4 sm:mb-10 sm:pb-6">
+			<div class="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
 				<div class="min-w-0">
-					<p class="news-kicker font-mono text-[9px] font-semibold uppercase tracking-[0.28em] text-red-500 sm:text-[10px] sm:tracking-[0.35em]">
+					<p class="news-kicker font-mono text-[9px] font-semibold uppercase tracking-[0.28em] text-red-400 sm:text-[10px] sm:tracking-[0.35em]">
 						JamCat · Digital edition
 					</p>
 					<h1 class="news-masthead-title mt-0.5 text-3xl font-semibold leading-[1.05] tracking-tight text-white sm:mt-1 sm:text-5xl">
@@ -350,9 +365,10 @@
 					<div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] text-slate-400 sm:mt-3 sm:gap-x-3 sm:text-xs">
 						<time datetime={new Date().toISOString()} class="line-clamp-1 text-slate-300">{editionDate}</time>
 						<span class="hidden sm:inline text-slate-600">·</span>
-						<span class="rounded-sm border border-red-600/40 bg-red-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white sm:text-[10px]">
-							Live
-						</span>
+						<button type="button" onclick={handleRefresh} disabled={isRefreshing}
+							class="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:border-white/20 hover:bg-white/10 hover:text-white disabled:opacity-50 flex items-center gap-1.5 transition-all">
+							{isRefreshing ? '⟳' : showRefreshSuccess ? '✓' : '↻'} {isRefreshing ? 'Refreshing...' : showRefreshSuccess ? 'Updated' : 'Refresh'}
+						</button>
 					</div>
 				</div>
 				<p class="news-dek hidden max-w-md font-sans text-sm leading-relaxed text-slate-400 sm:block">
@@ -364,7 +380,10 @@
 				{#each categories as cat (cat.id)}
 					<button type="button" onclick={() => handleCategoryClick(cat.id)} disabled={loading}
 						class="group relative shrink-0 snap-start overflow-hidden rounded-lg border px-2.5 py-1.5 text-[10px] font-semibold transition-all duration-300 sm:px-3 sm:py-2 sm:text-[11px]
-						{activeCategory === cat.id ? 'border-red-600/60 bg-red-600/15 text-white' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:bg-white/[0.06] hover:text-slate-200 disabled:opacity-50'}">
+						{activeCategory === cat.id ? 'border-red-500/50 bg-red-500/15 text-white shadow-[0_0_20px_rgba(239,68,68,0.15)]' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:bg-white/[0.06] hover:text-slate-200 disabled:opacity-50'}">
+						{#if activeCategory === cat.id}
+							<div class="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent"></div>
+						{/if}
 						<span class="relative z-10 flex items-center gap-1.5">
 							<span aria-hidden="true">{cat.icon}</span>{cat.label}
 						</span>
@@ -404,26 +423,26 @@
 			</div>
 		{:else}
 			<!-- ── Market strip (dateline style) ── -->
-			<div class="mb-4 font-mono sm:mb-8">
-				<p class="mb-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500 sm:mb-2 sm:text-[10px] sm:tracking-[0.25em]">
+			<div class="mb-6 font-mono sm:mb-8">
+				<p class="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500 sm:mb-3 sm:text-[10px] sm:tracking-[0.25em]">
 					Markets at a glance
 				</p>
-				<div class="grid grid-cols-4 gap-1.5 sm:gap-3">
+				<div class="grid grid-cols-4 gap-2 sm:gap-4">
 					{#each [
 						{ label: 'Stories', value: newsFeed.length.toString(), hi: true, trend: '●', key: 'articles', icon: '📰' },
 						{ label: 'Mkt cap', value: globalStats ? fmtCompact(globalStats.marketCap) : '--', trend: fmtChange(globalStats?.marketCapChange), key: 'cap', icon: '💎' },
 						{ label: 'BTC dom.', value: globalStats ? fmtDominance(globalStats.btcDominance) : '--', trend: '↗', key: 'btc', icon: '₿' },
 						{ label: 'Wire time', value: sidebarUpdatedAt || '—', trend: '●', key: 'time', icon: '⏱' },
 					] as s (s.key)}
-						<div class="group relative min-w-0 overflow-hidden rounded-lg border {s.hi ? 'border-red-600/35 bg-red-600/[0.08]' : 'border-white/[0.06] bg-white/[0.02]'} p-2 backdrop-blur-sm transition hover:border-white/10 sm:rounded-xl sm:p-3">
-							<div class="mb-0.5 flex items-center justify-between gap-1 sm:mb-1 sm:gap-2">
-								<p class="truncate text-[7px] uppercase tracking-wide text-slate-500 sm:text-[9px] sm:tracking-wider">{s.icon} {s.label}</p>
-								<span class="shrink-0 text-[8px] font-bold text-red-400 sm:text-[9px]">{s.trend}</span>
+						<div class="group relative min-w-0 overflow-hidden rounded-xl border {s.hi ? 'border-red-500/30 bg-gradient-to-br from-red-500/10 to-transparent' : 'border-white/8 bg-white/[0.02]'} p-3 backdrop-blur-sm transition-all duration-300 hover:border-white/15 hover:bg-white/[0.04] sm:p-4">
+							<div class="mb-1 flex items-center justify-between gap-2">
+								<p class="truncate text-[8px] uppercase tracking-wide text-slate-500 sm:text-[9px] sm:tracking-wider">{s.icon} {s.label}</p>
+								<span class="shrink-0 text-[9px] font-bold text-red-400 sm:text-[10px]">{s.trend}</span>
 							</div>
-							<p class="truncate text-sm font-bold tracking-tight sm:text-lg {s.hi ? 'text-red-400' : 'text-white'}">{s.value}</p>
-							<div class="mt-1.5 hidden h-5 items-end gap-px sm:flex sm:mt-2">
+							<p class="truncate text-base font-bold tracking-tight sm:text-lg {s.hi ? 'text-red-400' : 'text-white'}">{s.value}</p>
+							<div class="mt-2 hidden h-6 items-end gap-px sm:flex">
 								{#each newsSparkline as height, idx (idx)}
-									<div class="flex-1 rounded-sm bg-red-600/35 transition-all" style="height: {height}%"></div>
+									<div class="flex-1 rounded-sm bg-red-500/30 transition-all hover:bg-red-500/50" style="height: {height}%"></div>
 								{/each}
 							</div>
 						</div>
@@ -436,42 +455,40 @@
 				<!-- Main: editorial column -->
 				<div class="news-editorial flex min-w-0 flex-1 flex-col gap-5 sm:gap-10">
 					{#if featuredNews}
-						<article class="news-hero relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent shadow-[0_24px_80px_-24px_rgba(0,0,0,0.7)] sm:rounded-2xl">
-							<a href={featuredNews.link} target="_blank" rel="noopener noreferrer" class="group block">
-								<div class="relative aspect-[5/4] w-full max-h-[min(52vh,22rem)] overflow-hidden sm:max-h-none sm:aspect-[21/9]">
-									<img
-										src={featuredNews.thumbnail}
-										alt=""
-										class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-									/>
-									<div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
-									<div class="absolute bottom-0 left-0 right-0 p-3 sm:p-8">
-										<div class="mb-2 flex flex-wrap items-center gap-1.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-red-400 sm:mb-3 sm:gap-2 sm:text-[10px]">
-											<span class="rounded bg-red-600/90 px-1.5 py-0.5 text-white shadow-sm sm:px-2">Lead story</span>
-											{#each featuredNews.categories.slice(0, 2) as cat}
-												{@const catColor = getCatColor(cat)}
-												<span class="rounded border border-white/15 bg-black/40 px-1.5 py-0.5 text-white/90 backdrop-blur-sm sm:px-2"
-													>{cat}</span
-												>
-											{/each}
-										</div>
-										<h2 class="news-headline text-lg font-semibold leading-snug text-white sm:text-3xl md:text-4xl md:leading-[1.1]">
-											{featuredNews.title}
-										</h2>
-										<p class="news-lead mt-2 hidden max-w-3xl font-sans text-sm leading-relaxed text-slate-200/90 sm:mt-3 sm:block sm:text-base">
-											{featuredNews.desc}
-										</p>
-										<div class="news-byline mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] text-slate-400 sm:mt-4 sm:gap-x-3 sm:gap-y-1 sm:text-[11px]">
-											<span class="text-slate-300">{featuredNews.relativeStr}</span>
-											<span class="hidden text-slate-600 sm:inline">·</span>
-											<span class="hidden sm:inline">{featuredNews.date}</span>
-											<span class="text-slate-600">·</span>
-											<span>{featuredNews.readTime} min</span>
-										</div>
+					<article class="news-hero relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent shadow-[0_24px_80px_-24px_rgba(0,0,0,0.7)] transition-all duration-500 hover:shadow-[0_32px_100px_-24px_rgba(0,0,0,0.8)] sm:rounded-3xl">
+						<a href={featuredNews.link} target="_blank" rel="noopener noreferrer" class="group block">
+							<div class="relative aspect-[5/4] w-full max-h-[min(52vh,22rem)] overflow-hidden sm:max-h-none sm:aspect-[21/9]">
+								<img
+									src={featuredNews.thumbnail}
+									alt=""
+									class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02] group-hover:brightness-110"
+								/>
+								<div class="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/60 to-transparent"></div>
+								<div class="absolute bottom-0 left-0 right-0 p-4 sm:p-10">
+									<div class="mb-3 flex flex-wrap items-center gap-2 font-mono text-[9px] font-semibold uppercase tracking-wider text-red-400 sm:mb-4 sm:gap-3 sm:text-[10px]">
+										<span class="rounded-full bg-red-500/90 px-2 py-0.5 text-white shadow-lg shadow-red-500/30 sm:px-2.5">Lead story</span>
+										{#each featuredNews.categories.slice(0, 2) as cat, idx (cat + idx)}
+											{@const catColor = getCatColor(cat)}
+											<span class="rounded-full border border-white/20 bg-black/50 px-2 py-0.5 text-white/90 backdrop-blur-sm sm:px-2.5">{cat}</span>
+										{/each}
+									</div>
+									<h2 class="news-headline text-xl font-semibold leading-snug text-white sm:text-3xl md:text-4xl md:leading-[1.1] group-hover:text-red-200 transition-colors">
+										{featuredNews.title}
+									</h2>
+									<p class="news-lead mt-3 hidden max-w-3xl font-sans text-sm leading-relaxed text-slate-200/90 sm:mt-4 sm:block sm:text-base">
+										{featuredNews.desc}
+									</p>
+									<div class="news-byline mt-3 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] text-slate-400 sm:mt-5 sm:gap-x-3 sm:gap-y-1 sm:text-[11px]">
+										<span class="text-slate-300">{featuredNews.relativeStr}</span>
+										<span class="hidden text-slate-600 sm:inline">·</span>
+										<span class="hidden sm:inline">{featuredNews.date}</span>
+										<span class="text-slate-600">·</span>
+										<span>{featuredNews.readTime} min</span>
 									</div>
 								</div>
-							</a>
-						</article>
+							</div>
+						</a>
+					</article>
 					{/if}
 
 					{#if secondaryStories.length}
@@ -485,13 +502,13 @@
 							<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 								{#each secondaryStories as item, index (item.id)}
 									{@const itemColor = item.color}
-									<a
-										href={item.link}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="news-card group flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition duration-300 hover:border-white/15 hover:bg-white/[0.04]"
-										style={`animation: fadeUp 0.45s ease-out ${index * 0.06}s backwards;`}
-									>
+											<a
+												href={item.link}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="news-card group flex flex-col overflow-hidden rounded-xl border border-white/8 bg-white/[0.02] transition-all duration-300 hover:border-white/15 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
+												style={`animation: fadeUp 0.45s ease-out ${index * 0.06}s backwards;`}
+											>
 										<div class="relative aspect-[16/10] overflow-hidden">
 											<img
 												src={item.thumbnail}

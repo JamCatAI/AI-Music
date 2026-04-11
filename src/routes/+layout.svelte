@@ -27,15 +27,16 @@
 		{ label: 'DEX',        emoji: '📊', href: '/dex',        category: 'DeFi' },
 		{ label: 'Perps',      emoji: '📈', href: '/perps',      category: 'DeFi' },
 		{ label: 'Predict',    emoji: '🔮', href: '/predict',    category: 'DeFi' },
-		{ label: 'AI',         emoji: '🧠', href: '/ai',         category: 'Tech' },
-		{ label: 'LLM',        emoji: '💬', href: '/llm',        category: 'Tech' },
+		{ label: 'AI',         emoji: '🧠', href: '/ai',         category: 'Tech', highlight: true },
+		{ label: 'AI Agent',   emoji: '🤖', href: '/ai-agent',   category: 'Tech', highlight: true, badge: 'NEW' },
+		{ label: 'GitHub',     emoji: '📦', href: '/github',     category: 'Tech', highlight: true, badge: 'NEW' },
+		{ label: 'Mythos', emoji: '🛡️', href: '/claude-mythos', category: 'Tech', highlight: true, badge: 'NEW' },
+		{ label: 'Crypto',     emoji: '📊', href: '/crypto',     category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'x402',       emoji: '🤖', href: '/x402',       category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'OpenClaw',   emoji: '⚡', href: '/openclaw',   category: 'Tech', highlight: true, badge: 'NEW' },
 		{ label: 'Airdrop',    emoji: '🪂', href: '/airdrop',    category: 'Platform' },
 		{ label: 'Memes',      emoji: '🤣', href: '/memes',      category: 'Fun' },
-		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Fun' },
-		{ label: 'Play',       emoji: '🎮', href: '/play',       category: 'Fun' },
-		{ label: 'Games',      emoji: '🎲', href: '/games',      category: 'Fun' },
+		{ label: 'News',       emoji: '📰', href: '/news',       category: 'Fun', highlight: true },
 		{ label: 'NFT',        emoji: '🎵', href: '/drops',      category: 'Platform' },
 	];
 
@@ -63,6 +64,8 @@
 				{ label: 'Forbes',    emoji: '🔴', href: '/forbes' },
 				{ label: 'GPU',       emoji: '🖥️', href: '/gpu' },
 				{ label: 'Subagents', emoji: '🧬', href: '/subagents', highlight: true, badge: 'NEW' },
+				{ label: 'Play',      emoji: '🎮', href: '/play' },
+				{ label: 'Games',     emoji: '🎲', href: '/games' },
 			]
 		},
 	];
