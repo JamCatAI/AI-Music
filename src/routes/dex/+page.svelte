@@ -74,10 +74,10 @@ async function fetchPairsForProfiles(profiles) {
 
 	if (!addresses.length) { await searchPairs('SOL'); return; }
 
-	const res = await fetch(`${BASE}/latest/dex/tokens/${addresses.slice(0, 8).map(a => a.addr).join(',')}`);
+	const res = await fetch(`${BASE}/latest/dex/tokens/${addresses.slice(0, 20).map(a => a.addr).join(',')}`);
 	if (res.ok) {
 		const data = await res.json();
-		pairs = (data.pairs ?? []).slice(0, 60);
+		pairs = (data.pairs ?? []).slice(0, 100);
 	} else {
 		await searchPairs('SOL');
 	}
@@ -92,9 +92,9 @@ async function searchPairs(q) {
 		const data = await res.json();
 		const result = data.pairs ?? [];
 		if (q !== 'SOL') {
-			searched = result.slice(0, 30);
+			searched = result.slice(0, 50);
 		} else {
-			pairs = result.slice(0, 60);
+			pairs = result.slice(0, 100);
 		}
 	} catch (e) {
 		error = e.message;
@@ -227,102 +227,98 @@ onMount(() => {
 	</div>
 </div>
 
-<div class="relative min-h-screen overflow-hidden bg-[#050808]">
-	<!-- Ambient Background -->
+<div class="relative min-h-screen overflow-hidden bg-[#0a0f0a]">
+	<!-- Scanline Overlay -->
+	<div class="pointer-events-none fixed inset-0 z-10 opacity-[0.03]" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.05) 2px, rgba(0,255,136,0.05) 4px);"></div>
+
+	<!-- Dynamic Ambient Background -->
 	<div class="pointer-events-none fixed inset-0">
-		<div class="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full opacity-[0.04] blur-[150px]"
-			 style="background:radial-gradient(circle,#00d4aa,transparent 70%)"></div>
-		<div class="absolute top-1/3 right-0 h-[400px] w-[400px] rounded-full opacity-[0.03] blur-[120px]"
-			 style="background:radial-gradient(circle,#00d4aa,transparent 70%)"></div>
+		<div class="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full opacity-[0.08] blur-[200px] animate-pulse" style="background:radial-gradient(circle,rgba(0,255,136,0.3),transparent 70%);animation-duration:8s;"></div>
+		<div class="absolute top-1/3 right-0 h-[500px] w-[500px] rounded-full opacity-[0.06] blur-[180px] animate-pulse" style="background:radial-gradient(circle,rgba(0,212,170,0.25),transparent 70%);animation-duration:10s;"></div>
+		<div class="absolute bottom-0 left-1/2 h-[600px] w-[600px] rounded-full opacity-[0.05] blur-[160px] animate-pulse" style="background:radial-gradient(circle,rgba(20,184,166,0.2),transparent 70%);animation-duration:12s;"></div>
 	</div>
 
-	<div class="relative mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
+	<div class="relative mx-auto max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
 
-		<!-- ── HERO SECTION ─────────────────────────────────────────── -->
-		<div class="mb-10" in:fly={{ y: -20, duration: 500 }}>
-			<div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-				<div class="flex items-start gap-4">
-					<div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 text-3xl shadow-2xl shadow-emerald-500/10 ring-1 ring-emerald-500/20">
-						📊
-					</div>
-					<div>
-						<h1 class="text-4xl font-black tracking-tighter text-white sm:text-5xl lg:text-6xl">
-							DexScreener
-							<span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Pro</span>
-						</h1>
-						<p class="mt-2 max-w-lg text-sm text-white/40">Real-time DEX pairs across all chains. Live trading data, volume analysis, and market insights.</p>
-						<div class="mt-3 flex items-center gap-4">
-							<div class="flex items-center gap-2">
-								<div class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></div>
-								<span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400/60">Live</span>
-							</div>
-							{#if lastUpdated}
-								<span class="text-[10px] text-white/20">Updated {lastUpdated.toLocaleTimeString()}</span>
-							{/if}
-						</div>
+		<!-- ── COMPACT HERO ───────────────────────────────────────────── -->
+		<div class="mb-4 flex items-center justify-between" in:fly={{ y: -10, duration: 300 }}>
+			<div class="flex items-center gap-3">
+				<div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/30 via-teal-500/20 to-cyan-500/10 text-xl shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-500/30">
+					<div class="absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-400/20 to-transparent blur-sm"></div>
+					<span class="relative">📊</span>
+				</div>
+				<div>
+					<h1 class="text-2xl font-black tracking-tighter text-white">
+						DexScreener <span class="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent animate-gradient">Pro</span>
+					</h1>
+					<div class="flex items-center gap-2">
+						<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></div>
+						<span class="text-[9px] font-bold uppercase tracking-wider text-emerald-400/60">Live</span>
+						{#if lastUpdated}
+							<span class="text-[9px] text-white/20">· {lastUpdated.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+						{/if}
 					</div>
 				</div>
+			</div>
 
-				<div class="flex items-center gap-3">
+			<div class="flex items-center gap-2">
+				<div class="flex rounded-lg border border-white/10 bg-white/5 p-0.5">
 					<button onclick={() => viewMode = 'grid'}
-						class="rounded-xl border px-3 py-2 text-sm transition {viewMode === 'grid' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-white/10 text-white/40 hover:text-white/70'}">
+						class="rounded-md px-2 py-1 text-xs transition {viewMode === 'grid' ? 'bg-emerald-500/20 text-emerald-400' : 'text-white/40 hover:text-white/70'}">
 						⊞
 					</button>
 					<button onclick={() => viewMode = 'compact'}
-						class="rounded-xl border px-3 py-2 text-sm transition {viewMode === 'compact' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-white/10 text-white/40 hover:text-white/70'}">
+						class="rounded-md px-2 py-1 text-xs transition {viewMode === 'compact' ? 'bg-emerald-500/20 text-emerald-400' : 'text-white/40 hover:text-white/70'}">
 						☰
 					</button>
-					<button onclick={fetchTrending} disabled={loading}
-						class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/50 transition hover:bg-white/10 hover:text-white disabled:opacity-30">
-						<span class={loading ? 'animate-spin' : ''}>⟳</span>
-						<span class="hidden sm:inline">{loading ? 'Loading...' : 'Refresh'}</span>
-					</button>
 				</div>
-			</div>
-
-			<!-- Stats Bar -->
-			<div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-				{#each [
-					{ label: 'Active Pairs', value: displayPairs.length, icon: '💎' },
-					{ label: 'Total Volume 24h', value: fmt(displayPairs.reduce((a, p) => a + (p.volume?.h24 ?? 0), 0)), icon: '📈' },
-					{ label: 'Watchlisted', value: watchlist.size, icon: '⭐' },
-					{ label: 'Boosted', value: boosted.length, icon: '🚀' }
-				] as stat}
-					<div class="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-sm">
-						<div class="flex items-center gap-2">
-							<span class="text-lg">{stat.icon}</span>
-							<span class="text-[10px] font-bold uppercase tracking-wider text-white/30">{stat.label}</span>
-						</div>
-						<p class="mt-1 text-xl font-black text-white">{stat.value}</p>
-					</div>
-				{/each}
+				<button onclick={fetchTrending} disabled={loading}
+					class="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-bold text-white/50 transition hover:bg-white/10 hover:text-white disabled:opacity-30">
+					<span class={loading ? 'animate-spin' : ''}>⟳</span>
+					<span class="hidden sm:inline">{loading ? '' : 'Refresh'}</span>
+				</button>
 			</div>
 		</div>
 
-		<!-- ── BOOSTED / TRENDING STRIP ───────────────────────────────── -->
-		{#if boosted.length && !query}
-			<div class="mb-8" in:fly={{ y: 20, duration: 400 }}>
-				<div class="mb-4 flex items-center gap-3">
-					<span class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-xs">🔥</span>
-					<span class="text-xs font-black uppercase tracking-widest text-white/40">Trending Boosts</span>
+		<!-- ── COMPACT STATS ──────────────────────────────────────────── -->
+		<div class="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+			{#each [
+				{ label: 'Pairs', value: displayPairs.length, icon: '💎', color: 'emerald' },
+				{ label: 'Vol 24h', value: fmt(displayPairs.reduce((a, p) => a + (p.volume?.h24 ?? 0), 0)), icon: '📈', color: 'blue' },
+				{ label: 'Watch', value: watchlist.size, icon: '⭐', color: 'yellow' },
+				{ label: 'Boost', value: boosted.length, icon: '🚀', color: 'purple' }
+			] as stat}
+				<div class="group relative flex shrink-0 items-center gap-2 rounded-lg border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] px-3 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10">
+					<span class="text-sm">{stat.icon}</span>
+					<div>
+						<p class="text-[9px] font-bold uppercase tracking-wider text-white/30">{stat.label}</p>
+						<p class="text-sm font-black text-white">{stat.value}</p>
+					</div>
+					<div class="absolute inset-0 rounded-lg bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
 				</div>
-				<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-					{#each boosted as b (b.tokenAddress)}
+			{/each}
+		</div>
+
+		<!-- ── COMPACT TRENDING ─────────────────────────────────────── -->
+		{#if boosted.length && !query}
+			<div class="mb-3" in:fly={{ y: 10, duration: 300 }}>
+				<div class="mb-2 flex items-center gap-2">
+					<span class="text-xs">🔥</span>
+					<span class="text-[10px] font-black uppercase tracking-widest text-white/40">Trending</span>
+				</div>
+				<div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+					{#each boosted.slice(0, 8) as b (b.tokenAddress)}
 						{@const ch = chainBadge(b.chainId)}
 						<a href={b.url ?? '#'} target="_blank" rel="noopener"
-							class="group flex shrink-0 items-center gap-3 rounded-xl border border-white/8 bg-gradient-to-br from-white/[0.03] to-transparent p-3 transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5">
+							class="group relative flex shrink-0 items-center gap-2 rounded-lg border border-white/8 bg-gradient-to-br from-white/[0.04] to-white/[0.01] px-2 py-1.5 backdrop-blur-sm transition-all hover:border-orange-500/40 hover:bg-orange-500/10 hover:shadow-lg hover:shadow-orange-500/10">
 							{#if b.icon}
-								<img src={b.icon} alt="" class="h-10 w-10 rounded-full ring-2 ring-white/5" loading="lazy" />
+								<img src={b.icon} alt="" class="h-6 w-6 rounded-full ring-1 ring-white/5 ring-orange-500/20 group-hover:ring-orange-500/40 transition-all" loading="lazy" />
 							{:else}
-								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-									<span class="text-sm">🚀</span>
-								</div>
+								<div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/30 to-red-500/20 text-xs ring-1 ring-orange-500/30 group-hover:ring-orange-500/50 transition-all">🚀</div>
 							{/if}
 							<div>
-								<p class="max-w-[150px] truncate text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
-									{b.description?.slice(0, 24) ?? 'Token'}
-								</p>
-								<span class="rounded-md px-1.5 py-0.5 text-[9px] font-black" style="background:{ch.color}22;color:{ch.color}">{ch.label}</span>
+								<p class="max-w-[100px] truncate text-xs font-bold text-white group-hover:text-orange-400 transition-colors">{b.description?.slice(0, 12) ?? 'Token'}</p>
+								<span class="rounded px-1 py-0 text-[8px] font-black ring-1 ring-inset group-hover:ring-orange-500/40 transition-all" style="background:{ch.color}22;color:{ch.color};border-color:{ch.color}40">{ch.label}</span>
 							</div>
 						</a>
 					{/each}
@@ -330,52 +326,47 @@ onMount(() => {
 			</div>
 		{/if}
 
-		<!-- ── CONTROLS BAR ───────────────────────────────────────────── -->
-		<div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between" in:fly={{ y: 20, duration: 400, delay: 100 }}>
-			<div class="flex flex-wrap items-center gap-3">
-				<!-- Search -->
-				<div class="relative">
-					<input bind:value={query} oninput={onSearch}
-						placeholder="Search tokens, pairs..."
-						class="w-72 rounded-xl border border-white/8 bg-white/[0.03] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-emerald-500/40 focus:bg-white/[0.05] focus:shadow-lg focus:shadow-emerald-500/10" />
-					{#if searching}
-						<div class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-emerald-500/30 border-t-emerald-400"></div>
-					{:else}
-						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-white/20">⌘</span>
-					{/if}
-				</div>
-
-				<!-- Chain Filter -->
-				<div class="flex gap-1 rounded-xl border border-white/8 bg-white/[0.02] p-1">
-					{#each CHAINS as c}
-						<button onclick={() => chain = c.key}
-							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all {chain === c.key ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-white/40 hover:text-white/70'}">
-							<span>{c.icon}</span>
-							<span class="hidden sm:inline">{c.label}</span>
-						</button>
-					{/each}
-				</div>
+		<!-- ── COMPACT CONTROLS ───────────────────────────────────────── -->
+		<div class="mb-3 flex flex-wrap items-center gap-2" in:fly={{ y: 10, duration: 300, delay: 50 }}>
+			<!-- Search -->
+			<div class="relative">
+				<input bind:value={query} oninput={onSearch}
+					placeholder="Search..."
+					class="w-40 rounded-lg border border-white/8 bg-gradient-to-br from-white/[0.04] to-white/[0.01] py-1.5 pl-3 pr-8 text-xs text-white placeholder-white/20 outline-none transition-all focus:border-emerald-500/50 focus:shadow-lg focus:shadow-emerald-500/10" />
+				{#if searching}
+					<div class="absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin rounded-full border-2 border-emerald-500/30 border-t-emerald-400"></div>
+				{:else}
+					<span class="absolute right-2 top-1/2 -translate-y-1/2 text-white/20 text-xs">⌘</span>
+				{/if}
 			</div>
 
-			<div class="flex items-center gap-3">
-				<!-- Watchlist Toggle -->
-				<button onclick={() => showWatchlistOnly = !showWatchlistOnly}
-					class="flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition-all {showWatchlistOnly ? 'border-yellow-500/40 bg-yellow-500/10 text-yellow-400' : 'border-white/8 text-white/40 hover:text-white/70'}">
-					<span>⭐</span>
-					<span class="hidden sm:inline">Watchlist</span>
-					{#if watchlist.size > 0}
-						<span class="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px]">{watchlist.size}</span>
-					{/if}
-				</button>
-
-				<!-- Sort -->
-				<select bind:value={sortKey}
-					class="rounded-xl border border-white/8 bg-white/[0.02] px-3 py-2 text-xs font-bold text-white/60 outline-none transition hover:border-white/20 focus:border-emerald-500/40">
-					{#each SORT_OPTIONS as s}
-						<option value={s.key}>{s.icon} {s.label}</option>
-					{/each}
-				</select>
+			<!-- Chain Filter -->
+			<div class="flex gap-0.5 rounded-lg border border-white/8 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-0.5 backdrop-blur-sm">
+				{#each CHAINS as c}
+					<button onclick={() => chain = c.key}
+						class="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold transition-all {chain === c.key ? 'bg-emerald-500/20 text-emerald-400 shadow-md shadow-emerald-500/10' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}">
+						<span>{c.icon}</span>
+						<span class="hidden sm:inline text-[10px]">{c.label}</span>
+					</button>
+				{/each}
 			</div>
+
+			<!-- Watchlist Toggle -->
+			<button onclick={() => showWatchlistOnly = !showWatchlistOnly}
+				class="flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-bold transition-all {showWatchlistOnly ? 'border-yellow-500/40 bg-yellow-500/10 text-yellow-400 shadow-md shadow-yellow-500/10' : 'border-white/8 text-white/40 hover:text-white/70 hover:border-yellow-500/30 hover:bg-yellow-500/5'}">
+				<span>⭐</span>
+				{#if watchlist.size > 0}
+					<span class="rounded-full bg-white/10 px-1 py-0 text-[8px]">{watchlist.size}</span>
+				{/if}
+			</button>
+
+			<!-- Sort -->
+			<select bind:value={sortKey}
+				class="rounded-lg border border-white/8 bg-gradient-to-br from-white/[0.03] to-white/[0.01] px-2 py-1 text-xs font-bold text-white/60 outline-none transition hover:border-white/20 hover:bg-white/5 focus:border-emerald-500/50 focus:shadow-md focus:shadow-emerald-500/10">
+				{#each SORT_OPTIONS as s}
+					<option value={s.key}>{s.icon} {s.label}</option>
+				{/each}
+			</select>
 		</div>
 
 		<!-- ── ERROR ─────────────────────────────────────────────────── -->
@@ -422,129 +413,123 @@ onMount(() => {
 			</div>
 		{/if}
 
-		<!-- ── GRID VIEW ─────────────────────────────────────────────── -->
+		<!-- ── COMPACT GRID VIEW ─────────────────────────────────────── -->
 		{#if displayPairs.length && viewMode === 'grid'}
-			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" in:fade>
-				{#each displayPairs.slice(0, 40) as pair, i (pair.pairAddress ?? i)}
+			<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" in:fade>
+				{#each displayPairs.slice(0, 20) as pair, i (pair.pairAddress ?? i)}
 					{@const ch = chainBadge(pair.chainId)}
 					{@const change24 = pair.priceChange?.h24}
 					{@const txns = (pair.txns?.h24?.buys ?? 0) + (pair.txns?.h24?.sells ?? 0)}
 					{@const isWatched = watchlist.has(pair.pairAddress)}
-					{@const spark = fakeSparkline(pair.pairAddress || 'seed')}
 					{@const isBoosted = boosted.some(b => b.tokenAddress === pair.baseToken?.address)}
-					<div class="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-br from-white/[0.04] to-transparent p-4 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5"
-						in:fly={{ y: 20, duration: 300, delay: Math.min(i * 30, 600) }}>
+					<a href={pair.url ?? '#'} target="_blank" rel="noopener"
+						class="group relative overflow-hidden rounded-lg border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-2 backdrop-blur-md transition-all duration-300 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 hover:-translate-y-0.5"
+						in:fly={{ y: 10, duration: 200, delay: Math.min(i * 20, 200) }}>
 
-						<!-- Glow Effect -->
-						<div class="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-[60px] transition-opacity duration-500 group-hover:opacity-50"
-							 style="background:{ch.color}"></div>
+						<!-- Card Glow Effect -->
+						<div class="absolute -right-8 -bottom-8 h-24 w-24 rounded-full opacity-0 blur-[40px] transition-opacity duration-500 group-hover:opacity-60"
+							style="background:{ch.color}"></div>
 
 						<div class="relative">
 							<!-- Header -->
-							<div class="mb-4 flex items-start justify-between">
-								<div class="flex items-center gap-3">
+							<div class="mb-1 flex items-start justify-between">
+								<div class="flex items-center gap-1.5">
 									{#if pair.info?.imageUrl}
-										<img src={pair.info.imageUrl} alt="" class="h-12 w-12 rounded-full ring-2 ring-white/5" loading="lazy" />
+										<img src={pair.info.imageUrl} alt="" class="h-7 w-7 rounded-full ring-1 ring-white/5" loading="lazy" />
 									{:else}
-										<div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br {ch.gradient} text-lg font-black text-white/90">
+										<div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br {ch.gradient} text-xs font-black text-white/90">
 											{pair.baseToken?.symbol?.[0] ?? '?'}
 										</div>
 									{/if}
 									<div>
-										<div class="flex items-center gap-2">
-											<span class="text-sm font-black text-white">{pair.baseToken?.symbol ?? '?'}</span>
-											<span class="text-xs text-white/30">/{pair.quoteToken?.symbol ?? '?'}</span>
+										<div class="flex items-center gap-1">
+											<span class="text-xs font-black text-white">{pair.baseToken?.symbol ?? '?'}</span>
 											{#if isBoosted}
-												<span class="text-xs">🔥</span>
+												<span class="text-[8px]">🔥</span>
 											{/if}
 										</div>
-										<span class="rounded-md px-1.5 py-0.5 text-[9px] font-black" style="background:{ch.color}22;color:{ch.color}">{ch.label}</span>
+										<span class="rounded px-1 py-0 text-[7px] font-black" style="background:{ch.color}22;color:{ch.color}">{ch.label}</span>
 									</div>
 								</div>
 								<button onclick={(e) => toggleWatchlist(pair.pairAddress, e)}
-									class="text-lg transition-transform hover:scale-110 {isWatched ? 'text-yellow-400' : 'text-white/20 hover:text-yellow-400'}">
+									class="text-sm transition-transform hover:scale-110 {isWatched ? 'text-yellow-400' : 'text-white/20 hover:text-yellow-400'}">
 									{isWatched ? '★' : '☆'}
 								</button>
 							</div>
 
 							<!-- Price & Change -->
-							<div class="mb-4">
-								<div class="flex items-baseline gap-3">
-									<span class="text-2xl font-black text-white">{fmtPrice(pair.priceUsd)}</span>
-									<span class="text-sm font-bold {pctColor(change24)}">{pct(change24)}</span>
-								</div>
-								<!-- Mini Sparkline -->
-								<svg viewBox="0 0 60 24" class="mt-2 h-6 w-full opacity-40" preserveAspectRatio="none">
-									<path d={sparkSvg(spark, change24 >= 0)} fill="none" stroke={change24 >= 0 ? '#10b981' : '#f43f5e'} stroke-width="1.5" stroke-linecap="round" />
-								</svg>
+							<div class="mb-1">
+								<span class="text-sm font-black text-white">{fmtPrice(pair.priceUsd)}</span>
+								<span class="ml-1 text-xs font-bold {pctColor(change24)}">{pct(change24)}</span>
 							</div>
 
-							<!-- Stats Grid -->
-							<div class="grid grid-cols-3 gap-2 text-center">
-								<div class="rounded-lg bg-white/[0.03] p-2">
-									<p class="text-[9px] font-bold uppercase tracking-wider text-white/30">Volume</p>
-									<p class="mt-0.5 text-xs font-bold text-white/80">{fmt(pair.volume?.h24)}</p>
-								</div>
-								<div class="rounded-lg bg-white/[0.03] p-2">
-									<p class="text-[9px] font-bold uppercase tracking-wider text-white/30">Liquidity</p>
-									<p class="mt-0.5 text-xs font-bold text-white/80">{fmt(pair.liquidity?.usd)}</p>
-								</div>
-								<div class="rounded-lg bg-white/[0.03] p-2">
-									<p class="text-[9px] font-bold uppercase tracking-wider text-white/30">24h Txns</p>
-									<p class="mt-0.5 text-xs font-bold text-white/80">{txns ? txns.toLocaleString() : '—'}</p>
-								</div>
+							<!-- Compact Stats -->
+							<div class="flex flex-wrap gap-1 text-[8px]">
+								<span class="rounded bg-white/[0.05] px-1 py-0.5 text-white/60">{pair.dexId?.slice(0, 8) ?? 'DEX'}</span>
+								<span class="rounded bg-white/[0.05] px-1 py-0.5 text-white/60">V:{fmt(pair.volume?.h24)}</span>
+								<span class="rounded bg-white/[0.05] px-1 py-0.5 text-white/60">L:{fmt(pair.liquidity?.usd)}</span>
+								<span class="rounded bg-white/[0.05] px-1 py-0.5 text-white/60">T:{txns || '—'}</span>
+								{#if pair.marketCap}
+									<span class="rounded bg-emerald-500/10 px-1 py-0.5 text-emerald-400">MC:{fmt(pair.marketCap)}</span>
+								{/if}
 							</div>
 
-							<!-- Action -->
-							<a href={pair.url ?? '#'} target="_blank" rel="noopener"
-								class="mt-4 flex items-center justify-center gap-2 rounded-lg bg-white/[0.05] py-2.5 text-xs font-bold text-white/50 transition-all hover:bg-emerald-500/20 hover:text-emerald-400">
-								<span>View on DexScreener</span>
-								<span>→</span>
-							</a>
+							<!-- Multi-timeframe Changes -->
+							<div class="mt-1 flex gap-1 text-[8px]">
+								<span class="text-white/40">1h:</span>
+								<span class="{pctColor(pair.priceChange?.h1)}">{pct(pair.priceChange?.h1)}</span>
+								<span class="text-white/40 ml-1">6h:</span>
+								<span class="{pctColor(pair.priceChange?.h6)}">{pct(pair.priceChange?.h6)}</span>
+								<span class="text-white/40 ml-1">24h:</span>
+								<span class="{pctColor(change24)}">{pct(change24)}</span>
+							</div>
 						</div>
-					</div>
+					</a>
 				{/each}
 			</div>
 		{/if}
 
-		<!-- ── COMPACT LIST VIEW ─────────────────────────────────────── -->
+		<!-- ── ULTRA COMPACT LIST VIEW ──────────────────────────────── -->
 		{#if displayPairs.length && viewMode === 'compact'}
-			<div class="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a0e0e]" in:fade>
-				<div class="grid grid-cols-[3rem_1fr_6rem_5rem_5rem_4rem] items-center gap-2 border-b border-white/[0.05] px-4 py-3 text-[10px] font-black uppercase tracking-wider text-white/20">
+			<div class="overflow-hidden rounded-lg border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-md" in:fade>
+				<div class="grid grid-cols-[2rem_1fr_4rem_4rem_4rem_4rem_3rem_2rem] items-center gap-1 border-b border-white/[0.08] px-2 py-1 text-[8px] font-black uppercase tracking-wider text-white/30">
 					<span></span>
 					<span>Pair</span>
 					<span class="text-right">Price</span>
-					<span class="text-right">24h</span>
-					<span class="text-right hidden sm:block">Volume</span>
+					<span class="text-right">1h</span>
+					<span class="text-right hidden sm:block">24h</span>
+					<span class="text-right hidden sm:block">Vol</span>
+					<span class="text-right">DEX</span>
 					<span></span>
 				</div>
-				{#each displayPairs.slice(0, 50) as pair, i (pair.pairAddress ?? i)}
+				{#each displayPairs.slice(0, 15) as pair, i (pair.pairAddress ?? i)}
 					{@const ch = chainBadge(pair.chainId)}
 					{@const change24 = pair.priceChange?.h24}
 					{@const isWatched = watchlist.has(pair.pairAddress)}
 					<a href={pair.url ?? '#'} target="_blank" rel="noopener"
-						class="grid grid-cols-[3rem_1fr_6rem_5rem_5rem_4rem] items-center gap-2 border-b border-white/[0.03] px-4 py-3 text-xs transition hover:bg-white/[0.03] last:border-0"
-						in:fly={{ x: -10, duration: 200, delay: Math.min(i * 10, 400) }}>
+						class="group grid grid-cols-[2rem_1fr_4rem_4rem_4rem_4rem_3rem_2rem] items-center gap-1 border-b border-white/[0.04] px-2 py-1 text-xs transition-all hover:bg-emerald-500/5 hover:border-emerald-500/20 last:border-0"
+						in:fly={{ x: -10, duration: 200, delay: Math.min(i * 10, 200) }}>
 						<div class="flex justify-center">
 							{#if pair.info?.imageUrl}
-								<img src={pair.info.imageUrl} alt="" class="h-8 w-8 rounded-full" loading="lazy" />
+								<img src={pair.info.imageUrl} alt="" class="h-5 w-5 rounded-full" loading="lazy" />
 							{:else}
-								<div class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[10px] font-black">{pair.baseToken?.symbol?.[0] ?? '?'}</div>
+								<div class="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[8px] font-black">{pair.baseToken?.symbol?.[0] ?? '?'}</div>
 							{/if}
 						</div>
 						<div class="min-w-0">
-							<div class="flex items-center gap-2">
-								<span class="truncate font-bold text-white">{pair.baseToken?.symbol}</span>
-								<span class="rounded px-1 py-0.5 text-[8px] font-black" style="background:{ch.color}22;color:{ch.color}">{ch.label}</span>
+							<div class="flex items-center gap-1">
+								<span class="truncate font-bold text-white text-xs">{pair.baseToken?.symbol}</span>
+								<span class="rounded px-1 py-0 text-[7px] font-black" style="background:{ch.color}22;color:{ch.color}">{ch.label}</span>
 							</div>
-							<p class="truncate text-[10px] text-white/30">{pair.baseToken?.name}</p>
 						</div>
-						<p class="text-right font-bold text-white">{fmtPrice(pair.priceUsd)}</p>
-						<p class="text-right font-bold {pctColor(change24)}">{pct(change24)}</p>
-						<p class="text-right hidden text-white/40 sm:block">{fmt(pair.volume?.h24)}</p>
+						<p class="text-right font-bold text-white text-xs">{fmtPrice(pair.priceUsd)}</p>
+						<p class="text-right font-bold {pctColor(pair.priceChange?.h1)} text-xs">{pct(pair.priceChange?.h1)}</p>
+						<p class="text-right hidden font-bold {pctColor(change24)} sm:block text-xs">{pct(change24)}</p>
+						<p class="text-right hidden text-white/40 sm:block text-xs">{fmt(pair.volume?.h24)}</p>
+						<p class="text-right text-[8px] text-white/50">{pair.dexId?.slice(0, 4) ?? '-'}</p>
 						<div class="flex justify-center">
 							<button onclick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(pair.pairAddress, e); }}
-								class="text-lg transition {isWatched ? 'text-yellow-400' : 'text-white/20 hover:text-yellow-400'}">
+								class="text-sm transition {isWatched ? 'text-yellow-400' : 'text-white/20 hover:text-yellow-400'}">
 								{isWatched ? '★' : '☆'}
 							</button>
 						</div>
@@ -555,9 +540,8 @@ onMount(() => {
 
 		<!-- ── FOOTER INFO ────────────────────────────────────────────── -->
 		{#if displayPairs.length}
-			<div class="mt-6 flex items-center justify-between text-[10px] text-white/20">
-				<span>Showing {Math.min(displayPairs.length, viewMode === 'grid' ? 40 : 50)} of {displayPairs.length} pairs</span>
-				<span>Data from DexScreener API · Updates every 30s</span>
+			<div class="mt-2 flex items-center justify-between text-[9px] text-white/20">
+				<span>{displayPairs.length} pairs · DexScreener API · 30s updates</span>
 			</div>
 		{/if}
 	</div>
@@ -567,6 +551,15 @@ onMount(() => {
 	@keyframes marquee {
 		from { transform: translateX(0); }
 		to { transform: translateX(-33.33%); }
+	}
+	@keyframes animate-gradient {
+		0% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+		100% { background-position: 0% 50%; }
+	}
+	.animate-gradient {
+		background-size: 200% 200%;
+		animation: animate-gradient 3s ease infinite;
 	}
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
