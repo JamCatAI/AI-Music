@@ -44,6 +44,8 @@
 	let lastUpdated = $state(null);
 	let pulseSync = $state(false);
 	let serverTime = $state(null);
+	let isRefreshing = $state(false);
+	let showRefreshSuccess = $state(false);
 
 	const KRAKEN_PURPLE = '#5741d9';
 	const KRAKEN_ACCENT = '#7c5cff';
@@ -109,8 +111,8 @@
 		return { last, open, bid, ask, volBase, volUsd, change };
 	}
 
-	async function fetchKraken() {
-		loading = true;
+	async function fetchKraken({ silent = false } = {}) {
+		if (!silent) loading = true;
 		error = null;
 		try {
 			const [tickRes, timeRes] = await Promise.all([
@@ -148,8 +150,17 @@
 		} catch (e) {
 			error = e.message ?? String(e);
 		} finally {
-			loading = false;
+			if (!silent) loading = false;
 		}
+	}
+
+	async function handleRefresh() {
+		isRefreshing = true;
+		showRefreshSuccess = false;
+		await fetchKraken({ silent: true });
+		isRefreshing = false;
+		showRefreshSuccess = true;
+		setTimeout(() => showRefreshSuccess = false, 2000);
 	}
 
 	function setSort(key) {
@@ -224,7 +235,7 @@
 
 	onMount(() => {
 		fetchKraken();
-		const iv = setInterval(fetchKraken, 20_000);
+		const iv = setInterval(() => fetchKraken({ silent: true }), 20_000);
 		return () => clearInterval(iv);
 	});
 </script>
@@ -240,50 +251,58 @@
 	class="kraken-root relative min-h-screen overflow-hidden bg-[#07060d] text-white"
 	style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif;"
 >
-	<div class="pointer-events-none fixed inset-0">
+		<div class="pointer-events-none fixed inset-0">
 		<div
-			class="absolute inset-0 opacity-[0.035]"
-			style="background-image: linear-gradient(rgba(87,65,217,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(87,65,217,0.4) 1px, transparent 1px); background-size: 44px 44px;"
+			class="absolute inset-0 opacity-[0.04]"
+			style="background-image: linear-gradient(rgba(87,65,217,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(87,65,217,0.5) 1px, transparent 1px); background-size: 44px 44px;"
 		></div>
 		<div
-			class="absolute -top-24 right-1/4 h-[480px] w-[480px] rounded-full opacity-[0.12] blur-[120px]"
+			class="absolute -top-24 right-1/4 h-[480px] w-[480px] rounded-full opacity-[0.15] blur-[120px]"
 			style="background: radial-gradient(circle, {KRAKEN_PURPLE}, transparent 70%);"
 		></div>
 		<div
-			class="absolute bottom-0 left-1/4 h-[360px] w-[360px] rounded-full opacity-[0.1] blur-[100px]"
+			class="absolute bottom-0 left-1/4 h-[360px] w-[360px] rounded-full opacity-[0.12] blur-[100px]"
 			style="background: radial-gradient(circle, #a78bfa, transparent 72%);"
+		></div>
+		<div
+			class="absolute top-1/2 left-0 h-[300px] w-[300px] rounded-full opacity-[0.08] blur-[80px]"
+			style="background: radial-gradient(circle, #7c5cff, transparent 70%);"
 		></div>
 	</div>
 
-	<div
-		class="relative z-20 border-b border-violet-500/20 bg-black/45 backdrop-blur-2xl"
-		style="box-shadow: 0 0 40px rgba(87,65,217,0.08);"
+		<div
+		class="relative z-20 border-b border-violet-500/25 bg-black/50 backdrop-blur-2xl"
+		style="box-shadow: 0 0 50px rgba(87,65,217,0.12), 0 1px 0 rgba(87,65,217,0.1);"
 	>
-		<div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-2.5">
+		<div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
 			<div class="flex flex-wrap items-center gap-4">
 				<div class="flex items-center gap-2">
 					<span
-						class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] {pulseSync
+						class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] {pulseSync
 							? 'animate-ping'
 							: 'animate-pulse'}"
 					></span>
 					<span class="text-[10px] font-bold tracking-[0.2em] text-emerald-400/90">LIVE</span>
 				</div>
 				<div class="hidden h-4 w-px bg-white/15 sm:block"></div>
-				<span class="font-mono text-[9px] text-white/35">api.kraken.com/0/public</span>
+				<span class="font-mono text-[9px] text-white/40">api.kraken.com/0/public</span>
 			</div>
 			<div class="min-w-0 flex-1 overflow-hidden px-4">
 				<div class="flex w-max animate-kraken-marquee gap-5 whitespace-nowrap">
-					{#each [0, 1] as _}
-						{#each TICKER_SEGMENTS as seg}
+					{#each [0, 1] as _, idx (idx)}
+						{#each TICKER_SEGMENTS as seg, sidx (seg.text + sidx)}
 							<span class="text-[10px] font-bold tracking-wider {seg.style}">{seg.text}</span>
 							<span class="text-white/20">//</span>
 						{/each}
 					{/each}
 				</div>
 			</div>
-			<div class="font-mono text-[9px] text-white/40">
-				SYNC <span class="text-violet-300">{syncStr}</span>
+			<div class="flex items-center gap-3 font-mono text-[9px] text-white/40">
+				<button type="button" onclick={handleRefresh} disabled={isRefreshing} class="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] text-slate-400 hover:text-white hover:border-white/20 transition-all disabled:opacity-50">
+					{isRefreshing ? '⟳' : showRefreshSuccess ? '✓' : '↻'} {isRefreshing ? 'Syncing...' : showRefreshSuccess ? 'Synced' : 'Sync'}
+				</button>
+				<span class="text-white/20">|</span>
+				<span>SYNC <span class="text-violet-300">{syncStr}</span></span>
 				{#if serverTimeLabel}
 					<span class="text-white/25"> · SRV {serverTimeLabel}</span>
 				{/if}
@@ -293,52 +312,64 @@
 
 	<div class="relative z-10 mx-auto max-w-6xl px-4 py-8">
 		<div class="mb-8 flex flex-wrap items-end justify-between gap-4" in:fly={{ y: -10, duration: 320 }}>
-			<div class="flex items-start gap-3">
+			<div class="flex items-start gap-4">
 				<div
-					class="flex h-12 w-12 items-center justify-center rounded-xl border border-violet-500/35 bg-violet-950/40 text-2xl shadow-[0_0_28px_rgba(87,65,217,0.25)]"
+					class="flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-500/40 bg-gradient-to-br from-violet-950/60 to-violet-900/40 text-3xl shadow-[0_0_40px_rgba(87,65,217,0.3)] transition-all hover:shadow-[0_0_50px_rgba(87,65,217,0.4)] hover:scale-105"
 				>
 					🐙
 				</div>
 				<div>
-					<h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-						Kraken <span style="color: {KRAKEN_ACCENT}">Spot</span>
-					</h1>
-					<p class="mt-0.5 text-sm text-white/45">
+					<div class="flex items-center gap-2 mb-1">
+						<h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+							Kraken <span style="color: {KRAKEN_ACCENT}">Spot</span>
+						</h1>
+						<span class="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[9px] font-bold text-violet-300">PRO</span>
+					</div>
+					<p class="text-sm text-white/50">
 						USD pairs · public REST ticker · refreshes every 20s
 					</p>
+					{#if lastUpdated}
+						<p class="mt-1 text-[10px] font-mono text-white/30">Last updated: {lastUpdated.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</p>
+					{/if}
 				</div>
 			</div>
-			<button
-				type="button"
-				onclick={fetchKraken}
-				disabled={loading}
-				class="rounded-xl border border-violet-500/40 bg-violet-600/15 px-4 py-2.5 text-xs font-bold tracking-wide text-violet-200 transition hover:bg-violet-600/25 disabled:opacity-40"
-			>
-				{loading ? 'Updating…' : 'Refresh'}
-			</button>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					onclick={handleRefresh}
+					disabled={isRefreshing || loading}
+					class="rounded-xl border border-violet-500/40 bg-violet-600/15 px-4 py-2.5 text-xs font-bold tracking-wide text-violet-200 transition-all hover:bg-violet-600/25 hover:border-violet-500/60 hover:shadow-[0_0_20px_rgba(87,65,217,0.2)] disabled:opacity-40 flex items-center gap-2"
+				>
+					<span class={isRefreshing ? 'animate-spin' : ''}>{isRefreshing ? '⟳' : showRefreshSuccess ? '✓' : '↻'}</span>
+					{isRefreshing ? 'Syncing…' : showRefreshSuccess ? 'Updated' : 'Refresh'}
+				</button>
+			</div>
 		</div>
 
 		{#if error}
 			<div
-				class="mb-6 rounded-2xl border border-red-500/30 bg-red-950/25 p-6 text-center backdrop-blur-xl"
+				class="mb-6 rounded-2xl border border-red-500/30 bg-gradient-to-br from-red-950/30 to-red-900/10 p-6 text-center backdrop-blur-xl shadow-lg shadow-red-500/10"
 				in:fade
 			>
+				<div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 mx-auto">
+					<span class="text-xl">⚠️</span>
+				</div>
 				<p class="text-sm font-bold text-red-400">Kraken API error</p>
 				<p class="mt-2 font-mono text-xs text-white/50">{error}</p>
 				<button
 					type="button"
 					onclick={fetchKraken}
-					class="mt-4 rounded-lg border border-red-400/40 px-4 py-2 text-xs font-bold text-red-300 hover:bg-red-500/10"
+					class="mt-4 rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-300 hover:bg-red-500/20 transition-all hover:border-red-400/60"
 				>
-					Retry
+					↻ Retry Connection
 				</button>
 			</div>
 		{/if}
 
 		{#if loading && !rows.length}
 			<div class="space-y-2">
-				{#each Array(8) as _, i}
-					<div class="h-14 animate-pulse rounded-xl bg-white/[0.05]" style="animation-delay: {i * 80}ms"></div>
+				{#each Array(8) as _, i (i)}
+					<div class="h-14 animate-pulse rounded-xl bg-gradient-to-r from-white/[0.03] to-white/[0.06] border border-white/[0.04]" style="animation-delay: {i * 80}ms"></div>
 				{/each}
 			</div>
 		{/if}
