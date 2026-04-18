@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="28" viewBox="0 0 140 28" fill="none">
+  <title>OpenAI</title>
+  <rect x="0.75" y="0.75" width="138.5" height="26.5" rx="8" stroke="rgba(255,255,255,0.18)"/>
+  <g transform="translate(10,7)">
+    <path d="M7 0.8c1.9 0 3.4 1.5 3.4 3.4v1.9c0 1.9-1.5 3.4-3.4 3.4H5.1C3.2 13.4 1.7 11.9 1.7 10V8.1C1.7 6.2 3.2 4.7 5.1 4.7h2.6" stroke="rgba(167,243,208,0.9)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M4.1 2.1c.7-.8 1.7-1.3 2.9-1.3 1.9 0 3.4 1.5 3.4 3.4" stroke="rgba(34,211,238,0.7)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M9.9 11.9c-.7.8-1.7 1.3-2.9 1.3-1.9 0-3.4-1.5-3.4-3.4" stroke="rgba(244,114,182,0.65)" stroke-width="1.6" stroke-linecap="round"/>
+  </g>
+  <text x="34" y="18.3" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="12.5" font-weight="700" fill="rgba(255,255,255,0.82)">OpenAI</text>
+</svg>
+
