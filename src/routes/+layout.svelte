@@ -82,7 +82,8 @@
 			badge: 'NEW'
 		},
 		{ label: 'News', emoji: '📰', href: '/news', category: 'Fun', highlight: true },
-		{ label: 'NFT', emoji: '🎵', href: '/drops', category: 'Platform' }
+		{ label: 'NFT', emoji: '🎵', href: '/nft', category: 'Platform' },
+		{ label: 'Spud', emoji: '🥔', href: '/spud', category: 'Tech', highlight: true, badge: 'NEW' }
 	];
 
 	const MORE_GROUPS = [
@@ -148,6 +149,7 @@
 		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
 			e.preventDefault();
 			searchOpen = true;
+			selectedIndex = 0;
 			tick().then(() => searchInputEl?.focus());
 		}
 		if (e.key === 'Escape') {
@@ -156,6 +158,13 @@
 			moreOpen = false;
 		}
 		if (searchOpen) {
+			if (filteredItems.length === 0) {
+				if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+					e.preventDefault();
+					selectedIndex = 0;
+				}
+				return;
+			}
 			if (e.key === 'ArrowDown') {
 				e.preventDefault();
 				selectedIndex = (selectedIndex + 1) % filteredItems.length;
@@ -500,7 +509,7 @@
 		<div
 			class="hidden overflow-hidden border-t border-white/[0.04] bg-black/40 transition-all duration-300 md:block {secondaryVisible
 				? 'max-h-16 translate-y-0 opacity-100'
-				: 'max-h-0 -translate-y-full opacity-0 pointer-events-none'}"
+				: 'pointer-events-none max-h-0 -translate-y-full opacity-0'}"
 		>
 			<div class="mx-auto flex max-w-7xl items-center gap-1 px-3 py-1.5">
 				{#each SECONDARY as tab (tab.href)}
@@ -559,6 +568,7 @@
 					<input
 						bind:this={searchInputEl}
 						bind:value={searchQuery}
+						oninput={() => (selectedIndex = 0)}
 						type="text"
 						placeholder="Search pages..."
 						class="flex-1 bg-transparent text-[15px] text-white placeholder-white/30 outline-none"
